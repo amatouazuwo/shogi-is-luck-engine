@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        pool: [32, 16, 8, 4]
     steps:
       - uses: actions/checkout@v4
       - name: Fetch upstream
@@ -22,6 +26,19 @@ jobs:
           cd emsdk
           ./emsdk install 4.0.23
           ./emsdk activate 4.0.23
+      - name: Configure thread pool
+        env:
+          POOL: ${{ matrix.pool }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p = Path('upstream/source/Makefile')
+          s = p.read_text()
+          assert 'PTHREAD_POOL_SIZE=32' in s, 'Upstream pool setting changed'
+          p.write_text(s.replace('PTHREAD_POOL_SIZE=32', 'PTHREAD_POOL_SIZE=' + os.environ['POOL']))
+          PY
+          git -C upstream diff > pool.patch
       - name: Compile without evaluation weights
         shell: bash
         run: |
@@ -41,18 +58,18 @@ jobs:
       - name: Capture corresponding source
         run: |
           git -C upstream archive --format=tar.gz HEAD > output/upstream-source.tar.gz
-          cp upstream-revision.txt output/
+          cp upstream-revision.txt pool.patch output/
           cp .github/workflows/build-wasm.yml output/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: experimental-build-log
+          name: experimental-build-log-${{ matrix.pool }}
           path: |
             build.log
             upstream-revision.txt
           if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
-          name: experimental-wasm-source-and-binary
+          name: experimental-wasm-source-and-binary-${{ matrix.pool }}
           path: output/
           retention-days: 7
