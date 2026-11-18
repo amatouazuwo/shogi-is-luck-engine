@@ -1,0 +1,51 @@
+name: Experimental 11micro WASM build
+on:
+  push:
+    paths:
+      - '.github/workflows/build-wasm.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch upstream
+        run: |
+          git clone --depth 1 https://github.com/yaneurao/YaneuraOu.git upstream
+          git -C upstream rev-parse HEAD | tee upstream-revision.txt
+      - name: Install Emscripten
+        run: |
+          git clone --depth 1 --branch 4.0.23 https://github.com/emscripten-core/emsdk.git emsdk
+          cd emsdk
+          ./emsdk install 4.0.23
+          ./emsdk activate 4.0.23
+      - name: Compile without evaluation weights
+        shell: bash
+        run: |
+          set -o pipefail
+          source emsdk/emsdk_env.sh
+          mkdir -p "$GITHUB_WORKSPACE/output"
+          make -C upstream/source -j2 tournament COMPILER=em++ TARGET_CPU=WASM YANEURAOU_EDITION=YANEURAOU_ENGINE_SFNN_ka2_2048_8_64_progress8 TARGET="$GITHUB_WORKSPACE/output/yaneuraou.js" 2>&1 | tee build.log
+          test -s output/yaneuraou.wasm
+          test -s output/yaneuraou.js
+      - name: Capture corresponding source
+        run: |
+          git -C upstream archive --format=tar.gz HEAD > output/upstream-source.tar.gz
+          cp upstream-revision.txt output/
+          cp .github/workflows/build-wasm.yml output/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: experimental-build-log
+          path: |
+            build.log
+            upstream-revision.txt
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experimental-wasm-source-and-binary
+          path: output/
+          retention-days: 7
