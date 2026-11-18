@@ -36,24 +36,7 @@ jobs:
         run: |
           cp scripts/usi-smoke.cjs output/
           (cd output && timeout 20s node usi-smoke.cjs > usi-smoke.log 2>&1)
-          grep -q '^usiok        run: |
-          git -C upstream archive --format=tar.gz HEAD > output/upstream-source.tar.gz
-          cp upstream-revision.txt output/
-          cp .github/workflows/build-wasm.yml output/
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: experimental-build-log
-          path: |
-            build.log
-            upstream-revision.txt
-          if-no-files-found: warn
-      - uses: actions/upload-artifact@v4
-        with:
-          name: experimental-wasm-source-and-binary
-          path: output/
-          retention-days: 7
- output/usi-smoke.log
+          grep -q '^usiok$' output/usi-smoke.log
           echo "USI handshake passed (evaluation weights NOT loaded)"
       - name: Capture corresponding source
         run: |
