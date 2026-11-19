@@ -37,3 +37,8 @@ export function matchLegal(bestmove,legal) {
   if(typeof bestmove!=="string")return null;
   return legal.find(m=>toUsi(m)===bestmove)??null;
 }
+
+// The game's legal generator is authoritative, including special moves.
+export function immediateKingCapture(g, legal) {
+  return legal.find(m => { const p=g.board[m.to]; return p?.type==='K' && p.side===1-g.turn; }) ?? null;
+}
