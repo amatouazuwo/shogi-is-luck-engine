@@ -1,0 +1,38 @@
+name: Pit engine upstream baseline
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/pit-engine-baseline.yml']
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Fetch pinned upstream sources
+        run: |
+          git clone --depth 1 --branch v1.7.2 https://github.com/nyoki-mtl/rsshogi.git rules
+          git clone --depth 1 --branch v0.4.0 https://github.com/nyoki-mtl/rsshogi-nnue-mini.git engine
+          git -C rules rev-parse HEAD
+          git -C engine rev-parse HEAD
+          grep -F 'MIT License' rules/LICENSE engine/LICENSE
+          rustup toolchain install 1.95.0 --profile minimal
+          rustup target add wasm32-unknown-unknown --toolchain 1.95.0
+      - name: Validate local rules replacement
+        run: |
+          printf '\n[patch.crates-io]\nrsshogi = { path = "../rules/crates/rsshogi" }\n' >> engine/Cargo.toml
+          cd engine
+          cargo +1.95.0 update -p rsshogi --precise 1.7.2
+          cargo +1.95.0 test --lib --locked
+          cargo +1.95.0 rustc --lib --release --locked --crate-type cdylib --target wasm32-unknown-unknown --features c-api
+          test -s target/wasm32-unknown-unknown/release/rsshogi_nnue_mini.wasm
+          echo BASELINE_LOCAL_RULES_WASM_PASS
+      - name: Inventory occupancy and legality call sites
+        run: |
+          grep -RnE 'occupied\(\)|attackers_to|is_legal_move32|checkers\(' rules/crates/rsshogi/src/board/position rules/crates/rsshogi/src/board/movegen > occupancy-sites.txt
+          wc -l occupancy-sites.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pit-engine-occupancy-inventory
+          path: occupancy-sites.txt
