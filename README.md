@@ -35,3 +35,7 @@ Do not copy the experimental build to the production game until the following ar
 - Keeping the engine in a separate repository or communicating with it via a Worker does **not by itself** establish that other parts of an application are exempt from GPL obligations.
 
 This is an experimental integration repository, not a confirmed GPL-compliant release package.
+
+## Required cleanup after test integration
+
+User requested removal of obsolete YaneuraOu / TuyouraOu workflows, scripts and assets after rsshogi test-environment integration and verification succeed. Inventory references first; retain shared code and legally required notices for any retained components. Do not rewrite history or modify production without approval.
