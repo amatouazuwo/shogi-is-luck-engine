@@ -1,0 +1,45 @@
+name: Pit engine exact NNUE rebuild
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/pit-model-exact.yml']
+permissions:
+  contents: read
+jobs:
+  rebuild:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - run: |
+          git clone --depth 1 --branch v0.4.0 https://github.com/nyoki-mtl/rsshogi-nnue-mini.git engine
+          curl -fsSL --retry 3 https://github.com/nyoki-mtl/rsshogi-nnue-mini/releases/download/v0.4.0/rsshogi-nnue-mini-v0.4.0-wasm-sdk.zip -o sdk.zip
+          echo '3d05b85949f5ae3bce3cef1f0678a3aeb31d9e8f935565bcc09da63bb19dd1d1  sdk.zip' | sha256sum -c -
+          unzip -q sdk.zip -d sdk
+          python3 - <<'PY'
+          import pathlib,struct,hashlib
+          b=next(pathlib.Path('sdk').rglob('*.wasm')).read_bytes()
+          assert hashlib.sha256(b).hexdigest()=='feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d'
+          magic=b'RSNNPKG'+bytes([0])
+          matches=[]
+          i=b.find(magic)
+          while i>=0:
+              if i+28<=len(b):
+                  ver,flags,m,p=struct.unpack_from('<HHQQ',b,i+8)
+                  if ver==1 and flags==0 and i+28+m+p<=len(b):
+                      candidate=b[i:i+28+m+p]
+                      if hashlib.sha256(candidate).hexdigest()=='787739972eabb5a1c42c471d178ac0c97b688dce35c72b4291e7e1eeefa9786f':
+                          matches.append(candidate)
+              i=b.find(magic,i+1)
+          assert len(matches)==1, 'Exact model not found; do not substitute weights'
+          pathlib.Path('model.rsnn').write_bytes(matches[0])
+          print('EXACT MODEL PASS',len(matches[0]))
+          PY
+          rustup toolchain install 1.95.0 --profile minimal
+          rustup target add wasm32-unknown-unknown --toolchain 1.95.0
+          cd engine
+          export RSSHOGI_EMBEDDED_RSNN_PATH="$PWD/../model.rsnn"
+          export RSSHOGI_EMBEDDED_RSNN_SHA256=787739972eabb5a1c42c471d178ac0c97b688dce35c72b4291e7e1eeefa9786f
+          cargo +1.95.0 test --lib --locked --features embedded-rsnn
+          cargo +1.95.0 rustc --lib --release --locked --crate-type cdylib --target wasm32-unknown-unknown --features c-api,embedded-rsnn
+          test -s target/wasm32-unknown-unknown/release/rsshogi_nnue_mini.wasm
+          echo EMBEDDED_REBUILD_PASS
