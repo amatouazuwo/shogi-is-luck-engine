@@ -67,3 +67,43 @@ jobs:
           } finally {engine.dispose()}
           EOF
           node "$dir/bench.mjs"
+      - name: Check game position adapter
+        run: |
+          set -euo pipefail
+          dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
+          curl -fL https://raw.githubusercontent.com/amatouazuwo/shogi-is-luck-engine/3b02d152084666ab49fd7eb41fe2b383740b0c61/scripts/rsshogi-position.mjs -o "$dir/position.mjs"
+          cat > "$dir/position-test.mjs" <<'EOF'
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          import {MiniEngine} from './mini.js';
+          import {toSfen,toUsi,matchLegal} from './position.mjs';
+          const e=await MiniEngine.create(await readFile(new URL('./rsshogi_nnue_mini.wasm',import.meta.url)));
+          const ok=x=>{assert.equal(x.ok,true,JSON.stringify(x));return x};
+          const board=Array(81).fill(null);
+          const put=(i,type,side,pr=false)=>board[i]={type,side,pr};
+          for(let c=0;c<9;c++){put(c,'LNSGKGSNL'[c],1);put(72+c,'LNSGKGSNL'[c],0);put(18+c,'P',1);put(54+c,'P',0)}
+          put(10,'R',1);put(16,'B',1);put(64,'B',0);put(70,'R',0);
+          const g={board,turn:0,hands:[{},{}],steps:0};
+          assert.equal(toSfen(g),'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1');
+          assert.equal(toUsi({from:56,to:47}), '7g7f');
+          assert.equal(toUsi({drop:'P',to:40}),'P*5e');
+          assert.equal(toUsi({from:56,to:47,promote:true}),'7g7f+');
+          assert.equal(matchLegal('7g7f',[{from:56,to:47}]).to,47);
+          assert.equal(matchLegal('resign',[]),null);
+          for(const extra of [{holes:[40]},{effect:'dragon'},{effect:'doubleSecond'},{teleportActive:0},{seatShuffleClaim:{}}])assert.equal(toSfen({...g,...extra}),null);
+          ok(e.request({command:'load_embedded'}));
+          let seed=12345;
+          const rand=n=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed%n};
+          for(let i=0;i<40;i++){
+            const b=board.map(p=>p&&{...p});
+            for(const start of [0,72])for(let j=0;j<12;j++){const a=start+rand(9),c=start+rand(9);[b[a],b[c]]=[b[c],b[a]]}
+            const sfen=toSfen({...g,board:b,turn:i%2});
+            ok(e.request({command:'set_position',sfen,moves:[]}));
+            const result=ok(e.request({command:'search',movetime_ms:100})).result;
+            ok(e.request({command:'set_position',sfen,moves:[result.bestmove]}));
+            console.log(JSON.stringify({i,sfen,bestmove:result.bestmove,depth:result.depth}));
+          }
+          e.dispose();
+          console.log('POSITION TEST PASSED: 40 formations');
+          EOF
+          node "$dir/position-test.mjs"
