@@ -85,6 +85,51 @@ jobs:
           ''',1)
           p.write_text(s)
           PY
+          mkdir -p rules/crates/rsshogi/tests
+          cat > rules/crates/rsshogi/tests/shogiluck_holes.rs <<'RS'
+          use rsshogi::board::{self, Position, MoveList, Bitboard, movegen::generate_legal_all};
+          use rsshogi::types::{Move, Square};
+          fn sq(s: &str) -> Square { Move::from_usi(&format!("7g{s}")).unwrap().to_sq() }
+          fn setup(sfen: &str, holes: &[&str]) -> Position {
+              board::init();
+              let mut p = board::position_from_sfen(sfen).unwrap();
+              let mut mask = Bitboard::EMPTY;
+              for s in holes { mask.set(sq(s)); }
+              assert!(p.set_prototype_holes(mask));
+              p
+          }
+          fn has(p: &Position, s: &str) -> bool {
+              let mut list = MoveList::new();
+              generate_legal_all(p, &mut list);
+              list.as_slice().contains(&Move::from_usi(s).unwrap())
+          }
+          #[test]
+          fn rook_block_and_drop() {
+              let p = setup("k8/9/9/9/9/9/4R4/9/8K b G 1", &["5e"]);
+              assert!(has(&p,"5g5f"));
+              assert!(!has(&p,"5g5e"));
+              assert!(!has(&p,"5g5d"));
+              assert!(!has(&p,"G*5e"));
+              assert!(has(&p,"G*4e"));
+              assert!(!has(&p.clone_for_search(),"5g5d"));
+          }
+          #[test]
+          fn knight_and_multiple_holes() {
+              let p = setup("k8/9/9/9/9/9/4N4/9/8K b G 1", &["5f","4f","6f","4e"]);
+              assert!(has(&p,"5g6e"));
+              assert!(!has(&p,"5g4e"));
+              assert!(!has(&p,"G*6f"));
+          }
+          #[test]
+          fn rook_check_and_pin() {
+              let p = setup("k3r4/9/9/9/9/9/9/9/4K4 b - 1", &["5e"]);
+              assert!(!p.is_in_check());
+              let p = setup("k3r4/9/9/9/9/9/4G4/9/4K4 b - 1", &["5e"]);
+              assert!(has(&p,"5g4g"));
+              let p = setup("k3r4/9/9/9/9/9/4G4/9/4K4 b - 1", &[]);
+              assert!(!has(&p,"5g4g"));
+          }
+          RS
           git -C rules diff --check
           git -C rules diff
       - name: Compile prototype
@@ -92,3 +137,4 @@ jobs:
           cd rules
           cargo +1.95.0 check -p rsshogi --lib
           cargo +1.95.0 test -p rsshogi --lib
+          cargo +1.95.0 test -p rsshogi --test shogiluck_holes
