@@ -47,3 +47,15 @@ As of 2026-11-19: SDK embeds model and includes MIT LICENSE; v0.4.0 release iden
 User approved browser-first development with the unmodified official SDK. Continue isolated development and testing; unresolved model rights remain a release gate, and production deployment requires explicit approval.
 
 Special rules: use the term 落とし穴 (pitfall), not rock. Never forecast untriggered random events. Search only the current granted move; two-move events do not require planning a pair before the lottery. At every CPU turn, across all present and future event types, any legal opposing-king capture takes priority before engine search or candidate pruning. The special tactical candidate cap of 12 is provisional pending performance and strength tests.
+
+
+## Browser acceptance evidence and deployment checklist
+
+Game branch feature/rsshogi-browser: CI run 44556545617 passed desktop and Pixel 7 Chromium emulation, all 12 forced event activation cases per profile, room-entry transition, clock expiry, repeated games (desktop 215 plies / 111 engine moves; mobile 207 plies / 108 engine moves). Actual physical devices, Safari, real online matchmaking and one uninterrupted 200-ply game are not certified.
+
+Pinned upstream v0.4.0 WASM SDK: https://github.com/nyoki-mtl/rsshogi-nnue-mini/releases/tag/v0.4.0
+ZIP SHA-256: 3d05b85949f5ae3bce3cef1f0678a3aeb31d9e8f935565bcc09da63bb19dd1d1
+Embedded model SHA-256: 787739972eabb5a1c42c471d178ac0c97b688dce35c72b4291e7e1eeefa9786f
+Upstream README describes MIT and embedded model; release ZIP includes MIT text, but explicit coverage of embedded weights and their provenance have not been independently confirmed. Do not distribute SDK through a publicly reachable test or production server until resolved. Private CI remains permitted for isolated evaluation. Retain original MIT text and applicable dependency notices; do not relicense the game. No developer contact has been sent.
+
+Before staging: confirm redistribution rights, retain notices, verify deployed SDK hash, enable feature flag in test only, smoke test real device, verify fallback and rollback. Production remains separately gated.
