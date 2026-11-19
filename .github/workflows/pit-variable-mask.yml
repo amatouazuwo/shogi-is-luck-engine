@@ -55,9 +55,40 @@ jobs:
           p=root/'position/legality.rs'
           p.write_text(p.read_text().replace('let to = m.to_sq();','let to = m.to_sq();\n        if self.prototype_holes().test(to) { return false; }').replace('let occupied = self.bitboards().occupied();','let occupied = self.bitboards().occupied() | self.prototype_holes();'))
           PY
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('rules/crates/rsshogi/src/board/position')
+          p=root/'rules.rs'
+          s=p.read_text()
+          marker='Self {\n            board: self.board,'
+          assert marker in s
+          p.write_text(s.replace(marker,'Self {\n            holes: self.holes,\n            board: self.board,'))
+          p=root/'attacks.rs'
+          s=p.read_text()
+          marker='let between = Bitboard::between(sniper_sq, king_sq) & occupancy;'
+          assert marker in s
+          s=s.replace(marker,'if Bitboard::between(sniper_sq, king_sq).intersects(self.holes) { continue; }\n            '+marker)
+          s=s.replace('let occupied = self.bitboards().occupied();','let occupied = self.bitboards().occupied() | self.holes;')
+          p.write_text(s)
+          p=root/'cache.rs'
+          s=p.read_text().replace('let occupied = self.bitboards().occupied();','let occupied = self.bitboards().occupied() | self.holes;').replace('let occupancy = self.bitboards().occupied() & avoid_bb;','let occupancy = (self.bitboards().occupied() & avoid_bb) | self.holes;')
+          p.write_text(s)
+          p=root/'constructors.rs'
+          s=p.read_text().replace('impl Position {','''impl Position {
+              /// Experimental root-only obstacle setter; resets history.
+              pub fn set_prototype_holes(&mut self, holes: crate::types::Bitboard) -> bool {
+                  if holes.intersects(self.bitboards().occupied()) { return false; }
+                  self.holes = holes;
+                  self.init_stack();
+                  true
+              }
+          ''',1)
+          p.write_text(s)
+          PY
           git -C rules diff --check
           git -C rules diff
       - name: Compile prototype
         run: |
           cd rules
           cargo +1.95.0 check -p rsshogi --lib
+          cargo +1.95.0 test -p rsshogi --lib
