@@ -1,0 +1,61 @@
+name: Browser rsshogi integration
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/browser-rsshogi.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Prepare pinned SDK and game client
+        run: |
+          mkdir -p site/ai/sdk
+          curl -fL --retry 3 https://github.com/nyoki-mtl/rsshogi-nnue-mini/releases/download/v0.4.0/rsshogi-nnue-mini-v0.4.0-wasm-sdk.zip -o sdk.zip
+          echo '3d05b85949f5ae3bce3cef1f0678a3aeb31d9e8f935565bcc09da63bb19dd1d1  sdk.zip' | sha256sum -c -
+          unzip -q sdk.zip -d sdk
+          dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
+          cp "$dir/"* site/ai/sdk/
+          for f in rsshogi-client.mjs rsshogi-position.mjs; do
+            curl -fL "https://raw.githubusercontent.com/amatouazuwo/shogi-is-luck/3f7ce63ded6afa905026d7b75efb220326c140b1/ai/$f" -o "site/ai/$f"
+          done
+          echo '<!doctype html><meta charset="utf-8"><title>Local worker integration</title>' > site/index.html
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Exercise real browser worker
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory site > /tmp/http.log 2>&1 &
+          cat > browser.mjs <<'EOF'
+          import {chromium,devices} from 'playwright';
+          import assert from 'node:assert/strict';
+          const browser=await chromium.launch({headless:true});
+          try{
+            for(const [label,opts] of [['desktop',{}],['mobile',devices['Pixel 7']]]){
+              const page=await browser.newPage(opts);
+              await page.goto('http://127.0.0.1:8765');
+              const result=await page.evaluate(async()=>{
+                const {BrowserEngine}=await import('/ai/rsshogi-client.mjs');
+                const engine=new BrowserEngine(location.origin+'/ai/sdk/worker.js',location.origin+'/ai/sdk/rsshogi_nnue_mini.wasm');
+                const board=Array(81).fill(null),row='LNSGKGSNL';
+                for(let c=0;c<9;c++){board[c]={type:row[c],side:1};board[18+c]={type:'P',side:1};board[54+c]={type:'P',side:0};board[72+c]={type:row[c],side:0};}
+                board[10]={type:'R',side:1};board[16]={type:'B',side:1};board[64]={type:'B',side:0};board[70]={type:'R',side:0};
+                const g={board,turn:0,hands:[{},{}],holes:[],steps:0};
+                const legal=Array.from({length:9},(_,c)=>({from:54+c,to:45+c}));
+                legal.push(...[65,66,67,68,69,71].map(to=>({from:70,to})),...([60,61,62,63,65].map(to=>({from:76,to}))),{from:72,to:63},{from:80,to:71});
+                // Test transport independently of the full legal generator.
+                const t=performance.now();await engine.init();const init=Math.round(performance.now()-t);
+                const move=await engine.choose(g,legal,500);
+                const pending=engine.choose(g,legal,1500);engine.reset();const cancelled=await pending;
+                const recovered=await engine.choose(g,legal,500);engine.reset();
+                return {init,move,cancelled,recovered};
+              });
+              console.log(label,JSON.stringify(result));
+              assert.ok(result.move);assert.equal(result.cancelled,null);assert.ok(result.recovered);
+              await page.close();
+            }
+          }finally{await browser.close();}
+          EOF
+          node browser.mjs
