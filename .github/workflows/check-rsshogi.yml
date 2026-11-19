@@ -280,6 +280,7 @@ jobs:
           }
           function independentBoard(){for(let attempts=0;attempts<500;attempts++){const board=Array(81).fill(null);if(!buildSide(board,0)||!buildSide(board,1))continue;if(!inCheck({board},0)&&!inCheck({board},1))return board}throw Error('初期局面を生成できませんでした')}
           
+          const types=['K','R','B','G','S','N','L','P'];
           export {independentBoard,getLegal};
           EOF
           cat > "$dir/game-test.mjs" <<'EOF'
