@@ -429,3 +429,53 @@ jobs:
           }finally{engine.dispose();}
           EOF
           node "$dir/strength.mjs"
+      - name: Head to head search budget comparison
+        run: |
+          set -euo pipefail
+          dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
+          cat > "$dir/strength.mjs" <<'EOF'
+          import {readFile} from 'node:fs/promises';
+          import {MiniEngine} from './mini.js';
+          import {toSfen,matchLegal} from './position.mjs';
+          import {independentBoard,getLegal,sim,inCheck} from './game-rules.mjs';
+          const prices={K:9999,R:10,B:9,G:6,S:5,N:4,L:3,P:1};
+          let seed=92173;Math.random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+          const boards=Array.from({length:4},()=>independentBoard());
+          const engine=await MiniEngine.create(await readFile(new URL('./rsshogi_nnue_mini.wasm',import.meta.url)));
+          const ok=r=>{if(!r.ok)throw Error(JSON.stringify(r));return r.result};
+          ok(engine.request({command:'load_embedded'}));
+          const legacy=(g,legal)=>legal.map(m=>{
+            const p=g.board[m.to],r=Math.floor(m.to/9),c=m.to%9;
+            return {m,s:(Math.random()-.5)*5+(p?prices[p.type]*2.8:0)+(m.promote?2.4:0)+(4-Math.abs(4-c))*.12+(g.turn===0?8-r:r)*.07-(m.from!=null&&g.board[m.from].type==='K'?1.3:0)};
+          }).sort((a,b)=>b.s-a.s)[0].m;
+          const results=[];
+          try{
+            for(const ms of [500,1500])for(let i=0;i<boards.length;i++)for(const side of [0,1]){
+              ok(engine.request({command:'new_game'}));
+              let g={board:boards[i].map(p=>p?{...p}:null),hands:[{},{}],turn:0,holes:[],steps:0},winner=null,reason='ply-cap',fallback=0;
+              const history=new Map();
+              for(let ply=0;ply<160;ply++){
+                const legal=getLegal(g,g.turn);
+                if(!legal.length){winner=1-g.turn;reason='no-legal';break;}
+                let m;
+                if(true){
+                  try{
+                    ok(engine.request({command:'set_position',sfen:toSfen(g),moves:[]}));
+                    m=matchLegal(ok(engine.request({command:'search',movetime_ms:g.turn===side?ms:100})).bestmove,legal);
+                  }catch{}
+                  if(!m){fallback++;m=legacy(g,legal);}
+                }else m=legacy(g,legal);
+                const captured=g.board[m.to],actor=g.turn;
+                if(captured&&captured.type!=='K')g.hands[actor][captured.type]=(g.hands[actor][captured.type]||0)+1;
+                if(m.drop)g.hands[actor][m.drop]--;
+                g={...g,board:sim(g,m,actor).board,turn:1-actor,steps:g.steps+1};
+                const key=JSON.stringify([g.board,g.hands,g.turn]);history.set(key,(history.get(key)||0)+1);
+                if(history.get(key)>=4){reason='repetition';break;}
+              }
+              results.push({ms,formation:i,side,winner,reason,plies:g.steps,fallback});
+              console.log('HEAD TO HEAD GAME',JSON.stringify(results.at(-1)));
+            }
+            console.log('HEAD TO HEAD RESULTS',JSON.stringify(results));
+          }finally{engine.dispose();}
+          EOF
+          node "$dir/strength.mjs"
