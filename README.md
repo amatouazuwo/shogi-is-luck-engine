@@ -43,3 +43,5 @@ User requested removal of obsolete YaneuraOu / TuyouraOu workflows, scripts and 
 ## Release gate and special moves
 
 As of 2026-11-19: SDK embeds model and includes MIT LICENSE; v0.4.0 release identifies same model as v0.3.0. Cargo metadata declares permissive dependencies. Explicit model redistribution rights and training provenance remain unconfirmed; no public deployment pending clarification. Game legal moves are authoritative: if any legal move captures the opposing king, select it before any engine search or fallback. Adapter fixture suite passed 40 simplified formations (run 44460044227); actual game generator and end-to-end testing remain pending.
+
+User approved browser-first development with the unmodified official SDK. Continue isolated development and testing; unresolved model rights remain a release gate, and production deployment requires explicit approval.
