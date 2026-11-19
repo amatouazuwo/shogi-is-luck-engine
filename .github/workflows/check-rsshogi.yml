@@ -71,12 +71,12 @@ jobs:
         run: |
           set -euo pipefail
           dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
-          curl -fL https://raw.githubusercontent.com/amatouazuwo/shogi-is-luck-engine/3b02d152084666ab49fd7eb41fe2b383740b0c61/scripts/rsshogi-position.mjs -o "$dir/position.mjs"
+          curl -fL https://raw.githubusercontent.com/amatouazuwo/shogi-is-luck-engine/f96f70f0ba955c84e8bdd730c42a533301b7c2b2/scripts/rsshogi-position.mjs -o "$dir/position.mjs"
           cat > "$dir/position-test.mjs" <<'EOF'
           import assert from 'node:assert/strict';
           import {readFile} from 'node:fs/promises';
           import {MiniEngine} from './mini.js';
-          import {toSfen,toUsi,matchLegal} from './position.mjs';
+          import {toSfen,toUsi,matchLegal,immediateKingCapture} from './position.mjs';
           const e=await MiniEngine.create(await readFile(new URL('./rsshogi_nnue_mini.wasm',import.meta.url)));
           const ok=x=>{assert.equal(x.ok,true,JSON.stringify(x));return x};
           const board=Array(81).fill(null);
@@ -103,7 +103,19 @@ jobs:
             ok(e.request({command:'set_position',sfen,moves:[result.bestmove]}));
             console.log(JSON.stringify({i,sfen,bestmove:result.bestmove,depth:result.depth}));
           }
+          for(const turn of [0,1]){
+            const board=Array(81).fill(null);
+            board[40]={type:'K',side:1-turn};
+            board[41]={type:'K',side:turn};
+            const win={from:39,to:40,dragon:true}, own={from:39,to:41}, quiet={from:39,to:38};
+            for(const effect of ['doubleSecond','dragon',null]){
+              assert.equal(immediateKingCapture({board,turn,effect},[quiet,win]),win);
+              assert.equal(immediateKingCapture({board,turn,effect},[quiet,own]),null);
+              assert.equal(immediateKingCapture({board,turn,effect},[]),null);
+            }
+          }
           e.dispose();
+          console.log('KING CAPTURE PRIORITY PASSED');
           console.log('POSITION TEST PASSED: 40 formations');
           EOF
           node "$dir/position-test.mjs"
