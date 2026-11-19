@@ -1,0 +1,30 @@
+name: Pit engine embedded model feasibility
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/pit-model-recovery.yml']
+permissions:
+  contents: read
+jobs:
+  model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - run: |
+          git clone --depth 1 --branch v0.4.0 https://github.com/nyoki-mtl/rsshogi-nnue-mini.git engine
+          curl -fsSL --retry 3 https://github.com/nyoki-mtl/rsshogi-nnue-mini/releases/download/v0.4.0/rsshogi-nnue-mini-v0.4.0-wasm-sdk.zip -o sdk.zip
+          echo '3d05b85949f5ae3bce3cef1f0678a3aeb31d9e8f935565bcc09da63bb19dd1d1  sdk.zip' | sha256sum -c -
+          unzip -q sdk.zip -d sdk
+          grep -RnE 'MAGIC|magic|RSSHOGI_EMBEDDED_RSNN' engine/src/eval engine/src/api.rs engine/src/lib.rs
+          find sdk -name '*.wasm' -exec sha256sum {} \;
+      - name: Check embedded model container format
+        run: |
+          cat engine/src/eval/nnue/package/reader.rs
+          cat engine/src/eval/nnue/package/schema.rs | head -100
+          grep -RnE 'include_bytes!|RSSHOGI_EMBEDDED_RSNN_PATH' engine/src
+          python3 - <<'PY'
+          import pathlib,re
+          b=next(pathlib.Path('sdk').rglob('*.wasm')).read_bytes()
+          for pattern in [b'RSNN',b'rsnn',b'RSSHOGI']:
+              print(pattern, [m.start() for m in re.finditer(pattern,b)][:50])
+          PY
