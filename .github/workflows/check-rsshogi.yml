@@ -154,3 +154,43 @@ jobs:
           e.reset();console.log('CLIENT PROTOCOL TEST PASSED');
           EOF
           node "$dir/client-test.mjs"
+      - name: Real SDK worker integration with opening fixture
+        run: |
+          set -euo pipefail
+          dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
+          cat > "$dir/real-client.mjs" <<'EOF'
+          import assert from 'node:assert/strict';
+          import {Worker} from 'node:worker_threads';
+          import {readFile} from 'node:fs/promises';
+          import {BrowserEngine} from './rsshogi-client.mjs';
+          import {toUsi} from './rsshogi-position.mjs';
+          const wasm=await readFile(new URL('./rsshogi_nnue_mini.wasm',import.meta.url));
+          const workerUrl=new URL('./worker.js',import.meta.url).href;
+          const bootstrap=`import {parentPort} from 'node:worker_threads';globalThis.self=globalThis;globalThis.postMessage=v=>parentPort.postMessage(v);await import(${JSON.stringify(workerUrl)});parentPort.on('message',data=>self.onmessage({data}));`;
+          class Bridge {
+            constructor(){this.w=new Worker(new URL('data:text/javascript,'+encodeURIComponent(bootstrap)));this.w.on('message',data=>this.onmessage?.({data}));this.w.on('error',e=>this.onerror?.(e));}
+            postMessage(m){if(m.command==='init'){delete m.url;m.wasm=wasm;}this.w.postMessage(m);}
+            terminate(){this.w.terminate();}
+          }
+          const client=new BrowserEngine(workerUrl,'unused',{workerFactory:()=>new Bridge()});
+          const board=Array(81).fill(null);
+          const put=(i,type,side)=>board[i]={type,side,pr:false};
+          for(let c=0;c<9;c++){put(c,'LNSGKGSNL'[c],1);put(72+c,'LNSGKGSNL'[c],0);put(18+c,'P',1);put(54+c,'P',0);}
+          put(10,'R',1);put(16,'B',1);put(64,'B',0);put(70,'R',0);
+          const g={board,turn:0,hands:[{},{}],steps:0};
+          const legal=[];
+          for(let c=0;c<9;c++)legal.push({from:54+c,to:45+c});
+          for(let c of [0,2,3,4,5,6,7,8])legal.push({from:70,to:63+c});
+          for(let c=0;c<9;c++){
+            const p=board[72+c];if(['K','G','S'].includes(p.type))for(let d of [-1,0,1])if(c+d>=0&&c+d<9&&!board[63+c+d])legal.push({from:72+c,to:63+c+d});
+          }
+          try{
+            const first=await client.choose(g,legal,500);
+            assert.ok(first,'real worker returned no permitted move');
+            console.log('REAL CLIENT BESTMOVE',toUsi(first));
+            const pending=client.choose(g,legal,1500);client.reset();assert.equal(await pending,null);
+            assert.ok(await client.choose(g,legal,100));
+            console.log('REAL CLIENT TEST PASSED');
+          }finally{client.reset();}
+          EOF
+          node "$dir/real-client.mjs"
