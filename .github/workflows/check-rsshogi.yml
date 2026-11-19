@@ -1,0 +1,39 @@
+name: Check rsshogi official WASM
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/check-rsshogi.yml'
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download pinned official SDK
+        run: |
+          curl -fL --retry 3 https://github.com/nyoki-mtl/rsshogi-nnue-mini/releases/download/v0.4.0/rsshogi-nnue-mini-v0.4.0-wasm-sdk.zip -o sdk.zip
+          echo '3d05b85949f5ae3bce3cef1f0678a3aeb31d9e8f935565bcc09da63bb19dd1d1  sdk.zip' | sha256sum -c -
+          unzip -q sdk.zip -d sdk
+          find sdk -type f
+          find sdk -type f \( -iname '*license*' -o -iname '*notice*' -o -iname '*readme*' \) -print -exec cat {} \;
+      - name: Fetch exact upstream source
+        run: git clone --depth 1 --branch v0.4.0 https://github.com/nyoki-mtl/rsshogi-nnue-mini.git upstream
+      - name: Smoke test official package without publishing binaries
+        run: |
+          set -euo pipefail
+          wasm="$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)"
+          test -s "$wasm"
+          dir="$(dirname "$wasm")"
+          test -f "$dir/mini.js"
+          test -f "$dir/worker.js"
+          cp upstream/bindings/wasm/check.mjs "$dir/check.mjs"
+          printf '{"type":"module"}\n' > "$dir/package.json"
+          node "$dir/check.mjs" "$wasm" | tee smoke.log
+          grep -F 'Wasm smoke passed: real model' smoke.log
+      - name: Inspect dependency license declarations
+        run: |
+          cd upstream
+          cargo metadata --locked --format-version 1 > /tmp/metadata.json
+          python3 -c 'import json; p=json.load(open("/tmp/metadata.json")); print("\n".join(x["name"]+" "+x["version"]+" "+str(x["license"]) for x in p["packages"]))'
