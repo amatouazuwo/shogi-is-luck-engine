@@ -37,3 +37,33 @@ jobs:
           cd upstream
           cargo metadata --locked --format-version 1 > /tmp/metadata.json
           python3 -c 'import json; p=json.load(open("/tmp/metadata.json")); print("\n".join(x["name"]+" "+x["version"]+" "+str(x["license"]) for x in p["packages"]))'
+      - name: Benchmark official WASM
+        run: |
+          set -euo pipefail
+          dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
+          cat "$dir/manifest.json"
+          cat > "$dir/bench.mjs" <<'EOF'
+          import { MiniEngine } from './mini.js';
+          import { readFile } from 'node:fs/promises';
+          import assert from 'node:assert/strict';
+          const engine = await MiniEngine.create(await readFile(new URL('./rsshogi_nnue_mini.wasm',import.meta.url)));
+          const ok = x => {assert.equal(x.ok,true,JSON.stringify(x));return x};
+          try {
+            ok(engine.request({command:'load_embedded'}));
+            ok(engine.request({command:'configure',hash_mb:16,threads:1}));
+            for(const moves of [[],['7g7f'],['7g7f','3c3d'],['2g2f','8c8d','2f2e']]){
+              for(const ms of [100,500,1500]){
+                ok(engine.request({command:'new_game'}));
+                ok(engine.request({command:'set_position',sfen:'startpos',moves}));
+                const t=performance.now();
+                const result=ok(engine.request({command:'search',depth:64,movetime_ms:ms})).result;
+                const wall=Math.round(performance.now()-t);
+                assert.match(result.bestmove,/^(?:[1-9][a-i][1-9][a-i]\+?|[PLNSGBR]\*[1-9][a-i])$/);
+                ok(engine.request({command:'set_position',sfen:'startpos',moves:[...moves,result.bestmove]}));
+                console.log(JSON.stringify({moves,ms,wall,...result}));
+                assert(wall<ms+2000);
+              }
+            }
+          } finally {engine.dispose()}
+          EOF
+          node "$dir/bench.mjs"
