@@ -119,3 +119,38 @@ jobs:
           console.log('POSITION TEST PASSED: 40 formations');
           EOF
           node "$dir/position-test.mjs"
+      - name: Browser client protocol test
+        run: |
+          set -euo pipefail
+          dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
+          curl -fL https://raw.githubusercontent.com/amatouazuwo/shogi-is-luck-engine/08ebe90c7dba62c890f5e87b6dcbb768c946183c/scripts/rsshogi-client.mjs -o "$dir/rsshogi-client.mjs"
+          cp "$dir/position.mjs" "$dir/rsshogi-position.mjs"
+          cat > "$dir/client-test.mjs" <<'EOF'
+          import assert from 'node:assert/strict';
+          import {BrowserEngine} from './rsshogi-client.mjs';
+          import {toUsi} from './rsshogi-position.mjs';
+          // Deterministic protocol double: exercises request IDs, stale responses, errors, legal filtering.
+          let last, chosen='7g7f';
+          class MockWorker {
+            postMessage(m){queueMicrotask(()=>{
+              if(this.dead)return;
+              if(m.command==='go'){
+                this.onmessage({data:{id:m.id,ok:true,event:'info',result:{bestmove:'1a1b'}}});
+                this.onmessage({data:{id:m.id,ok:true,event:'bestmove',result:{bestmove:chosen}}});
+              }else this.onmessage({data:{id:m.id,ok:true,event:m.command}});
+            });}
+            terminate(){this.dead=true;}
+          }
+          const e=new BrowserEngine('worker.js','engine.wasm',{workerFactory:()=>last=new MockWorker(),timeout:1000});
+          const board=Array(81).fill(null);
+          board[4]={type:'K',side:1};board[76]={type:'K',side:0};board[56]={type:'P',side:0};
+          const g={board,turn:0,hands:[{},{}]};
+          const legal=[{from:56,to:47}];
+          assert.equal(toUsi(await e.choose(g,legal)), '7g7f');
+          chosen='1a1b';assert.equal(await e.choose(g,legal),null);
+          assert.equal(await e.choose({...g,holes:[40]},legal),null);
+          const win={from:56,to:4};assert.equal(await e.choose(g,[win]),win);
+          chosen='7g7f';const pending=e.choose(g,legal);e.reset();assert.equal(await pending,null);
+          e.reset();console.log('CLIENT PROTOCOL TEST PASSED');
+          EOF
+          node "$dir/client-test.mjs"
