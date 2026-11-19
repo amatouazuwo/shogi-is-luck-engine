@@ -194,3 +194,119 @@ jobs:
           }finally{client.reset();}
           EOF
           node "$dir/real-client.mjs"
+      - name: Actual game random formation compatibility
+        run: |
+          set -euo pipefail
+          dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
+          cat > "$dir/game-rules.mjs" <<'EOF'
+          const rand=n=>Math.floor(Math.random()*n),shuffle=a=>{for(let i=a.length-1;i>0;i--){let j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+          const pos=(r,c)=>r*9+c,rc=i=>[Math.floor(i/9),i%9],inside=(r,c)=>r>=0&&r<9&&c>=0&&c<9;
+          const piece=(type,side,pr=false)=>({type,side,pr});
+          const shallowBoard=a=>a.map(p=>p?{...p}:null);
+          function expandedDirs(p,dragon=false){const f=p.side===0?-1:1;
+          const O=(a,b)=>[a*f,b],step=[],slide=[];
+          if(dragon || p.pr&&p.type==='R'){slide.push(...[[1,0],[-1,0],[0,1],[0,-1]]);step.push(...[[1,1],[1,-1],[-1,1],[-1,-1]])}
+          else if(p.pr&&p.type==='B'){slide.push(...[[1,1],[1,-1],[-1,1],[-1,-1]]);step.push(...[[1,0],[-1,0],[0,1],[0,-1]])}
+          else if(p.pr&&['S','N','L','P'].includes(p.type)||p.type==='G'){step.push(...[O(1,-1),O(1,0),O(1,1),O(0,-1),O(0,1),O(-1,0)])}
+          else if(p.type==='K'){step.push(...[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]])}
+          else if(p.type==='P'){step.push(O(1,0))}
+          else if(p.type==='L'){slide.push(O(1,0))}
+          else if(p.type==='N'){step.push(O(2,-1),O(2,1))} // 桂馬は跳躍できるため手前の穴を飛び越せる
+          else if(p.type==='S'){step.push(...[O(1,-1),O(1,0),O(1,1),O(-1,-1),O(-1,1)])}
+          else if(p.type==='B'){slide.push(...[[1,1],[1,-1],[-1,1],[-1,-1]])}
+          else if(p.type==='R'){slide.push(...[[1,0],[-1,0],[0,1],[0,-1]])}
+          return{step,slide}}
+          function pseudoTargets(x,from,dragon=false){let p=x.board[from],out=[];if(!p)return out;const [r,c]=rc(from),d=expandedDirs(p,dragon);
+          for(const [dr,dc] of d.step){const nr=r+dr,nc=c+dc;if(!inside(nr,nc))continue;const j=pos(nr,nc),q=x.board[j];if(q&&q.side===p.side)continue;if(!(x.holes||[]).includes(j))out.push(j)}
+          for(const [dr,dc] of d.slide){let nr=r+dr,nc=c+dc;while(inside(nr,nc)){const j=pos(nr,nc),q=x.board[j];if((x.holes||[]).includes(j))break; // 穴は飛車・角・香車・竜・馬の射線も遮る
+          if(q&&q.side===p.side)break;out.push(j);if(q)break;nr+=dr;nc+=dc}}
+          return out}
+          function inCheck(x,side){const k=x.board.findIndex(p=>p&&p.type==='K'&&p.side===side);if(k<0)return true;for(let i=0;i<81;i++){const p=x.board[i];if(p&&p.side!==side&&pseudoTargets(x,i).includes(k))return true}return false}
+          function zone(r,s){return s===0?r<=2:r>=6}
+          function deadAt(type,s,r){return(type==='P'||type==='L')?(s===0?r===0:r===8):type==='N'?(s===0?r<=1:r>=7):false}
+          function canPromote(p){return !p.pr&&['R','B','S','N','L','P'].includes(p.type)}
+          function sim(x,m,side){const b=shallowBoard(x.board),result={board:b,holes:x.holes||[]};if(m.teleport){const at=b.findIndex(p=>p&&p.type==='K'&&p.side===side);if(at>=0){b[m.to]=b[at];b[at]=null}return result}if(m.drop){b[m.to]=piece(m.drop,side);return result}
+          const p=b[m.from];b[m.from]=null;b[m.to]={...p,pr:m.promote||p.pr};return result}
+          function getLegal(x,side,opts={}){if(x.over)return [];
+           if(x.teleportActive===side){const old=x.board.findIndex(p=>p&&p.type==='K'&&p.side===side);if(old<0)return [];return Array.from({length:81},(_,to)=>({from:old,to,drop:null,dragon:false,promote:false,teleport:true})).filter(m=>m.to!==old&&!x.board[m.to]&&!(x.holes||[]).includes(m.to)&&!inCheck({...x,board:sim(x,m,side).board},side));}
+           let moves=[],allowDragon=!opts.noDragon&&side===x.turn&&x.effect==='dragon';
+          for(let i=0;i<81;i++){
+           const p=x.board[i];if(!p||p.side!==side)continue;
+           for(const dragon of (allowDragon?[true]:[false])){
+            for(const j of pseudoTargets(x,i,dragon)){
+             const seatCapture=x.board[j]?.type==='K'&&x.seatShuffleClaim?.attacker===side&&x.seatShuffleClaim?.side===1-side&&x.turn===side;
+             if(x.board[j]&&x.board[j].type==='K'&&!(x.effect==='doubleSecond'&&side===x.turn)&&!seatCapture)continue;
+             const [r]=rc(i),[r2]=rc(j),may=canPromote(p)&&(zone(r,side)||zone(r2,side));
+             const must=canPromote(p)&&deadAt(p.type,side,r2);
+             for(const promote of must?[true]:may?[false,true]:[false]){
+              const m={from:i,to:j,drop:null,dragon,promote};if(seatCapture||!inCheck(sim(x,m,side),side))moves.push(m);
+             }
+            }
+           }
+          }
+          for(const type of types.slice(1)){
+           if(!(x.hands[side]?.[type]>0))continue;
+           for(let j=0;j<81;j++){
+            if(x.board[j]||(x.holes||[]).includes(j))continue;const [r,c]=rc(j);
+            if(deadAt(type,side,r))continue;
+            if(type==='P'&&x.board.some((p,i)=>p&&p.side===side&&p.type==='P'&&!p.pr&&i%9===c))continue;
+            const m={from:null,to:j,drop:type,dragon:false,promote:false};const t=sim(x,m,side);if(inCheck(t,side))continue;
+            if(type==='P'&&!opts.skipPawnMate&&inCheck(t,1-side)){
+             const nx={...x,board:t.board,turn:1-side,effect:null};if(!getLegal(nx,1-side,{skipPawnMate:true,noDragon:true}).length)continue;
+            }
+            moves.push(m)
+           }
+          }
+          return moves}
+          function randomPromo(p){return canPromote(p)&&Math.random()<(p.type==='P'?.12:.18)}
+          function pool(){return['K','R','B','G','G','S','S','N','N','L','L',...Array(9).fill('P')]}
+          function buildSide(board,side,excluded={},fixed={}){
+           const rows=side===0?[6,7,8]:[0,1,2],isBlocked=i=>!!excluded[i]||!!board[i];let typesLeft=pool();
+           for(const [idx,t] of Object.entries(fixed)){const i=+idx;board[i]=piece(t,side,false);typesLeft.splice(typesLeft.indexOf(t),1)}
+           const pawns=typesLeft.filter(t=>t==='P').length;
+           const cols=shuffle([0,1,2,3,4,5,6,7,8]);
+           for(let q=0;q<pawns;q++){
+            const c=cols[q%9],opts=shuffle(rows.map(r=>pos(r,c)).filter(i=>!isBlocked(i)));
+            if(opts.length){const at=opts[0];board[at]=piece('P',side,randomPromo(piece('P',side)));typesLeft.splice(typesLeft.indexOf('P'),1)}
+           }
+           if(typesLeft.includes('P'))return false;
+           if(typesLeft.includes('K')){
+            const options=shuffle((side===0?[7,8]:[0,1]).flatMap(r=>Array.from({length:9},(_,c)=>pos(r,c))).filter(i=>!isBlocked(i)));
+            if(!options.length)return false;const at=options[0];board[at]=piece('K',side);typesLeft.splice(typesLeft.indexOf('K'),1)
+           }
+           const empties=shuffle(rows.flatMap(r=>Array.from({length:9},(_,c)=>pos(r,c))).filter(i=>!isBlocked(i)));
+           if(empties.length<typesLeft.length)return false;
+           shuffle(typesLeft).forEach((t,k)=>board[empties[k]]=piece(t,side,randomPromo(piece(t,side))));return true;
+          }
+          function independentBoard(){for(let attempts=0;attempts<500;attempts++){const board=Array(81).fill(null);if(!buildSide(board,0)||!buildSide(board,1))continue;if(!inCheck({board},0)&&!inCheck({board},1))return board}throw Error('初期局面を生成できませんでした')}
+          
+          export {independentBoard,getLegal};
+          EOF
+          cat > "$dir/game-test.mjs" <<'EOF'
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          import {MiniEngine} from './mini.js';
+          import {toSfen,matchLegal} from './position.mjs';
+          import {independentBoard,getLegal} from './game-rules.mjs';
+          const engine=await MiniEngine.create(await readFile(new URL('./rsshogi_nnue_mini.wasm',import.meta.url)));
+          const ok=r=>{assert.equal(r.ok,true,JSON.stringify(r));return r};
+          let seed=91827;Math.random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+          ok(engine.request({command:'load_embedded'}));
+          let passed=0,failed=[];
+          try{
+            for(let i=0;i<100;i++){
+              const g={board:independentBoard(),turn:i%2,hands:[{},{}],holes:[],steps:0};
+              const legal=getLegal(g,g.turn);
+              try{
+                const sfen=toSfen(g);assert.ok(sfen);
+                ok(engine.request({command:'set_position',sfen,moves:[]}));
+                const r=ok(engine.request({command:'search',movetime_ms:100})).result;
+                assert.ok(matchLegal(r.bestmove,legal),'not in game legal list: '+r.bestmove);
+                passed++;
+              }catch(e){failed.push({i,error:String(e),sfen:toSfen(g)});}
+            }
+            console.log(JSON.stringify({passed,failed}));
+            assert.equal(passed,100);
+          }finally{engine.dispose();}
+          EOF
+          node "$dir/game-test.mjs"
