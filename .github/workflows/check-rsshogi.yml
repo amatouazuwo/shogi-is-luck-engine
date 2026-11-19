@@ -281,7 +281,7 @@ jobs:
           function independentBoard(){for(let attempts=0;attempts<500;attempts++){const board=Array(81).fill(null);if(!buildSide(board,0)||!buildSide(board,1))continue;if(!inCheck({board},0)&&!inCheck({board},1))return board}throw Error('初期局面を生成できませんでした')}
           
           const types=['K','R','B','G','S','N','L','P'];
-          export {independentBoard,getLegal};
+          export {independentBoard,getLegal,sim,inCheck};
           EOF
           cat > "$dir/game-test.mjs" <<'EOF'
           import assert from 'node:assert/strict';
@@ -311,3 +311,71 @@ jobs:
           }finally{engine.dispose();}
           EOF
           node "$dir/game-test.mjs"
+      - name: Special position tactical test
+        run: |
+          set -euo pipefail
+          dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
+          cat > "$dir/special-test.mjs" <<'EOF'
+          import assert from 'node:assert/strict';
+          import {performance} from 'node:perf_hooks';
+          import {independentBoard,getLegal,sim,inCheck} from './game-rules.mjs';
+          const prices={K:9999,R:10,B:9,G:6,S:5,N:4,L:3,P:1};
+          function cpuSpecialMove(x,legal){
+           const side=x.turn,opp=1-side;
+           const win=legal.find(m=>x.board[m.to]?.type==='K'&&x.board[m.to].side===opp);
+           if(win)return win;
+           const value=p=>p?((prices[p.type]||0)+(p.pr?(['R','B'].includes(p.type)?3:Math.max(0,6-(prices[p.type]||0))):0)):0;
+           const next=(state,m,actor)=>{
+            const board=sim(state,m,actor).board,hands=state.hands.map(h=>({...h})),captured=state.board[m.to];
+            if(captured&&captured.type!=='K')hands[actor][captured.type]=(hands[actor][captured.type]||0)+1;
+            if(m.drop)hands[actor][m.drop]--;
+            const turn=1-actor;
+            return {...state,board,hands,turn,effect:state.dragonReady?.[turn]>0?'dragon':null,teleportActive:null,seatShuffleClaim:null};
+           };
+           const assess=state=>{
+            let score=0;
+            for(const p of state.board)if(p&&p.type!=='K')score+=(p.side===side?1:-1)*value(p);
+            for(const actor of [side,opp])for(const [t,n] of Object.entries(state.hands[actor]))score+=(actor===side?1:-1)*(prices[t]||0)*n;
+            if(inCheck(state,opp))score+=0.5;
+            if(inCheck(state,side))score-=0.5;
+            return score;
+           };
+           // Rank every legal move, then examine the strongest immediate replies for top candidates.
+           const ranked=legal.map(m=>({m,state:next(x,m,side)})).map(a=>({...a,score:assess(a.state)})).sort((a,b)=>b.score-a.score);
+           let best=ranked[0]?.m,bestScore=-Infinity;
+           for(const a of ranked.slice(0,12)){
+            const replies=getLegal(a.state,opp);
+            let worst=a.score;
+            if(!replies.length)worst=inCheck(a.state,opp)?100000:a.score;
+            else for(const reply of replies){
+             if(a.state.board[reply.to]?.type==='K'){worst=-100000;break;}
+             worst=Math.min(worst,assess(next(a.state,reply,opp)));
+            }
+            if(worst>bestScore){bestScore=worst;best=a.m;}
+           }
+           return best??null;
+          }
+          let seed=72321;Math.random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+          const times=[];
+          for(const effect of [null,'dragon','doubleSecond','future-event']){
+            for(const turn of [0,1]){
+              const board=Array(81).fill(null);board[4]={type:'K',side:1};board[76]={type:'K',side:0};
+              const target=turn===0?4:76;
+              const m={from:40,to:target};
+              assert.equal(cpuSpecialMove({board,turn,effect},[{from:40,to:41},m]),m);
+            }
+          }
+          for(const kind of ['hole','dragon','doubleSecond','teleport','seatShuffle']){
+            for(let i=0;i<10;i++){
+              const turn=i%2,board=independentBoard();
+              const g={board,turn,hands:[{},{}],holes:kind==='hole'?[40]:[],effect:['dragon','doubleSecond'].includes(kind)?kind:null,teleportActive:kind==='teleport'?turn:null,seatShuffleClaim:kind==='seatShuffle'?{attacker:turn,side:1-turn}:null};
+              const legal=getLegal(g,turn);assert.ok(legal.length);
+              const t=performance.now(),m=cpuSpecialMove(g,legal);
+              times.push({kind,ms:Math.round(performance.now()-t)});
+              assert.ok(legal.includes(m));
+              if(kind==='hole')assert.notEqual(m.to,40);
+            }
+          }
+          console.log('SPECIAL TEST PASSED',JSON.stringify(times));
+          EOF
+          node "$dir/special-test.mjs"
