@@ -1,0 +1,43 @@
+name: Pit rule prototype
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/pit-rule-prototype.yml']
+permissions:
+  contents: read
+jobs:
+  prototype:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - run: |
+          git clone --depth 1 --branch v1.7.2 https://github.com/nyoki-mtl/rsshogi.git rules
+          rustup toolchain install 1.95.0 --profile minimal
+      - name: Implement isolated fixed-mask prototype
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('rules/crates/rsshogi/src/board')
+          p=root/'position/attacks.rs'
+          s=p.read_text()
+          # Prototype only: fixed obstacle at center, not a production position field.
+          s=s.replace('impl Position {','''impl Position {
+              pub(crate) fn prototype_holes() -> Bitboard {
+                  Bitboard::from_square(Square::from_index(40))
+              }
+          ''',1)
+          for marker in ['let sq_idx = sq.to_index();']:
+              s=s.replace(marker,'let occupied = occupied | Self::prototype_holes();\n        '+marker)
+          s=s.replace('let occupied = bb.occupied();','let occupied = bb.occupied() | Self::prototype_holes();')
+          p.write_text(s)
+          p=root/'movegen/pieces.rs'
+          s=p.read_text().replace('let occupied = pos.bitboards().occupied();','let occupied = pos.bitboards().occupied() | Position::prototype_holes();').replace('let enemy = occupied.and_not(ours);','let enemy = pos.bitboards().occupied().and_not(ours);').replace('.and_not(ours);\n\n    macro_rules!', '.and_not(ours | Position::prototype_holes());\n\n    macro_rules!')
+          s=s.replace('let occupied = pos.bitboards().occupied().and_not(Bitboard::from_square(from));','let occupied = (pos.bitboards().occupied() | Position::prototype_holes()).and_not(Bitboard::from_square(from));')
+          p.write_text(s)
+          PY
+          git -C rules diff --check
+          git -C rules diff
+      - name: Compile prototype
+        run: |
+          cd rules
+          cargo +1.95.0 check -p rsshogi --lib
