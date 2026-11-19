@@ -59,3 +59,10 @@ Embedded model SHA-256: 787739972eabb5a1c42c471d178ac0c97b688dce35c72b4291e7e1ee
 Upstream README describes MIT and embedded model; release ZIP includes MIT text, but explicit coverage of embedded weights and their provenance have not been independently confirmed. Do not distribute SDK through a publicly reachable test or production server until resolved. Private CI remains permitted for isolated evaluation. Retain original MIT text and applicable dependency notices; do not relicense the game. No developer contact has been sent.
 
 Before staging: confirm redistribution rights, retain notices, verify deployed SDK hash, enable feature flag in test only, smoke test real device, verify fallback and rollback. Production remains separately gated.
+
+
+### Staging operational runbook
+
+Game branch server.js now has an explicit AI file allowlist and RSSHOGI_SERVE_ASSETS=1 opt-in (default disabled). This is a preparation change only, not a deployment. Before enabling, resolve embedded model rights, install and checksum the pinned SDK, verify all imports and MIME responses using the actual Node server, and add a staging-only client feature flag configuration (SHOGILUCK_RSSHOGI_ENABLED=true). Verify actual Render staging branch and deployment revision, health endpoint, game smoke tests and physical mobile device tests. Do not set the server environment variable or publish the SDK while rights remain unresolved.
+
+Rollback: disable client feature flag and RSSHOGI_SERVE_ASSETS, redeploy the previous known-good staging revision if necessary, verify old CPU and online entry, and ensure AI asset URLs return 404. No database migration is needed for this integration. Never alter production without explicit approval. Actual Node server routing tests remain pending.
