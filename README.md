@@ -1,5 +1,15 @@
 # shogi-is-luck-engine
 
+## Current direction (2026-11-19)
+
+The YaneuraOu experiment is on hold. Preserving the game's independent license is mandatory; playing strength is the primary ranking criterion among eligible engines. No GPL engine integration is authorized for the game. Preserve the prior experiment for reference only.
+
+Candidates: rsshogi-nnue-mini (MIT source, model and dependency terms pending), OpenShogiAI (WASM, license audit pending), Sekirei (MIT/Apache-2.0 source, separate model terms), Sunfish4 and lbase-shogi. Before integration, verify exact source revision, dependencies, model redistribution rights, provenance, browser build, legal moves, special rules, measured strength and mobile performance. Test environment only; production requires explicit approval.
+
+## Archived experiment
+
+# shogi-is-luck-engine
+
 Experimental WebAssembly build of [YaneuraOu](https://github.com/yaneurao/YaneuraOu) for the browser game *将棋は運ゲー*.
 
 ## Status
