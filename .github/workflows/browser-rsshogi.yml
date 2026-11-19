@@ -8,7 +8,7 @@ permissions:
   contents: read
 jobs:
   browser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Prepare pinned SDK and game client
@@ -19,9 +19,187 @@ jobs:
           unzip -q sdk.zip -d sdk
           dir="$(dirname "$(find sdk -name rsshogi_nnue_mini.wasm -print -quit)")"
           cp "$dir/"* site/ai/sdk/
-          for f in rsshogi-client.mjs rsshogi-position.mjs; do
-            curl -fL "https://raw.githubusercontent.com/amatouazuwo/shogi-is-luck/3f7ce63ded6afa905026d7b75efb220326c140b1/ai/$f" -o "site/ai/$f"
-          done
+          cat > site/ai/rsshogi-client.mjs <<'EOF'
+          // SDK is supplied separately, unmodified. Never use an unvalidated engine move.
+          import {toSfen,matchLegal,immediateKingCapture} from './rsshogi-position.mjs';
+          export class BrowserEngine {
+            constructor(workerUrl, wasmUrl, {workerFactory = url => new Worker(url,{type:'module'}), timeout=10000}={}) {
+              this.workerUrl=workerUrl; this.wasmUrl=wasmUrl; this.factory=workerFactory; this.timeout=timeout;
+              this.seq=0; this.generation=0; this.pending=new Map(); this.worker=null; this.ready=null;
+            }
+            reset(){
+              this.generation++;
+              this.worker?.terminate(); this.worker=null; this.ready=null;
+              for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(new Error('engine cancelled'));}
+              this.pending.clear();
+            }
+            async init(){
+              if(this.ready)return this.ready;
+              const w=this.factory(this.workerUrl);this.worker=w;
+              w.onmessage=({data})=>{
+                if(this.worker!==w)return;
+                const p=this.pending.get(data.id);if(!p)return;
+                if(data.ok!==false&&p.search&&data.event!=='bestmove')return;
+                this.pending.delete(data.id);clearTimeout(p.timer);
+                if(data.ok===false)p.reject(new Error(data.error||'engine error'));else p.resolve(data.result);
+              };
+              w.onerror=()=>{if(this.worker===w)this.reset();};
+              this.ready=this.request('init',{url:this.wasmUrl,hash_mb:16}).catch(e=>{if(this.worker===w)this.reset();throw e;});
+              return this.ready;
+            }
+            request(command,args={},search=false){
+              return new Promise((resolve,reject)=>{
+                const id=++this.seq;
+                const timer=setTimeout(()=>{this.reset();},this.timeout);
+                this.pending.set(id,{resolve,reject,timer,search});
+                try{this.worker.postMessage({id,command,...args});}catch(e){this.reset();}
+              });
+            }
+            async choose(g,legal,ms=500){
+              const capture=immediateKingCapture(g,legal);if(capture)return capture;
+              const sfen=toSfen(g);if(!sfen)return null;
+              if(this.busy)this.reset();
+              const gen=++this.generation;this.busy=gen;
+              try{
+                await this.init();if(gen!==this.generation)return null;
+                await this.request('position',{sfen,moves:[]});if(gen!==this.generation)return null;
+                const result=await this.request('go',{depth:64,movetime_ms:Math.max(1,Math.floor(ms))},true);
+                return gen===this.generation?matchLegal(result?.bestmove,legal):null;
+              }catch{return null;}finally{if(this.busy===gen)this.busy=0;}
+            }
+          }
+          EOF
+          cat > site/ai/rsshogi-position.mjs <<'EOF'
+          // Game coordinates: row 0 is opponent's home rank; column 0 is file 9.
+          const TYPES = "RBGSNLP";
+          export function toSfen(g) {
+            if (!g || !Array.isArray(g.board) || g.board.length !== 81 || ![0,1].includes(g.turn)) return null;
+            if (g.holes?.length || g.effect === 'dragon' || g.effect === 'doubleSecond' || g.teleportActive != null || g.seatShuffleClaim) return null;
+            const kings=[0,0], rows=[];
+            for(let r=0;r<9;r++){
+              let row="", empty=0;
+              for(let c=0;c<9;c++){
+                const p=g.board[r*9+c];
+                if(!p){empty++;continue;}
+                if(!"KRBGSNLP".includes(p.type)||p.type.length!==1||![0,1].includes(p.side)|| (p.pr&&! "RB SNLP".replace(" ","").includes(p.type))) return null;
+                if(p.type==="K")kings[p.side]++;
+                if(empty){row+=empty;empty=0;}
+                row+=(p.pr?"+":"")+(p.side===0?p.type:p.type.toLowerCase());
+              }
+              if(empty)row+=empty;
+              rows.push(row);
+            }
+            if(kings.some(n=>n!==1))return null;
+            let hand="";
+            for(const side of [0,1])for(const t of TYPES){
+              const n=g.hands?.[side]?.[t]??0;
+              if(!Number.isInteger(n)||n<0||n>18)return null;
+              if(n)hand+=(n>1?n:"")+(side===0?t:t.toLowerCase());
+            }
+            return rows.join("/")+" "+(g.turn===0?"b":"w")+" "+(hand||"-")+" "+(Math.max(0,Number(g.steps)||0)+1);
+          }
+          const square=i=>Number.isInteger(i)&&i>=0&&i<81?String(9-i%9)+String.fromCharCode(97+Math.floor(i/9)):null;
+          export function toUsi(m){
+            if(!m||m.dragon||m.teleport)return null;
+            const to=square(m.to);if(!to)return null;
+            if(m.drop)return TYPES.includes(m.drop)&&m.drop.length===1?m.drop+"*"+to:null;
+            const from=square(m.from);return from?from+to+(m.promote?"+":""):null;
+          }
+          export function matchLegal(bestmove,legal) {
+            if(typeof bestmove!=="string")return null;
+            return legal.find(m=>toUsi(m)===bestmove)??null;
+          }
+          
+          // The game's legal generator is authoritative, including special moves.
+          export function immediateKingCapture(g, legal) {
+            return legal.find(m => { const p=g.board[m.to]; return p?.type==='K' && p.side===1-g.turn; }) ?? null;
+          }
+          EOF
+          cat > site/ai/game-rules.mjs <<'EOF'
+          const rand=n=>Math.floor(Math.random()*n),shuffle=a=>{for(let i=a.length-1;i>0;i--){let j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+          const pos=(r,c)=>r*9+c,rc=i=>[Math.floor(i/9),i%9],inside=(r,c)=>r>=0&&r<9&&c>=0&&c<9;
+          const piece=(type,side,pr=false)=>({type,side,pr});
+          const shallowBoard=a=>a.map(p=>p?{...p}:null);
+          function expandedDirs(p,dragon=false){const f=p.side===0?-1:1;
+          const O=(a,b)=>[a*f,b],step=[],slide=[];
+          if(dragon || p.pr&&p.type==='R'){slide.push(...[[1,0],[-1,0],[0,1],[0,-1]]);step.push(...[[1,1],[1,-1],[-1,1],[-1,-1]])}
+          else if(p.pr&&p.type==='B'){slide.push(...[[1,1],[1,-1],[-1,1],[-1,-1]]);step.push(...[[1,0],[-1,0],[0,1],[0,-1]])}
+          else if(p.pr&&['S','N','L','P'].includes(p.type)||p.type==='G'){step.push(...[O(1,-1),O(1,0),O(1,1),O(0,-1),O(0,1),O(-1,0)])}
+          else if(p.type==='K'){step.push(...[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]])}
+          else if(p.type==='P'){step.push(O(1,0))}
+          else if(p.type==='L'){slide.push(O(1,0))}
+          else if(p.type==='N'){step.push(O(2,-1),O(2,1))} // 桂馬は跳躍できるため手前の穴を飛び越せる
+          else if(p.type==='S'){step.push(...[O(1,-1),O(1,0),O(1,1),O(-1,-1),O(-1,1)])}
+          else if(p.type==='B'){slide.push(...[[1,1],[1,-1],[-1,1],[-1,-1]])}
+          else if(p.type==='R'){slide.push(...[[1,0],[-1,0],[0,1],[0,-1]])}
+          return{step,slide}}
+          function pseudoTargets(x,from,dragon=false){let p=x.board[from],out=[];if(!p)return out;const [r,c]=rc(from),d=expandedDirs(p,dragon);
+          for(const [dr,dc] of d.step){const nr=r+dr,nc=c+dc;if(!inside(nr,nc))continue;const j=pos(nr,nc),q=x.board[j];if(q&&q.side===p.side)continue;if(!(x.holes||[]).includes(j))out.push(j)}
+          for(const [dr,dc] of d.slide){let nr=r+dr,nc=c+dc;while(inside(nr,nc)){const j=pos(nr,nc),q=x.board[j];if((x.holes||[]).includes(j))break; // 穴は飛車・角・香車・竜・馬の射線も遮る
+          if(q&&q.side===p.side)break;out.push(j);if(q)break;nr+=dr;nc+=dc}}
+          return out}
+          function inCheck(x,side){const k=x.board.findIndex(p=>p&&p.type==='K'&&p.side===side);if(k<0)return true;for(let i=0;i<81;i++){const p=x.board[i];if(p&&p.side!==side&&pseudoTargets(x,i).includes(k))return true}return false}
+          function zone(r,s){return s===0?r<=2:r>=6}
+          function deadAt(type,s,r){return(type==='P'||type==='L')?(s===0?r===0:r===8):type==='N'?(s===0?r<=1:r>=7):false}
+          function canPromote(p){return !p.pr&&['R','B','S','N','L','P'].includes(p.type)}
+          function sim(x,m,side){const b=shallowBoard(x.board),result={board:b,holes:x.holes||[]};if(m.teleport){const at=b.findIndex(p=>p&&p.type==='K'&&p.side===side);if(at>=0){b[m.to]=b[at];b[at]=null}return result}if(m.drop){b[m.to]=piece(m.drop,side);return result}
+          const p=b[m.from];b[m.from]=null;b[m.to]={...p,pr:m.promote||p.pr};return result}
+          function getLegal(x,side,opts={}){if(x.over)return [];
+           if(x.teleportActive===side){const old=x.board.findIndex(p=>p&&p.type==='K'&&p.side===side);if(old<0)return [];return Array.from({length:81},(_,to)=>({from:old,to,drop:null,dragon:false,promote:false,teleport:true})).filter(m=>m.to!==old&&!x.board[m.to]&&!(x.holes||[]).includes(m.to)&&!inCheck({...x,board:sim(x,m,side).board},side));}
+           let moves=[],allowDragon=!opts.noDragon&&side===x.turn&&x.effect==='dragon';
+          for(let i=0;i<81;i++){
+           const p=x.board[i];if(!p||p.side!==side)continue;
+           for(const dragon of (allowDragon?[true]:[false])){
+            for(const j of pseudoTargets(x,i,dragon)){
+             const seatCapture=x.board[j]?.type==='K'&&x.seatShuffleClaim?.attacker===side&&x.seatShuffleClaim?.side===1-side&&x.turn===side;
+             if(x.board[j]&&x.board[j].type==='K'&&!(x.effect==='doubleSecond'&&side===x.turn)&&!seatCapture)continue;
+             const [r]=rc(i),[r2]=rc(j),may=canPromote(p)&&(zone(r,side)||zone(r2,side));
+             const must=canPromote(p)&&deadAt(p.type,side,r2);
+             for(const promote of must?[true]:may?[false,true]:[false]){
+              const m={from:i,to:j,drop:null,dragon,promote};if(seatCapture||!inCheck(sim(x,m,side),side))moves.push(m);
+             }
+            }
+           }
+          }
+          for(const type of types.slice(1)){
+           if(!(x.hands[side]?.[type]>0))continue;
+           for(let j=0;j<81;j++){
+            if(x.board[j]||(x.holes||[]).includes(j))continue;const [r,c]=rc(j);
+            if(deadAt(type,side,r))continue;
+            if(type==='P'&&x.board.some((p,i)=>p&&p.side===side&&p.type==='P'&&!p.pr&&i%9===c))continue;
+            const m={from:null,to:j,drop:type,dragon:false,promote:false};const t=sim(x,m,side);if(inCheck(t,side))continue;
+            if(type==='P'&&!opts.skipPawnMate&&inCheck(t,1-side)){
+             const nx={...x,board:t.board,turn:1-side,effect:null};if(!getLegal(nx,1-side,{skipPawnMate:true,noDragon:true}).length)continue;
+            }
+            moves.push(m)
+           }
+          }
+          return moves}
+          function randomPromo(p){return canPromote(p)&&Math.random()<(p.type==='P'?.12:.18)}
+          function pool(){return['K','R','B','G','G','S','S','N','N','L','L',...Array(9).fill('P')]}
+          function buildSide(board,side,excluded={},fixed={}){
+           const rows=side===0?[6,7,8]:[0,1,2],isBlocked=i=>!!excluded[i]||!!board[i];let typesLeft=pool();
+           for(const [idx,t] of Object.entries(fixed)){const i=+idx;board[i]=piece(t,side,false);typesLeft.splice(typesLeft.indexOf(t),1)}
+           const pawns=typesLeft.filter(t=>t==='P').length;
+           const cols=shuffle([0,1,2,3,4,5,6,7,8]);
+           for(let q=0;q<pawns;q++){
+            const c=cols[q%9],opts=shuffle(rows.map(r=>pos(r,c)).filter(i=>!isBlocked(i)));
+            if(opts.length){const at=opts[0];board[at]=piece('P',side,randomPromo(piece('P',side)));typesLeft.splice(typesLeft.indexOf('P'),1)}
+           }
+           if(typesLeft.includes('P'))return false;
+           if(typesLeft.includes('K')){
+            const options=shuffle((side===0?[7,8]:[0,1]).flatMap(r=>Array.from({length:9},(_,c)=>pos(r,c))).filter(i=>!isBlocked(i)));
+            if(!options.length)return false;const at=options[0];board[at]=piece('K',side);typesLeft.splice(typesLeft.indexOf('K'),1)
+           }
+           const empties=shuffle(rows.flatMap(r=>Array.from({length:9},(_,c)=>pos(r,c))).filter(i=>!isBlocked(i)));
+           if(empties.length<typesLeft.length)return false;
+           shuffle(typesLeft).forEach((t,k)=>board[empties[k]]=piece(t,side,randomPromo(piece(t,side))));return true;
+          }
+          function independentBoard(){for(let attempts=0;attempts<500;attempts++){const board=Array(81).fill(null);if(!buildSide(board,0)||!buildSide(board,1))continue;if(!inCheck({board},0)&&!inCheck({board},1))return board}throw Error('初期局面を生成できませんでした')}
+          
+          const types=['K','R','B','G','S','N','L','P'];
+          export {independentBoard,getLegal,sim,inCheck};
+          EOF
           echo '<!doctype html><meta charset="utf-8"><title>Local worker integration</title>' > site/index.html
           npm install --no-save playwright
           npx playwright install --with-deps chromium
@@ -43,9 +221,8 @@ jobs:
                 for(let c=0;c<9;c++){board[c]={type:row[c],side:1};board[18+c]={type:'P',side:1};board[54+c]={type:'P',side:0};board[72+c]={type:row[c],side:0};}
                 board[10]={type:'R',side:1};board[16]={type:'B',side:1};board[64]={type:'B',side:0};board[70]={type:'R',side:0};
                 const g={board,turn:0,hands:[{},{}],holes:[],steps:0};
-                const legal=Array.from({length:9},(_,c)=>({from:54+c,to:45+c}));
-                legal.push(...[65,66,67,68,69,71].map(to=>({from:70,to})),...([60,61,62,63,65].map(to=>({from:76,to}))),{from:72,to:63},{from:80,to:71});
-                // Test transport independently of the full legal generator.
+                const {getLegal}=await import('/ai/game-rules.mjs');
+                const legal=getLegal(g,g.turn);
                 const t=performance.now();await engine.init();const init=Math.round(performance.now()-t);
                 const move=await engine.choose(g,legal,500);
                 const pending=engine.choose(g,legal,1500);engine.reset();const cancelled=await pending;
