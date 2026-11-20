@@ -312,12 +312,84 @@ jobs:
               }
           }
           RS
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('engine/src/api.rs')
+          s=p.read_text()
+          marker='    pub fn new_game(&mut self) {'
+          assert marker in s
+          s=s.replace(marker,'''    pub fn set_obstacle_position(&mut self, sfen: &str, holes: &[String]) -> Result<(), String> {
+                  use rsshogi::types::{Bitboard, Move};
+                  let fields: Vec<_> = sfen.split_whitespace().collect();
+                  if fields.len()!=4 { return Err("expected four SFEN fields".into()); }
+                  crate::position::validate_sfen_hands(fields[2])?;
+                  let mut position=board::position_from_sfen(sfen).map_err(|e|e.to_string())?;
+                  let mut mask=Bitboard::EMPTY;
+                  for square in holes {
+                      let b=square.as_bytes();
+                      if b.len()!=2 || !(b'1'..=b'9').contains(&b[0]) || !(b'a'..=b'i').contains(&b[1]) {
+                          return Err("invalid obstacle square".into());
+                      }
+                      let sq=Move::from_usi(&format!("{}{}",if square=="7g" {"8g"} else {"7g"},square)).ok_or("invalid square")?.to_sq();
+                      if mask.test(sq) { return Err("duplicate obstacle".into()); }
+                      mask.set(sq);
+                  }
+                  if !position.set_prototype_holes(mask) { return Err("obstacle overlaps piece".into()); }
+                  crate::position::validate_evaluable_position(&position)?;
+                  position.set_entering_king_rule(EnteringKingRule::None);
+                  if self.position.obstacle_mask()!=mask {
+                      self.table.clear();
+                      if let Some(c)=&mut self.coordinator { c.clear(); }
+                  }
+                  self.position=position;
+                  Ok(())
+              }
+          '''+marker)
+          p.write_text(s)
+          p=Path('engine/src/position.rs')
+          s=p.read_text().replace('fn validate_sfen_hands(', 'pub(crate) fn validate_sfen_hands(')
+          p.write_text(s)
+          p=Path('engine/src/ffi.rs')
+          s=p.read_text().replace('    Configure {','    SetObstaclePosition { sfen: String, holes: Vec<String> },\n    Configure {',1)
+          s=s.replace('        Request::Configure { hash_mb, threads } => {','''        Request::SetObstaclePosition { sfen, holes } => {
+                      engine.set_obstacle_position(&sfen,&holes)?;
+                      Ok(json!({"ok":true}))
+                  }
+                  Request::Configure { hash_mb, threads } => {''',1)
+          p.write_text(s)
+          PY
+          cat >> engine/src/api.rs <<'RS'
+          #[cfg(all(test, feature="embedded-rsnn"))]
+          mod obstacle_api_tests {
+              use super::*;
+              #[test]
+              fn exact_model_obstacle_search_and_invalid_input() {
+                  let mut e=Engine::new();
+                  e.load_embedded().unwrap();
+                  e.configure(Some(1),Some(1)).unwrap();
+                  let sfen="4k4/9/9/3G1R3/9/9/9/9/8K b - 1";
+                  let holes=["4a","6a","4b","6b"].map(str::to_owned);
+                  e.set_obstacle_position(sfen,&holes).unwrap();
+                  assert!(e.set_obstacle_position(sfen,&["5a".into()]).is_err());
+                  assert!(e.set_obstacle_position(sfen,&["0a".into()]).is_err());
+                  let out=e.search(SearchOptions{depth:4,..Default::default()}).unwrap();
+                  assert!(out.score>=31996, "{out:?}");
+                  let mv=board::move_from_usi(&e.position,&out.bestmove).unwrap();
+                  assert!(e.position.is_legal_move32(mv));
+                  e.position.apply_move32(mv);
+                  let mut list=rsshogi::board::Move32List::new();
+                  rsshogi::board::generate_legal_all_move32(&e.position,&mut list);
+                  assert!(list.as_slice().is_empty());
+                  eprintln!("EXACT_NNUE_OBSTACLE_SEARCH {out:?}");
+              }
+          }
+          RS
           cd engine
           printf '\n[patch.crates-io]\nrsshogi = { path = "../rules/crates/rsshogi" }\n' >> Cargo.toml
           cargo +1.95.0 update -p rsshogi --precise 1.7.2
           export RSSHOGI_EMBEDDED_RSNN_PATH="$PWD/../model.rsnn"
           export RSSHOGI_EMBEDDED_RSNN_SHA256=787739972eabb5a1c42c471d178ac0c97b688dce35c72b4291e7e1eeefa9786f
-          cargo +1.95.0 test --lib --locked --features embedded-rsnn
+          cargo +1.95.0 test --lib --locked --features c-api,embedded-rsnn
           cargo +1.95.0 rustc --lib --release --locked --crate-type cdylib --target wasm32-unknown-unknown --features c-api,embedded-rsnn
           test -s target/wasm32-unknown-unknown/release/rsshogi_nnue_mini.wasm
           echo EMBEDDED_REBUILD_PASS
