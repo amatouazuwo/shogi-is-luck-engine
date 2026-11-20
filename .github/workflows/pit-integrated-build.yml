@@ -384,6 +384,46 @@ jobs:
               }
           }
           RS
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('engine/src/position.rs')
+          s=p.read_text()
+          marker='    validate_sfen_hands(spec.as_sfen_parts().2)?;'
+          assert s.count(marker)==1
+          s=s.replace(marker,'''    replay_with_holes(spec, moves, rsshogi::types::Bitboard::EMPTY)
+          }
+          pub(crate) fn replay_with_holes(spec: &PositionSpec, moves: &[String], holes: rsshogi::types::Bitboard) -> Result<Position,String> {
+              validate_sfen_hands(spec.as_sfen_parts().2)?;''')
+          marker='    validate_evaluable_position(&position)?;'
+          s=s.replace(marker,'''    if !position.set_prototype_holes(holes) { return Err("hole overlaps piece".to_owned()); }
+              validate_evaluable_position(&position)?;''',1)
+          p.write_text(s)
+          p=Path('engine/src/api.rs')
+          s=p.read_text().replace('MAX_SEARCH_DEPTH, replay','MAX_SEARCH_DEPTH, replay_with_holes')
+          marker='        let fields: Vec<_> = sfen.split_whitespace().collect();'
+          assert s.count(marker)==1
+          s=s.replace(marker,'''        self.set_position_with_holes(sfen,moves,&[])
+              }
+              pub fn set_position_with_holes(&mut self, sfen: &str, moves: &[String], holes: &[String]) -> Result<(),String> {
+                  let mut mask=rsshogi::types::Bitboard::EMPTY;
+                  for square in holes {
+                      let bytes=square.as_bytes();
+                      if bytes.len()!=2 || !(b'1'..=b'9').contains(&bytes[0]) || !(b'a'..=b'i').contains(&bytes[1]) {
+                          return Err("invalid obstacle square".to_owned());
+                      }
+                      let sq=rsshogi::types::Move::from_usi(&format!("7g{square}")).ok_or("invalid obstacle square")?.to_sq();
+                      mask.set(sq);
+                  }
+          '''+marker)
+          s=s.replace('let mut position = replay(&spec, moves)?;', 'let mut position = replay_with_holes(&spec, moves, mask)?;\n        if self.position.obstacle_mask() != mask { self.table.clear(); self.coordinator=None; }')
+          # Existing test uses replay directly.
+          s=s.replace('let position = replay(&PositionSpec::StartPos, &owned).unwrap();','let position = crate::position::replay(&PositionSpec::StartPos, &owned).unwrap();')
+          p.write_text(s)
+          p=Path('engine/src/ffi.rs')
+          s=p.read_text().replace('    Configure {','    SetObstaclePosition { sfen: String, holes: Vec<String> },\n    Configure {',1)
+          s=s.replace('        Request::Configure { hash_mb, threads } => {','        Request::SetObstaclePosition { sfen, holes } => {\n            engine.set_position_with_holes(&sfen,&[],&holes)?;\n            Ok(json!({"ok": true}))\n        }\n        Request::Configure { hash_mb, threads } => {',1)
+          p.write_text(s)
+          PY
           cd engine
           printf '\n[patch.crates-io]\nrsshogi = { path = "../rules/crates/rsshogi" }\n' >> Cargo.toml
           cargo +1.95.0 update -p rsshogi --precise 1.7.2
@@ -393,3 +433,34 @@ jobs:
           cargo +1.95.0 rustc --lib --release --locked --crate-type cdylib --target wasm32-unknown-unknown --features c-api,embedded-rsnn
           test -s target/wasm32-unknown-unknown/release/rsshogi_nnue_mini.wasm
           echo EMBEDDED_REBUILD_PASS
+          cat > bindings/wasm/obstacle-smoke.mjs <<'JS'
+          import {readFile} from 'node:fs/promises';
+          import {MiniEngine} from './mini.js';
+          import assert from 'node:assert/strict';
+          const e=await MiniEngine.create(await readFile('target/wasm32-unknown-unknown/release/rsshogi_nnue_mini.wasm'));
+          const req=x=>{const r=e.request(x);assert.equal(r.ok,true,JSON.stringify(r));return r;};
+          req({command:'load_embedded'});
+          req({command:'configure',hash_mb:4,threads:1});
+          const sfen='4k4/9/9/9/9/9/4R4/9/8K b - 1';
+          assert.equal(e.request({command:'set_position',sfen}).ok,false);
+          for(const holes of [['5e'],['4d','5d','6d','4e','5e','6e','4f','5f','6f']]){
+            req({command:'set_obstacle_position',sfen,holes});
+            const r=req({command:'search',depth:64,movetime_ms:100}).result;
+            assert.ok(r.nodes>0);
+            assert.notEqual(r.bestmove,'resign');
+            assert.ok(!holes.includes(r.bestmove.slice(2,4)));
+            console.log('OBSTACLE_WASM_SEARCH',JSON.stringify({holes,...r}));
+          }
+          assert.equal(e.request({command:'set_obstacle_position',sfen,holes:['5g']}).ok,false);
+          assert.equal(e.request({command:'set_obstacle_position',sfen,holes:['0z']}).ok,false);
+          e.dispose();
+          JS
+          node bindings/wasm/obstacle-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: obstacle-wasm-experimental
+          path: |
+            engine/target/wasm32-unknown-unknown/release/rsshogi_nnue_mini.wasm
+            engine/LICENSE
+            engine/bindings/wasm/mini.js
+            engine/bindings/wasm/worker.js
