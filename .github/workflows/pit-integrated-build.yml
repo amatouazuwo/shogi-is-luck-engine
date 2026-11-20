@@ -231,7 +231,7 @@ jobs:
               use super::test_support::{depth_limits, run_result};
               use rsshogi::types::{Bitboard, Move};
               #[test]
-              fn forced_hole_mate_search() {
+              fn forced_hole_terminal_win_search() {
                   rsshogi::board::init();
                   let mut p = rsshogi::board::position_from_sfen("4k4/9/9/3G1R3/9/9/9/9/8K b - 1").unwrap();
                   let mut holes=Bitboard::EMPTY;
@@ -246,9 +246,32 @@ jobs:
                   eprintln!("OBSTACLE_SEARCH best={} score={} depth={} nodes={}",mv.to_usi(),result.score,result.depth,result.nodes);
                   assert!(p.is_legal_move32(mv));
                   p.apply_move32(mv);
-                  assert!(p.is_in_check(), "selected move {} was not check",mv.to_usi());
-                  assert!(legal_moves(&p).is_empty(), "must find mate in one");
-                  eprintln!("OBSTACLE_MATE best={} depth={} nodes={}",mv.to_usi(),result.depth,result.nodes);
+                  assert!(result.score >= MATE-4, "must recognize terminal win");
+                  assert!(legal_moves(&p).is_empty(), "must find terminal win in one");
+                  eprintln!("OBSTACLE_TERMINAL check={} best={} depth={} nodes={}",p.is_in_check(),mv.to_usi(),result.depth,result.nodes);
+              }
+              #[test]
+              fn genuine_mate_with_remaining_escape_square() {
+                  rsshogi::board::init();
+                  let mut p = rsshogi::board::position_from_sfen("4k4/9/4G4/4R4/9/9/9/9/8K b - 1").unwrap();
+                  let mut holes=Bitboard::EMPTY;
+                  for s in ["6a","4b","6b"] {
+                      holes.set(Move::from_usi(&format!("7g{s}")).unwrap().to_sq());
+                  }
+                  assert!(p.set_prototype_holes(holes));
+                  let checking_mates: Vec<_> = legal_moves(&p).into_iter().filter(|&m| {
+                      let mut child=p.clone_for_search();
+                      child.apply_move32(m);
+                      child.is_in_check() && legal_moves(&child).is_empty()
+                  }).collect();
+                  assert!(!checking_mates.is_empty(),"fixture must contain a genuine mate");
+                  let mut limits=depth_limits(4);
+                  limits.searchmoves=checking_mates.iter().map(|m|m.to_usi()).collect();
+                  let result=run_result(p.clone_for_search(),limits,1);
+                  assert!(result.score>=MATE-4);
+                  let mv=result.best_move.unwrap();
+                  p.apply_move32(mv);
+                  assert!(p.is_in_check() && legal_moves(&p).is_empty());
               }
           }
           RS
