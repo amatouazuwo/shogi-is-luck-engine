@@ -224,6 +224,31 @@ jobs:
               }
           }
           RS
+          cat >> engine/src/search.rs <<'RS'
+          #[cfg(test)]
+          mod obstacle_search_tests {
+              use super::*;
+              use super::test_support::{depth_limits, run_result};
+              use rsshogi::types::{Bitboard, Move};
+              #[test]
+              fn forced_hole_mate_search() {
+                  rsshogi::board::init();
+                  let mut p = rsshogi::board::position_from_sfen("4k4/9/3G5/4R4/9/9/9/9/8K b - 1").unwrap();
+                  let mut holes=Bitboard::EMPTY;
+                  for s in ["4a","6a","4b","6b"] {
+                      holes.set(Move::from_usi(&format!("7g{s}")).unwrap().to_sq());
+                  }
+                  assert!(p.set_prototype_holes(holes));
+                  let result=run_result(p.clone_for_search(),depth_limits(4),1);
+                  let mv=result.best_move.expect("must find a move");
+                  assert!(p.is_legal_move32(mv));
+                  p.apply_move32(mv);
+                  assert!(p.is_in_check());
+                  assert!(legal_moves(&p).is_empty(), "must find mate in one");
+                  eprintln!("OBSTACLE_MATE best={} depth={} nodes={}",mv.to_usi(),result.depth,result.nodes);
+              }
+          }
+          RS
           cd engine
           printf '\n[patch.crates-io]\nrsshogi = { path = "../rules/crates/rsshogi" }\n' >> Cargo.toml
           cargo +1.95.0 update -p rsshogi --precise 1.7.2
