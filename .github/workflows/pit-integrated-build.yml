@@ -76,6 +76,7 @@ jobs:
           p=root/'constructors.rs'
           s=p.read_text().replace('impl Position {','''impl Position {
               /// Experimental root-only obstacle setter; resets history.
+              pub fn obstacle_mask(&self) -> crate::types::Bitboard { self.holes }
               pub fn set_prototype_holes(&mut self, holes: crate::types::Bitboard) -> bool {
                   if holes.intersects(self.bitboards().occupied()) { return false; }
                   self.holes = holes;
@@ -272,6 +273,42 @@ jobs:
                   let mv=result.best_move.unwrap();
                   p.apply_move32(mv);
                   assert!(p.is_in_check() && legal_moves(&p).is_empty());
+              }
+          }
+          RS
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('engine/src/search/context.rs')
+          s=p.read_text()
+          marker='    position.key().low_u64() ^ fingerprint.rotate_left(1)'
+          assert s.count(marker)==1
+          s=s.replace(marker,'''    let mut holes = position.obstacle_mask();
+              while let Some(sq) = holes.pop_lsb() {
+                  mix_tt_component(&mut fingerprint, 0x484f4c4500000000u64 | sq.to_index() as u64);
+              }
+          '''+marker)
+          p.write_text(s)
+          PY
+          cat >> engine/src/search/context.rs <<'RS'
+          #[cfg(test)]
+          mod obstacle_cache_tests {
+              use super::*;
+              use rsshogi::types::{Bitboard, Move};
+              #[test]
+              fn distinct_masks_have_distinct_tt_keys() {
+                  rsshogi::board::init();
+                  let mut p=rsshogi::board::hirate_position();
+                  let base=tt_key(&p,0);
+                  let mut keys=std::collections::HashSet::from([base]);
+                  for square in ["4e","5e","6e","4d","5d","6d","4f","5f","6f"] {
+                      let sq=Move::from_usi(&format!("7g{square}")).unwrap().to_sq();
+                      assert!(p.set_prototype_holes(Bitboard::from_square(sq)));
+                      let key=tt_key(&p,0);
+                      assert!(keys.insert(key));
+                      assert_eq!(key,tt_key(&p.clone_for_search(),0));
+                  }
+                  assert!(p.set_prototype_holes(Bitboard::EMPTY));
+                  assert_eq!(base,tt_key(&p,0));
               }
           }
           RS
