@@ -1,0 +1,457 @@
+diff --git a/crates/rsshogi/src/board/movegen/checks.rs b/crates/rsshogi/src/board/movegen/checks.rs
+index 591e631bed85f9f52c94e01d7dcae8305df6c918..23b93121cc11ae809af80245e379a1e29ecdc28d 100644
+--- a/crates/rsshogi/src/board/movegen/checks.rs
++++ b/crates/rsshogi/src/board/movegen/checks.rs
+@@ -116,7 +116,7 @@ fn make_move_target_general(
+     all: bool,
+     us: Color,
+ ) {
+-    let occupied = pos.bitboards().occupied();
++    let occupied = pos.bitboards().occupied() | pos.obstacle_mask();
+     let pt = piece.piece_type();
+
+     let attacks = match pt {
+@@ -264,7 +264,7 @@ fn make_move_check(
+ ) {
+     let pt = piece.piece_type();
+     let enemy = enemy_territory(us);
+-    let occupied = pos.bitboards().occupied();
++    let occupied = pos.bitboards().occupied() | pos.obstacle_mask();
+
+     match pt {
+         PieceType::PAWN => {
+@@ -389,6 +389,7 @@ fn generate_checks_board_internal(
+     let y = pos.blockers_for_king(them) & bb.color_pieces(us);
+
+     let target = if quiet_only { bb.empties() } else { !bb.color_pieces(us) };
++    let target = target.and_not(pos.obstacle_mask());
+
+     let mut src = y;
+     while let Some(from) = src.pop_lsb() {
+@@ -561,7 +562,7 @@ pub fn generate_checks_drops_part_color<C: ColorMarker>(pos: &Position, list: &m
+     let us = C::COLOR;
+     let bb = pos.bitboards();
+     let hand = pos.hand(us);
+-    let empty = !bb.occupied();
++    let empty = !(bb.occupied() | pos.obstacle_mask());
+
+     for piece_type in [
+         PieceType::PAWN,
+diff --git a/crates/rsshogi/src/board/movegen/drops.rs b/crates/rsshogi/src/board/movegen/drops.rs
+index 7cd5efdf4f11fe55498799a57821096114cab0bf..0d1f3c06e3fbe1a21b5220fe4ec207d8eff45e0c 100644
+--- a/crates/rsshogi/src/board/movegen/drops.rs
++++ b/crates/rsshogi/src/board/movegen/drops.rs
+@@ -144,7 +144,7 @@ pub(super) fn generate_drops<T: MoveGenType>(pos: &Position, list: &mut impl Mov
+     if hand.bits() == 0 {
+         return;
+     }
+-    let empties = pos.empties();
++    let empties = pos.empties().and_not(pos.obstacle_mask());
+
+     let ordinary = !T::IS_CHECKS && !T::QUIET_CHECKS && !T::EVASIONS;
+     if T::IS_LEGAL || ordinary {
+diff --git a/crates/rsshogi/src/board/movegen/pieces.rs b/crates/rsshogi/src/board/movegen/pieces.rs
+index f8e02c9cdaffc9175ecc069f4e0b5677490bc3a8..407d84077be0f2bf91ee0652a2ffbe4f0b636516 100644
+--- a/crates/rsshogi/src/board/movegen/pieces.rs
++++ b/crates/rsshogi/src/board/movegen/pieces.rs
+@@ -85,7 +85,8 @@ fn pseudo_ok<T: MoveGenType>(
+ }
+
+ fn king_evasion_leaves_checker_attack(pos: &Position, from: Square, to: Square) -> bool {
+-    let occupied = pos.bitboards().occupied().and_not(Bitboard::from_square(from));
++    let occupied =
++        (pos.bitboards().occupied() | pos.obstacle_mask()).and_not(Bitboard::from_square(from));
+     let mut checkers = pos.checkers();
+     while let Some(checker) = checkers.pop_lsb() {
+         let piece = pos.piece_on(checker);
+@@ -212,10 +213,11 @@ fn generate_board_moves_with_facts<T: MoveGenType, const APPLY_EVASION_MASK: boo
+     facts: GenerationFacts,
+ ) {
+     let us = facts.us;
+-    let occupied = pos.bitboards().occupied();
++    let occupied = pos.bitboards().occupied() | pos.obstacle_mask();
+     let ours = pos.bitboards().color_pieces(us);
+-    let enemy = occupied.and_not(ours);
+-    let destination_mask = only_to.map_or(Bitboard::ALL, Bitboard::from_square).and_not(ours);
++    let enemy = pos.bitboards().occupied().and_not(ours);
++    let destination_mask =
++        only_to.map_or(Bitboard::ALL, Bitboard::from_square).and_not(ours | pos.obstacle_mask());
+
+     macro_rules! generate_piece_type {
+         ($piece_type:expr, |$from:ident| $attacks:expr) => {{
+diff --git a/crates/rsshogi/src/board/position/attacks.rs b/crates/rsshogi/src/board/position/attacks.rs
+index 4be84c74c3e31bfcbfdcb20529f575c315ca3273..ecd4b0ef1333c3263ed16254bd4c44249ff03c2f 100644
+--- a/crates/rsshogi/src/board/position/attacks.rs
++++ b/crates/rsshogi/src/board/position/attacks.rs
+@@ -16,6 +16,7 @@ impl Position {
+             return Bitboard::EMPTY;
+         }
+
++        let occupied = occupied | self.obstacle_mask();
+         let sq_idx = sq.to_index();
+         let bb = self.bitboards();
+         let mut attackers = Bitboard::EMPTY;
+@@ -101,6 +102,7 @@ impl Position {
+         use crate::board::attack_tables::{bishop_attacks, lance_step_attacks, rook_attacks};
+         let us = if BLACK { Color::BLACK } else { Color::WHITE };
+         let them = us.flip();
++        let occupied = occupied | self.obstacle_mask();
+         let sq_idx = sq.to_index();
+         let bb = self.bitboards();
+         let ours = bb.color_pieces(us);
+@@ -131,6 +133,7 @@ impl Position {
+         use crate::board::attack_tables::{bishop_attacks, lance_step_attacks, rook_attacks};
+         let us = if BLACK { Color::BLACK } else { Color::WHITE };
+         let them = us.flip();
++        let occupied = occupied | self.obstacle_mask();
+         let sq_idx = sq.to_index();
+         let bb = self.bitboards();
+         let ours = bb.color_pieces(us);
+@@ -182,7 +185,7 @@ impl Position {
+     #[must_use]
+     #[inline]
+     pub fn is_attacked_by(&self, sq: Square, by_color: Color) -> bool {
+-        let occupied = self.bitboards().occupied();
++        let occupied = self.bitboards().occupied() | self.holes;
+         self.attacked_by_color_fast(by_color, sq, occupied)
+     }
+
+@@ -195,7 +198,7 @@ impl Position {
+
+         let them = color.flip();
+         let bb = self.bitboards();
+-        let occupied = bb.occupied();
++        let occupied = bb.occupied() | self.obstacle_mask();
+
+         let bb_hd = bb.pieces(PieceType::HORSE) | bb.pieces(PieceType::DRAGON);
+         let knights = KNIGHT_ATTACKS[sq][them.to_index()] & bb.pieces(PieceType::KNIGHT);
+@@ -260,7 +263,7 @@ impl Position {
+     pub fn attacks_by(&self, color: Color, piece_type: PieceType) -> Bitboard {
+         use crate::board::attack_tables::PAWN_ATTACKS;
+
+-        let occupied = self.bitboards().occupied();
++        let occupied = self.bitboards().occupied() | self.holes;
+         let mut attacks = Bitboard::EMPTY;
+         let mut pieces = self.bitboards().pieces_for(piece_type, color);
+
+@@ -315,6 +318,9 @@ impl Position {
+         while !snipers.is_empty() {
+             // SAFETY: ループ条件により `snipers` が非空であることが保証される。
+             let sniper_sq = unsafe { snipers.pop_lsb_unchecked() };
++            if Bitboard::between(sniper_sq, king_sq).intersects(self.holes) {
++                continue;
++            }
+             let between = Bitboard::between(sniper_sq, king_sq) & occupancy;
+
+             if !between.is_empty() && !between.more_than_one() {
+diff --git a/crates/rsshogi/src/board/position/cache.rs b/crates/rsshogi/src/board/position/cache.rs
+index 0b55d32b6068ae86fe544a4e97b8d4bcec16aa93..e8a3d83f626b4c592e46a5bd87a21be99013fd88 100644
+--- a/crates/rsshogi/src/board/position/cache.rs
++++ b/crates/rsshogi/src/board/position/cache.rs
+@@ -165,7 +165,7 @@ impl Position {
+         let lance_snipers = lance_like & lance_step_attacks(king_sq, c) & avoid_bb;
+
+         let snipers = rook_snipers | bishop_snipers | lance_snipers;
+-        let occupancy = self.bitboards().occupied() & avoid_bb;
++        let occupancy = (self.bitboards().occupied() & avoid_bb) | self.holes;
+         let mut result = Bitboard::EMPTY;
+
+         for sniper_sq in &snipers {
+@@ -235,7 +235,7 @@ impl Position {
+             return check_squares;
+         }
+
+-        let occupied = self.bitboards().occupied();
++        let occupied = self.bitboards().occupied() | self.holes;
+
+         // 各駒種について、敵玉から逆向きに攻撃範囲を計算（無条件）
+         let pawn = PAWN_ATTACKS[ksq][them.to_index()];
+diff --git a/crates/rsshogi/src/board/position/constructors.rs b/crates/rsshogi/src/board/position/constructors.rs
+index 5d931b892cd0e79e46cde0d1c4d5906dc33636d3..3d61bcaccaec8a7daf3aebef404631bdaa312d50 100644
+--- a/crates/rsshogi/src/board/position/constructors.rs
++++ b/crates/rsshogi/src/board/position/constructors.rs
+@@ -2,9 +2,26 @@ use super::Position;
+ use super::types::BoardArray;
+ use crate::board::bitboard_set::BitboardSet;
+ use crate::board::state_info::{StateInfo, StateStack};
+-use crate::types::{Color, EnteringKingRule, Hand, Square};
++use crate::types::{Bitboard, Color, EnteringKingRule, Hand, Square};
+
+ impl Position {
++    /// Returns the impassable squares in this position.
++    #[must_use]
++    pub fn obstacle_mask(&self) -> Bitboard {
++        self.holes
++    }
++
++    /// Changes the impassable squares and rebuilds root state and history.
++    /// Returns false without changing the position if a square contains a piece.
++    pub fn set_obstacle_mask(&mut self, holes: Bitboard) -> bool {
++        if holes.intersects(self.bitboards().occupied()) {
++            return false;
++        }
++        self.holes = holes;
++        self.init_stack();
++        true
++    }
++
+     /// 新しい空の盤面を作成
+     #[must_use]
+     pub fn empty() -> Self {
+@@ -18,6 +35,7 @@ impl Position {
+             ply: 1,
+             st_index: 0,
+             state_stack: StateStack::new(),
++            holes: Bitboard::EMPTY,
+             king_square: [Square::NONE; Color::COUNT],
+         }
+     }
+diff --git a/crates/rsshogi/src/board/position/legality.rs b/crates/rsshogi/src/board/position/legality.rs
+index e98a20adc3022070eda956c42f83d01f00f06998..4313cd6ac60d5d79cfce1605ac596b9854410a6e 100644
+--- a/crates/rsshogi/src/board/position/legality.rs
++++ b/crates/rsshogi/src/board/position/legality.rs
+@@ -20,6 +20,9 @@ impl Position {
+         let piece_hint = mv.piece_after_hint();
+         let us = self.turn();
+         let to = m.to_sq();
++        if self.obstacle_mask().test(to) {
++            return false;
++        }
+
+         if m.is_drop() {
+             let Some(piece_type) = m.dropped_piece() else {
+@@ -74,7 +77,7 @@ impl Position {
+             }
+         }
+
+-        let occupied = self.bitboards().occupied();
++        let occupied = self.bitboards().occupied() | self.obstacle_mask();
+         if !Self::piece_attacks(piece.piece_type(), from, us, occupied).test(to) {
+             return false;
+         }
+diff --git a/crates/rsshogi/src/board/position/mod.rs b/crates/rsshogi/src/board/position/mod.rs
+index 7b2d6cc8dbc641f5892062f42773966817236da7..81e3992caa9e0ed62f6266ded680c6de9002275c 100644
+--- a/crates/rsshogi/src/board/position/mod.rs
++++ b/crates/rsshogi/src/board/position/mod.rs
+@@ -175,6 +175,7 @@ pub use types::{
+ /// 複製元の予約容量も継承し、複製先に余る領域は以後の再利用のために保持する。
+ #[repr(C, align(64))]
+ pub struct Position {
++    pub(super) holes: crate::types::Bitboard,
+     /// `Piece` を81要素並べた盤面
+     pub(super) board: BoardArray,
+
+@@ -213,6 +214,7 @@ impl Clone for Position {
+     #[allow(clippy::clone_on_copy)]
+     fn clone(&self) -> Self {
+         Self {
++            holes: self.holes,
+             board: Clone::clone(&self.board),
+             bitboards: Clone::clone(&self.bitboards),
+             hands: Clone::clone(&self.hands),
+@@ -229,6 +231,7 @@ impl Clone for Position {
+     #[inline]
+     fn clone_from(&mut self, source: &Self) {
+         self.state_stack.clone_from(&source.state_stack);
++        self.holes = source.holes;
+         self.board = source.board;
+         self.bitboards = source.bitboards;
+         self.hands = source.hands;
+@@ -261,6 +264,7 @@ impl Position {
+     #[must_use]
+     pub fn clone_compact(&self) -> Self {
+         Self {
++            holes: self.holes,
+             board: self.board,
+             bitboards: self.bitboards,
+             hands: self.hands,
+diff --git a/crates/rsshogi/src/board/position/parser.rs b/crates/rsshogi/src/board/position/parser.rs
+index d6d67405f69c2a9db3439ea6a5d3ab6bea459d9e..a5561cb6e9dc27a3db9331a8357633e927ee1374 100644
+--- a/crates/rsshogi/src/board/position/parser.rs
++++ b/crates/rsshogi/src/board/position/parser.rs
+@@ -82,6 +82,7 @@ impl Position {
+     }
+
+     fn apply_position_state(&mut self, state: &PositionState) {
++        self.holes = crate::types::Bitboard::EMPTY;
+         self.board = state.board;
+         self.hands = state.hands;
+         self.set_side_to_move(state.side_to_move);
+diff --git a/crates/rsshogi/src/board/position/rules.rs b/crates/rsshogi/src/board/position/rules.rs
+index e74a6f6d1772693a97055be15c25e2a1773e4d13..f2f38857adc45c6057000e75bee30c47f6d24bdb 100644
+--- a/crates/rsshogi/src/board/position/rules.rs
++++ b/crates/rsshogi/src/board/position/rules.rs
+@@ -401,7 +401,8 @@ impl Position {
+         if king_sq.is_none() {
+             return true;
+         }
+-        let mut escape_bb = KING_ATTACKS[king_sq].and_not(self.bitboards().color_pieces(them));
++        let mut escape_bb =
++            KING_ATTACKS[king_sq].and_not(self.bitboards().color_pieces(them) | self.holes);
+         escape_bb.clear(to);
+
+         let mut occupied = self.bitboards().occupied();
+@@ -699,6 +700,7 @@ impl Position {
+         let state_stack = self.state_stack.clone_suffix(keep_from);
+
+         Self {
++            holes: self.holes,
+             board: self.board,
+             bitboards: self.bitboards,
+             hands: self.hands,
+diff --git a/crates/rsshogi/src/mate.rs b/crates/rsshogi/src/mate.rs
+index d377a54dab555016fdca8a24749081b92cfaa653..cfe29b0224d0c467cc38773280c61f6e9e84c258 100644
+--- a/crates/rsshogi/src/mate.rs
++++ b/crates/rsshogi/src/mate.rs
+@@ -95,8 +95,9 @@ fn king_neighborhood(position: &Position) -> Option<KingNeighborhood> {
+
+     let bitboards = position.bitboards();
+     let their_pieces = bitboards.color_pieces(them);
+-    let occupied_without_king = bitboards.occupied().and_not(Bitboard::from_square(king));
+-    let adjacent = KING_ATTACKS[king];
++    let holes = position.obstacle_mask();
++    let occupied_without_king = (bitboards.occupied() | holes).and_not(Bitboard::from_square(king));
++    let adjacent = KING_ATTACKS[king].and_not(holes);
+     let adjacent_their_pieces = adjacent & their_pieces;
+
+     let mut squares = [Square::NONE; 8];
+@@ -252,7 +253,7 @@ fn mate_context(position: &Position) -> Option<MateContext> {
+         their_king,
+         their_king_bb: Bitboard::from_square(their_king),
+         their_blockers: position.blockers_for_king(us.flip()),
+-        occupied: position.bitboards().occupied(),
++        occupied: position.bitboards().occupied() | position.obstacle_mask(),
+         their_hand: position.hand(us.flip()),
+         our_king: position.king_square(us),
+     })
+diff --git a/crates/rsshogi/tests/shogiluck_holes.rs b/crates/rsshogi/tests/shogiluck_holes.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..1046a531368569df7fdf31d804fc9ca7e8cfff84
+--- /dev/null
++++ b/crates/rsshogi/tests/shogiluck_holes.rs
+@@ -0,0 +1,125 @@
++use rsshogi::board::{self, Bitboard, MoveList, Position, movegen::generate_legal_all};
++use rsshogi::types::{Move, Square};
++fn sq(s: &str) -> Square {
++    Move::from_usi(&format!("7g{s}")).unwrap().to_sq()
++}
++fn setup(sfen: &str, holes: &[&str]) -> Position {
++    board::init();
++    let mut p = board::position_from_sfen(sfen).unwrap();
++    let mut mask = Bitboard::EMPTY;
++    for s in holes {
++        mask.set(sq(s));
++    }
++    assert!(p.set_obstacle_mask(mask));
++    p
++}
++fn has(p: &Position, s: &str) -> bool {
++    let mut list = MoveList::new();
++    generate_legal_all(p, &mut list);
++    list.as_slice().contains(&Move::from_usi(s).unwrap())
++}
++#[test]
++fn rook_block_and_drop() {
++    let p = setup("k8/9/9/9/9/9/4R4/9/8K b G 1", &["5e"]);
++    assert!(has(&p, "5g5f"));
++    assert!(!has(&p, "5g5e"));
++    assert!(!has(&p, "5g5d"));
++    assert!(!has(&p, "G*5e"));
++    assert!(has(&p, "G*4e"));
++    assert!(!has(&p.clone_for_search(), "5g5d"));
++}
++#[test]
++fn knight_and_multiple_holes() {
++    let p = setup("k8/9/9/9/9/9/4N4/9/8K b G 1", &["5f", "4f", "6f", "4e"]);
++    assert!(has(&p, "5g6e"));
++    assert!(!has(&p, "5g4e"));
++    assert!(!has(&p, "G*6f"));
++}
++#[test]
++fn rook_check_and_pin() {
++    let p = setup("k3r4/9/9/9/9/9/9/9/4K4 b - 1", &["5e"]);
++    assert!(!p.is_in_check());
++    let p = setup("k3r4/9/9/9/9/9/4G4/9/4K4 b - 1", &["5e"]);
++    assert!(has(&p, "5g4g"));
++    let p = setup("k3r4/9/9/9/9/9/4G4/9/4K4 b - 1", &[]);
++    assert!(!has(&p, "5g4g"));
++}
++#[test]
++fn blackhole_nine_squares_and_undo() {
++    let mut p = setup(
++        "k8/9/9/9/9/9/4R4/9/8K b G 1",
++        &["4d", "5d", "6d", "4e", "5e", "6e", "4f", "5f", "6f"],
++    );
++    let before = p.to_sfen(None);
++    let mut list = MoveList::new();
++    generate_legal_all(&p, &mut list);
++    for m in list.as_slice() {
++        assert!(
++            !["4d", "5d", "6d", "4e", "5e", "6e", "4f", "5f", "6f"]
++                .iter()
++                .any(|s| sq(s) == m.to_sq())
++        );
++    }
++    assert!(!has(&p, "5g5c"));
++    assert!(has(&p, "5g3g"));
++    let m = p.move32_from_move(Move::from_usi("5g3g").unwrap());
++    p.apply_move32(m);
++    p.undo_move32(m).unwrap();
++    assert_eq!(before, p.to_sfen(None));
++    assert!(!has(&p, "5g5f"));
++}
++#[test]
++fn mate_and_escape() {
++    let p = setup("4k4/4R4/4G4/9/9/9/9/9/8K w - 1", &["4a", "6a", "4b", "6b"]);
++    assert!(p.is_in_check());
++    let mut list = MoveList::new();
++    generate_legal_all(&p, &mut list);
++    assert!(list.as_slice().is_empty());
++    let p = setup("4k4/4R4/4G4/9/9/9/9/9/8K w - 1", &["6a", "4b", "6b"]);
++    assert!(has(&p, "5a4a"));
++}
++#[test]
++fn bishop_and_lance_block() {
++    let p = setup("k8/9/9/9/9/9/4B3L/9/8K b - 1", &["4f", "1e"]);
++    assert!(!has(&p, "5g3e"));
++    assert!(has(&p, "5g6f"));
++    assert!(has(&p, "1g1f"));
++    assert!(!has(&p, "1g1d"));
++}
++
++#[test]
++fn obstacle_creates_checking_mate_in_one() {
++    let mut p = setup("4k4/9/4G4/4R4/9/9/9/9/8K b - 1", &["4a", "6a", "4b", "6b"]);
++    let mate = rsshogi::mate::solve_mate_in_one(&p).expect("obstacle mate must be found");
++    assert!(p.is_legal_move32(mate));
++    p.apply_move32(mate);
++    assert!(p.is_in_check());
++    assert!(p.is_mated());
++    p.set_hirate();
++    assert!(p.obstacle_mask().is_empty());
++}
++
++#[test]
++fn holes_can_make_a_pawn_drop_illegal_mate() {
++    let sfen = "4k4/9/4G4/9/9/9/9/9/8K b P 1";
++    assert!(!has(&setup(sfen, &["4a", "6a", "4b", "6b"]), "P*5b"));
++    assert!(has(&setup(sfen, &["6a", "4b", "6b"]), "P*5b"));
++}
++
++#[test]
++fn check_generators_respect_impassable_squares() {
++    use rsshogi::board::Move32List;
++    use rsshogi::board::movegen::generate_checks_all_move32;
++
++    let sfen = "4k4/9/9/9/9/R8/9/9/8K b G 1";
++    for (holes, expected_rook, expected_drop) in
++        [(&[][..], true, true), (&["7f"][..], false, true), (&["5b"][..], false, false)]
++    {
++        let p = setup(sfen, holes);
++        let mut checks = Move32List::new();
++        generate_checks_all_move32(&p, &mut checks);
++        let has_check = |expected| checks.as_slice().iter().any(|mv| mv.to_usi() == expected);
++        assert_eq!(has_check("9f5f"), expected_rook);
++        assert_eq!(has_check("G*5b"), expected_drop);
++    }
++}
