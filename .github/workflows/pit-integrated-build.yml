@@ -233,7 +233,7 @@ jobs:
               #[test]
               fn forced_hole_mate_search() {
                   rsshogi::board::init();
-                  let mut p = rsshogi::board::position_from_sfen("4k4/9/3G5/5R3/9/9/9/9/8K b - 1").unwrap();
+                  let mut p = rsshogi::board::position_from_sfen("4k4/9/9/3G1R3/9/9/9/9/8K b - 1").unwrap();
                   let mut holes=Bitboard::EMPTY;
                   for s in ["4a","6a","4b","6b"] {
                       holes.set(Move::from_usi(&format!("7g{s}")).unwrap().to_sq());
@@ -243,9 +243,10 @@ jobs:
                   assert!(!legal_moves(&p).is_empty(), "fixture has legal moves");
                   let result=run_result(p.clone_for_search(),depth_limits(4),1);
                   let mv=result.best_move.expect("must find a move");
+                  eprintln!("OBSTACLE_SEARCH best={} score={} depth={} nodes={}",mv.to_usi(),result.score,result.depth,result.nodes);
                   assert!(p.is_legal_move32(mv));
                   p.apply_move32(mv);
-                  assert!(p.is_in_check());
+                  assert!(p.is_in_check(), "selected move {} was not check",mv.to_usi());
                   assert!(legal_moves(&p).is_empty(), "must find mate in one");
                   eprintln!("OBSTACLE_MATE best={} depth={} nodes={}",mv.to_usi(),result.depth,result.nodes);
               }
