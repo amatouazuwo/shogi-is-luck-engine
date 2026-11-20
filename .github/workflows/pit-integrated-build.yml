@@ -424,6 +424,71 @@ jobs:
           s=s.replace('        Request::Configure { hash_mb, threads } => {','        Request::SetObstaclePosition { sfen, holes } => {\n            engine.set_position_with_holes(&sfen,&[],&holes)?;\n            Ok(json!({"ok": true}))\n        }\n        Request::Configure { hash_mb, threads } => {',1)
           p.write_text(s)
           PY
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('engine/src/position.rs')
+          s=p.read_text()
+          marker='pub(crate) fn replay(spec: &PositionSpec, moves: &[String]) -> Result<Position, String> {'
+          assert marker in s
+          s=s.replace(marker,marker+'''
+              replay_with_holes(spec, moves, &[])
+          }
+          pub(crate) fn replay_with_holes(spec: &PositionSpec, moves: &[String], holes: &[String]) -> Result<Position, String> {
+              if holes.len()>81 { return Err("too many obstacles".into()); }
+          ''')
+          marker='    validate_evaluable_position(&position)?;'
+          assert marker in s
+          s=s.replace(marker,'''    let mut mask=rsshogi::types::Bitboard::EMPTY;
+              for square in holes {
+                  let b=square.as_bytes();
+                  if b.len()!=2 || !(b'1'..=b'9').contains(&b[0]) || !(b'a'..=b'i').contains(&b[1]) { return Err("invalid obstacle square".into()); }
+                  let sq=rsshogi::types::Move::from_usi(&format!("7g{square}")).ok_or("invalid obstacle")?.to_sq();
+                  if mask.test(sq) { return Err("duplicate obstacle".into()); }
+                  mask.set(sq);
+              }
+              if !holes.is_empty() && !position.set_prototype_holes(mask) { return Err("obstacle overlaps piece".into()); }
+          '''+marker,1)
+          p.write_text(s)
+          p=Path('engine/src/api.rs')
+          s=p.read_text()
+          marker='        let fields: Vec<_> = sfen.split_whitespace().collect();'
+          assert marker in s
+          s=s.replace(marker,'''        self.set_position_with_holes(sfen,moves,&[])
+              }
+              pub fn set_position_with_holes(&mut self,sfen:&str,moves:&[String],holes:&[String])->Result<(),String>{
+          '''+marker,1)
+          s=s.replace('let mut position = replay(&spec, moves)?;', 'let mut position = crate::position::replay_with_holes(&spec, moves, holes)?;')
+          s=s.replace('        self.position = position;','''        if self.position.obstacle_mask()!=position.obstacle_mask() {
+                  self.table.clear();
+                  if let Some(coordinator)=&mut self.coordinator { coordinator.clear(); }
+              }
+              self.position = position;''',1)
+          p.write_text(s)
+          p=Path('engine/src/ffi.rs')
+          s=p.read_text().replace('        moves: Vec<String>,','        moves: Vec<String>,\n        #[serde(default)]\n        holes: Vec<String>,',1).replace('Request::SetPosition { sfen, moves }','Request::SetPosition { sfen, moves, holes }').replace('engine.set_position(&sfen, &moves)?;','engine.set_position_with_holes(&sfen, &moves, &holes)?;')
+          p.write_text(s)
+          PY
+          cat >> engine/src/api.rs <<'RS'
+          #[cfg(all(test,feature="embedded-rsnn"))]
+          mod obstacle_api_tests {
+              use super::*;
+              #[test]
+              fn actual_nnue_search_accepts_obstacles_and_rejects_overlap() {
+                  let mut e=Engine::new();
+                  e.load_embedded().unwrap();
+                  let sfen="4k4/9/9/9/9/9/4R4/9/8K b - 1";
+                  assert!(e.set_position(sfen,&[]).is_err());
+                  e.set_position_with_holes(sfen,&[],&["5e".into()]).unwrap();
+                  let score=e.evaluate().unwrap();
+                  assert!(e.set_position_with_holes(sfen,&[],&["5g".into()]).is_err());
+                  assert_eq!(e.evaluate().unwrap(),score);
+                  let out=e.search(SearchOptions{depth:4,nodes:None,movetime_ms:Some(500)}).unwrap();
+                  assert_ne!(out.bestmove,"resign");
+                  assert!(out.nodes>0);
+                  eprintln!("NNUE_OBSTACLE best={} depth={} nodes={}",out.bestmove,out.depth,out.nodes);
+              }
+          }
+          RS
           cd engine
           printf '\n[patch.crates-io]\nrsshogi = { path = "../rules/crates/rsshogi" }\n' >> Cargo.toml
           cargo +1.95.0 update -p rsshogi --precise 1.7.2
