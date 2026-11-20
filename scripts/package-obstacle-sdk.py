@@ -111,6 +111,7 @@ def package(build, output, rust, rules_revision, engine_revision, model_digest):
         shutil.copyfile(source, staging / name)
     notices = collect_notices(lock, build / "rules", rules_revision)
     (staging / "THIRD-PARTY-NOTICES.txt").write_text(notices, encoding="utf-8")
+    artifacts = sorted([*files, "THIRD-PARTY-NOTICES.txt"])
     manifest = {
         "package": "rsshogi-nnue-mini-obstacle",
         "upstream_engine": {
@@ -142,18 +143,19 @@ def package(build, output, rust, rules_revision, engine_revision, model_digest):
             name: digest((project / "patches" / name).read_bytes())
             for name in ("obstacle-engine.patch", "obstacle-rules.patch")
         },
-        "artifacts_sha256": {path.name: digest(path.read_bytes()) for path in sorted(staging.iterdir())},
+        "artifacts_sha256": {name: digest((staging / name).read_bytes()) for name in artifacts},
     }
     revision_paths = ["patches", "scripts/build-obstacle-sdk.sh", "scripts/package-obstacle-sdk.py"]
     repo = ["git", "-C", str(project)]
     if subprocess.run([*repo, "diff", "--quiet", "HEAD", "--", *revision_paths]).returncode == 0:
         manifest["patch_revision"] = subprocess.check_output([*repo, "rev-parse", "HEAD"], text=True).strip()
     (staging / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    sums = [f"{digest(path.read_bytes())}  {path.name}" for path in sorted(staging.iterdir())]
+    payload = [*artifacts, "manifest.json"]
+    sums = [f"{digest((staging / name).read_bytes())}  {name}" for name in payload]
     (staging / "SHA256SUMS").write_text("\n".join(sums) + "\n", encoding="utf-8")
     output.mkdir(parents=True, exist_ok=True)
-    for path in staging.iterdir():
-        shutil.copyfile(path, output / path.name)
+    for name in [*payload, "SHA256SUMS"]:
+        shutil.copyfile(staging / name, output / name)
     print(f"Assembled verified obstacle SDK in {output}")
 
 
