@@ -129,6 +129,44 @@ jobs:
               let p = setup("k3r4/9/9/9/9/9/4G4/9/4K4 b - 1", &[]);
               assert!(!has(&p,"5g4g"));
           }
+          #[test]
+          fn blackhole_nine_squares_and_undo() {
+              let mut p = setup("k8/9/9/9/9/9/4R4/9/8K b G 1",
+                  &["4d","5d","6d","4e","5e","6e","4f","5f","6f"]);
+              let before = p.to_sfen(None);
+              let mut list = MoveList::new();
+              generate_legal_all(&p, &mut list);
+              for m in list.as_slice() {
+                  assert!(!["4d","5d","6d","4e","5e","6e","4f","5f","6f"].iter().any(|s| sq(s)==m.to_sq()));
+              }
+              assert!(!has(&p,"5g5c"));
+              assert!(has(&p,"5g3g"));
+              let m = p.move32_from_move(Move::from_usi("5g3g").unwrap());
+              p.apply_move32(m);
+              p.undo_move32(m);
+              assert_eq!(before,p.to_sfen(None));
+              assert!(!has(&p,"5g5f"));
+          }
+          #[test]
+          fn mate_and_escape() {
+              let p = setup("4k4/4R4/4G4/9/9/9/9/9/8K w - 1",
+                  &["4a","6a","4b","6b"]);
+              assert!(p.is_in_check());
+              let mut list = MoveList::new();
+              generate_legal_all(&p,&mut list);
+              assert!(list.as_slice().is_empty());
+              let p = setup("4k4/4R4/4G4/9/9/9/9/9/8K w - 1",
+                  &["6a","4b","6b"]);
+              assert!(has(&p,"5a4a"));
+          }
+          #[test]
+          fn bishop_and_lance_block() {
+              let p = setup("k8/9/9/9/9/9/4B3L/9/8K b - 1",&["4f","1e"]);
+              assert!(!has(&p,"5g3e"));
+              assert!(has(&p,"5g6f"));
+              assert!(has(&p,"1g1f"));
+              assert!(!has(&p,"1g1d"));
+          }
           RS
           git -C rules diff --check
           git -C rules diff
