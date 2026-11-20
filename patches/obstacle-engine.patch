@@ -1,0 +1,425 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 6d5228359fdfd7cfccc17fcebea6f247db228588..cd000a2f4a7e130d334836346c41a8d6ccb69d13 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -101,8 +101,6 @@ dependencies = [
+ [[package]]
+ name = "rsshogi"
+ version = "1.7.2"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "49903ab1dfa110a2d5931f9a0a1c83edd876e3ad57668ba5b070ae22193d0ce6"
+ dependencies = [
+  "log",
+  "thiserror",
+diff --git a/Cargo.toml b/Cargo.toml
+index 9350e55ae4ab3c1c2f308c1b0e2abda3e05bfd27..9cf7e0026fae94b95361cb9386ba2d5eddca0c70 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -38,3 +38,6 @@ lto = "thin"
+ inherits = "release"
+ lto = "fat"
+ codegen-units = 1
++
++[patch.crates-io]
++rsshogi = { path = "../rules/crates/rsshogi" }
+diff --git a/bindings/wasm/obstacle-smoke.mjs b/bindings/wasm/obstacle-smoke.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..5ad9d55031fb3e03d99aa46775d9d0ce33a0317b
+--- /dev/null
++++ b/bindings/wasm/obstacle-smoke.mjs
+@@ -0,0 +1,21 @@
++import {readFile} from 'node:fs/promises';
++import {MiniEngine} from './mini.js';
++import assert from 'node:assert/strict';
++const e=await MiniEngine.create(await readFile('target/wasm32-unknown-unknown/release/rsshogi_nnue_mini.wasm'));
++const req=x=>{const r=e.request(x);assert.equal(r.ok,true,JSON.stringify(r));return r;};
++req({command:'load_embedded'});
++req({command:'configure',hash_mb:4,threads:1});
++const sfen='4k4/9/9/9/9/9/4R4/9/8K b - 1';
++assert.equal(e.request({command:'set_position',sfen}).ok,false);
++for(const holes of [['5e'],['4d','5d','6d','4e','5e','6e','4f','5f','6f']]){
++  req({command:'set_obstacle_position',sfen,holes});
++  const r=req({command:'search',depth:64,movetime_ms:100}).result;
++  assert.ok(r.nodes>0);
++  assert.notEqual(r.bestmove,'resign');
++  assert.ok(req({command:'legal_moves'}).result.includes(r.bestmove));
++  assert.ok(!holes.includes(r.bestmove.slice(2,4)));
++  console.log('OBSTACLE_WASM_SEARCH',JSON.stringify({holes,...r}));
++}
++assert.equal(e.request({command:'set_obstacle_position',sfen,holes:['5g']}).ok,false);
++assert.equal(e.request({command:'set_obstacle_position',sfen,holes:['0z']}).ok,false);
++e.dispose();
+diff --git a/bindings/wasm/obstacle-worker-smoke.mjs b/bindings/wasm/obstacle-worker-smoke.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..fba109dc57196989f8df7c253fcc026a0f16979a
+--- /dev/null
++++ b/bindings/wasm/obstacle-worker-smoke.mjs
+@@ -0,0 +1,31 @@
++import {Worker} from 'node:worker_threads';
++import {readFile} from 'node:fs/promises';
++import assert from 'node:assert/strict';
++const url=new URL('./worker.js',import.meta.url).href;
++const source='const {parentPort,workerData}=require("node:worker_threads"); global.self=global; global.postMessage=x=>parentPort.postMessage(x); import(workerData).then(()=>{parentPort.on("message",data=>self.onmessage({data}));parentPort.postMessage({ready:true});});';
++const worker=new Worker(source,{eval:true,workerData:url});
++try {
++  await new Promise((resolve,reject)=>{worker.once('message',resolve);worker.once('error',reject);});
++  let id=0;
++  function send(command,fields={}){
++    return new Promise((resolve,reject)=>{
++      const current=++id;
++      const timer=setTimeout(()=>{worker.off('message',listen);reject(Error('worker timeout '+command));},15000);
++      function listen(r){if(r.id!==current||r.event==='info')return;clearTimeout(timer);worker.off('message',listen);resolve(r);}
++      worker.on('message',listen);worker.postMessage({command,id:current,...fields});
++    });
++  }
++  const wasm=await readFile('target/wasm32-unknown-unknown/release/rsshogi_nnue_mini.wasm');
++  assert.equal((await send('init',{wasm,hash_mb:4})).ok,true);
++  const sfen='4k4/9/9/9/9/9/4R4/9/8K b - 1';
++  for(const holes of [['5e'],['4d','5d','6d','4e','5e','6e','4f','5f','6f']]){
++    assert.equal((await send('position',{sfen,holes})).ok,true);
++    const r=await send('go',{depth:64,movetime_ms:100});
++    const {result:legal}=await send('legalMoves');
++    assert.ok(legal.includes(r.result.bestmove));
++    assert.equal(r.ok,true);assert.ok(r.result.nodes>0);assert.ok(!holes.includes(r.result.bestmove.slice(2,4)));
++    console.log('OBSTACLE_WORKER_PASS',r.result.bestmove);
++  }
++  assert.equal((await send('position',{sfen:'startpos'})).ok,true);
++  assert.equal((await send('go',{depth:2,movetime_ms:100})).ok,true);
++} finally {await worker.terminate();}
+diff --git a/bindings/wasm/worker.js b/bindings/wasm/worker.js
+index ab1f19531ec72a5f56a596c1c5f23f9c9c498bb6..be751ba8e031ebe435ebea126b32e6f46a39af01 100644
+--- a/bindings/wasm/worker.js
++++ b/bindings/wasm/worker.js
+@@ -82,7 +82,18 @@ self.onmessage = async ({ data: message }) => {
+       }
+       case "position":
+         invalidate();
+-        reply(message, requireEngine().request({ command: "set_position", sfen: message.sfen ?? "startpos", moves: message.moves ?? [] }));
++        if (message.holes !== undefined && !Array.isArray(message.holes)) {
++          throw new Error("holes must be an array of USI squares");
++        }
++        if (message.holes?.length) {
++          if (message.moves?.length) throw new Error("obstacle positions require current SFEN without replay");
++          reply(message, requireEngine().request({ command: "set_obstacle_position", sfen: message.sfen, holes: message.holes }));
++        } else {
++          reply(message, requireEngine().request({ command: "set_position", sfen: message.sfen ?? "startpos", moves: message.moves ?? [] }));
++        }
++        break;
++      case "legalMoves":
++        reply(message, requireEngine().request({ command: "legal_moves" }));
+         break;
+       case "new_game":
+         invalidate();
+diff --git a/src/api.rs b/src/api.rs
+index 8a9191a6155d0acd12ab0aceb16ca1eb3c5de71b..2b6dfbfdabab4173cdff3e496a3c9b5bf4e1e825 100644
+--- a/src/api.rs
++++ b/src/api.rs
+@@ -179,10 +179,56 @@ impl Engine {
+         };
+         let mut position = replay(&spec, moves)?;
+         position.set_entering_king_rule(EnteringKingRule::Point27);
+-        self.position = position;
++        self.install_position(position);
++        Ok(())
++    }
++
++    pub fn set_obstacle_position(&mut self, sfen: &str, holes: &[String]) -> Result<(), String> {
++        use rsshogi::types::{Bitboard, Square};
++        let fields: Vec<_> = sfen.split_whitespace().collect();
++        if fields.len() != 4 {
++            return Err("expected four SFEN fields".into());
++        }
++        crate::position::validate_sfen_hands(fields[2])?;
++        let mut position = board::position_from_sfen(sfen).map_err(|e| e.to_string())?;
++        let mut mask = Bitboard::EMPTY;
++        for square in holes {
++            let b = square.as_bytes();
++            if b.len() != 2 || !(b'1'..=b'9').contains(&b[0]) || !(b'a'..=b'i').contains(&b[1]) {
++                return Err("invalid obstacle square".into());
++            }
++            let sq = Square::from_usi(square).ok_or("invalid obstacle square")?;
++            if mask.test(sq) {
++                return Err("duplicate obstacle".into());
++            }
++            mask.set(sq);
++        }
++        if !position.set_obstacle_mask(mask) {
++            return Err("obstacle overlaps piece".into());
++        }
++        crate::position::validate_evaluable_position(&position)?;
++        position.set_entering_king_rule(EnteringKingRule::None);
++        self.install_position(position);
+         Ok(())
+     }
+
++    fn install_position(&mut self, position: Position) {
++        if self.position.obstacle_mask() != position.obstacle_mask() {
++            self.table.clear();
++            if let Some(coordinator) = &mut self.coordinator {
++                coordinator.clear();
++            }
++        }
++        self.position = position;
++    }
++
++    /// Returns the full legal move set for the current position in USI form.
++    pub fn legal_moves(&self) -> Vec<String> {
++        let mut list = board::Move32List::new();
++        board::generate_legal_all_move32(&self.position, &mut list);
++        list.as_slice().iter().map(|mv| mv.to_usi()).collect()
++    }
++
+     pub fn new_game(&mut self) {
+         self.position = initial_position();
+         self.table.clear();
+@@ -398,3 +444,27 @@ mod tests {
+         }
+     }
+ }
++#[cfg(all(test, feature = "embedded-rsnn"))]
++mod obstacle_api_tests {
++    use super::*;
++    #[test]
++    fn exact_model_obstacle_search_and_invalid_input() {
++        let mut e = Engine::new();
++        e.load_embedded().unwrap();
++        e.configure(Some(1), Some(1)).unwrap();
++        let sfen = "4k4/9/9/3G1R3/9/9/9/9/8K b - 1";
++        let holes = ["4a", "6a", "4b", "6b"].map(str::to_owned);
++        e.set_obstacle_position(sfen, &holes).unwrap();
++        assert!(e.set_obstacle_position(sfen, &["5a".into()]).is_err());
++        assert!(e.set_obstacle_position(sfen, &["0a".into()]).is_err());
++        let out = e.search(SearchOptions { depth: 4, ..Default::default() }).unwrap();
++        assert!(out.score >= 31996, "{out:?}");
++        let mv = board::move_from_usi(&e.position, &out.bestmove).unwrap();
++        assert!(e.position.is_legal_move32(mv));
++        e.position.apply_move32(mv);
++        let mut list = rsshogi::board::Move32List::new();
++        rsshogi::board::generate_legal_all_move32(&e.position, &mut list);
++        assert!(list.as_slice().is_empty());
++        eprintln!("EXACT_NNUE_OBSTACLE_SEARCH {out:?}");
++    }
++}
+diff --git a/src/ffi.rs b/src/ffi.rs
+index 5e705e034f8486e5fc46830ff7b12ca5f3aa1848..5a489a921a6e3804458cc21f99d1e3ef6924c077 100644
+--- a/src/ffi.rs
++++ b/src/ffi.rs
+@@ -26,12 +26,17 @@ enum Request {
+         #[serde(default)]
+         moves: Vec<String>,
+     },
++    SetObstaclePosition {
++        sfen: String,
++        holes: Vec<String>,
++    },
+     Configure {
+         hash_mb: Option<usize>,
+         threads: Option<usize>,
+     },
+     NewGame,
+     Evaluate,
++    LegalMoves,
+     Search {
+         depth: Option<u32>,
+         nodes: Option<u64>,
+@@ -131,6 +136,10 @@ fn dispatch(engine: &mut Engine, request: Request) -> Result<Value, String> {
+             engine.set_position(&sfen, &moves)?;
+             Ok(json!({"ok": true}))
+         }
++        Request::SetObstaclePosition { sfen, holes } => {
++            engine.set_obstacle_position(&sfen, &holes)?;
++            Ok(json!({"ok":true}))
++        }
+         Request::Configure { hash_mb, threads } => {
+             engine.configure(hash_mb, threads)?;
+             Ok(json!({"ok": true}))
+@@ -139,6 +148,7 @@ fn dispatch(engine: &mut Engine, request: Request) -> Result<Value, String> {
+             engine.new_game();
+             Ok(json!({"ok": true}))
+         }
++        Request::LegalMoves => Ok(json!({"ok": true, "result": engine.legal_moves()})),
+         Request::Evaluate => Ok(json!({"ok": true, "score": engine.evaluate()?})),
+         Request::Search { depth, nodes, movetime_ms } => {
+             if depth.is_none() && nodes.is_none() && movetime_ms.is_none() {
+diff --git a/src/position.rs b/src/position.rs
+index bf1592f7b4376f3436bccc09d8a11f6c880321f5..322e23850ce3e56d9221af266bd9f7b2e2118b76 100644
+--- a/src/position.rs
++++ b/src/position.rs
+@@ -30,7 +30,7 @@ pub(crate) fn replay(spec: &PositionSpec, moves: &[String]) -> Result<Position,
+     Ok(position)
+ }
+
+-fn validate_sfen_hands(hands: &str) -> Result<(), String> {
++pub(crate) fn validate_sfen_hands(hands: &str) -> Result<(), String> {
+     if hands == "-" {
+         return Ok(());
+     }
+diff --git a/src/search.rs b/src/search.rs
+index 84344b616db23ab048547b146daaa7fe399e30a5..07a7dad2962bdf390ffbbad19d4199cb3f1fda92 100644
+--- a/src/search.rs
++++ b/src/search.rs
+@@ -633,3 +633,81 @@ mod tests {
+         assert_eq!(result.nodes, 0);
+     }
+ }
++#[cfg(test)]
++mod obstacle_search_tests {
++    use super::test_support::{depth_limits, run_result};
++    use super::*;
++    use rsshogi::types::{Bitboard, Move};
++    #[test]
++    fn forced_hole_terminal_win_search() {
++        rsshogi::board::init();
++        let mut p = rsshogi::board::position_from_sfen("4k4/9/9/3G1R3/9/9/9/9/8K b - 1").unwrap();
++        let mut holes = Bitboard::EMPTY;
++        for s in ["4a", "6a", "4b", "6b"] {
++            holes.set(Move::from_usi(&format!("7g{s}")).unwrap().to_sq());
++        }
++        assert!(p.set_obstacle_mask(holes));
++        assert!(!p.is_in_check());
++        assert!(!legal_moves(&p).is_empty(), "fixture has legal moves");
++        let result = run_result(p.clone_for_search(), depth_limits(4), 1);
++        let mv = result.best_move.expect("must find a move");
++        eprintln!(
++            "OBSTACLE_SEARCH best={} score={} depth={} nodes={}",
++            mv.to_usi(),
++            result.score,
++            result.depth,
++            result.nodes
++        );
++        assert!(p.is_legal_move32(mv));
++        p.apply_move32(mv);
++        assert!(result.score >= MATE - 4, "must recognize terminal win");
++        assert!(legal_moves(&p).is_empty(), "must find terminal win in one");
++        eprintln!(
++            "OBSTACLE_TERMINAL check={} best={} depth={} nodes={}",
++            p.is_in_check(),
++            mv.to_usi(),
++            result.depth,
++            result.nodes
++        );
++    }
++    #[test]
++    fn obstacle_terminal_position_preempts_static_cutoffs() {
++        rsshogi::board::init();
++        let mut position = rsshogi::board::position_from_sfen("k8/9/9/9/9/9/9/9/8K w - 1").unwrap();
++        let mut holes = Bitboard::EMPTY;
++        for square in ["8a", "8b", "9b"] {
++            holes.set(rsshogi::types::Square::from_usi(square).unwrap());
++        }
++        assert!(position.set_obstacle_mask(holes));
++        assert!(!position.is_in_check());
++        assert!(position.is_mated());
++        assert_eq!(super::score::terminal_score(&position, 1, 0), Some(-MATE + 1));
++    }
++
++    #[test]
++    fn genuine_mate_with_remaining_escape_square() {
++        rsshogi::board::init();
++        let mut p = rsshogi::board::position_from_sfen("4k4/9/4G4/4R4/9/9/9/9/8K b - 1").unwrap();
++        let mut holes = Bitboard::EMPTY;
++        for s in ["6a", "4b", "6b"] {
++            holes.set(Move::from_usi(&format!("7g{s}")).unwrap().to_sq());
++        }
++        assert!(p.set_obstacle_mask(holes));
++        let checking_mates: Vec<_> = legal_moves(&p)
++            .into_iter()
++            .filter(|&m| {
++                let mut child = p.clone_for_search();
++                child.apply_move32(m);
++                child.is_in_check() && legal_moves(&child).is_empty()
++            })
++            .collect();
++        assert!(!checking_mates.is_empty(), "fixture must contain a genuine mate");
++        let mut limits = depth_limits(4);
++        limits.searchmoves = checking_mates.iter().map(|m| m.to_usi()).collect();
++        let result = run_result(p.clone_for_search(), limits, 1);
++        assert!(result.score >= MATE - 4);
++        let mv = result.best_move.unwrap();
++        p.apply_move32(mv);
++        assert!(p.is_in_check() && legal_moves(&p).is_empty());
++    }
++}
+diff --git a/src/search/context.rs b/src/search/context.rs
+index f46d974af0ce51fc002c39c33a2912462d7b1dbe..fda0a1495a20bb31be469ec7f0c60a2356b656c9 100644
+--- a/src/search/context.rs
++++ b/src/search/context.rs
+@@ -327,6 +327,10 @@ pub(super) fn tt_key(position: &Position, max_moves_to_draw: u32) -> u64 {
+         mix_tt_component(&mut fingerprint, u64::from(max_moves_to_draw));
+         mix_tt_component(&mut fingerprint, u64::from(position.game_ply()));
+     }
++    let mut holes = position.obstacle_mask();
++    while let Some(sq) = holes.pop_lsb() {
++        mix_tt_component(&mut fingerprint, 0x484f4c4500000000u64 | sq.to_index() as u64);
++    }
+     position.key().low_u64() ^ fingerprint.rotate_left(1)
+ }
+
+@@ -646,3 +650,24 @@ pub(super) mod stats {
+         }
+     }
+ }
++#[cfg(test)]
++mod obstacle_cache_tests {
++    use super::*;
++    use rsshogi::types::{Bitboard, Move};
++    #[test]
++    fn distinct_masks_have_distinct_tt_keys() {
++        rsshogi::board::init();
++        let mut p = rsshogi::board::hirate_position();
++        let base = tt_key(&p, 0);
++        let mut keys = std::collections::HashSet::from([base]);
++        for square in ["4e", "5e", "6e", "4d", "5d", "6d", "4f", "5f", "6f"] {
++            let sq = Move::from_usi(&format!("7g{square}")).unwrap().to_sq();
++            assert!(p.set_obstacle_mask(Bitboard::from_square(sq)));
++            let key = tt_key(&p, 0);
++            assert!(keys.insert(key));
++            assert_eq!(key, tt_key(&p.clone_for_search(), 0));
++        }
++        assert!(p.set_obstacle_mask(Bitboard::EMPTY));
++        assert_eq!(base, tt_key(&p, 0));
++    }
++}
+diff --git a/src/search/score.rs b/src/search/score.rs
+index 646a961419f227c1cb089acd5bf08b2a830aa41b..099ef45a2177abfdc42c67dcb1ac14d19e5b02fe 100644
+--- a/src/search/score.rs
++++ b/src/search/score.rs
+@@ -29,6 +29,11 @@ pub(super) fn bound_after_search(alpha: i32, search_alpha: i32) -> Bound {
+ }
+
+ pub(super) fn terminal_score(position: &Position, ply: u32, max_moves_to_draw: u32) -> Option<i32> {
++    // Holes can leave the side to move without any legal moves, even outside check.
++    // Check before static evaluation cutoffs in both main search and qsearch.
++    if !position.obstacle_mask().is_empty() && position.is_mated() {
++        return Some(-MATE + ply as i32);
++    }
+     let state = if ply == 0 {
+         position.repetition_state()
+     } else {
+diff --git a/src/search/see.rs b/src/search/see.rs
+index 44c3a9d92f6dec62912f464a08aad0c5029c5bb2..984c65f1eb703fb714cb4aef97a3fcfc2493720a 100644
+--- a/src/search/see.rs
++++ b/src/search/see.rs
+@@ -524,3 +524,22 @@ mod tests {
+         }
+     }
+ }
++#[cfg(test)]
++mod obstacle_see_tests {
++    use super::*;
++    #[test]
++    fn hole_blocks_recapture() {
++        rsshogi::board::init();
++        let mut p = rsshogi::board::position_from_sfen("k3r4/9/9/9/9/4p4/4G4/9/8K b - 1").unwrap();
++        let m = p.move32_from_usi("5g5f").unwrap();
++        let params = EvalParams::default();
++        let exposed = static_exchange_eval(&p, m, params).unwrap();
++        let hole = rsshogi::types::Move::from_usi("7g5d").unwrap().to_sq();
++        assert!(p.set_obstacle_mask(Bitboard::from_square(hole)));
++        let shielded = static_exchange_eval(&p, m, params).unwrap();
++        assert!(shielded > exposed, "hole must prevent rook recapture");
++        assert_eq!(shielded, capture_gain(PieceType::PAWN, params));
++        assert!(static_exchange_ge(&p, m, shielded, params));
++        assert!(!static_exchange_ge(&p, m, shielded + 1, params));
++    }
++}
