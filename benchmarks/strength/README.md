@@ -57,3 +57,14 @@ python3 summarize-obstacle.py /tmp/hole-eval-games.jsonl
 ```
 
 独立C++との再対局では同じ局面のフラグに `--opponent reference` を指定する。`experiments/normal-continuous` は通常版公式WASMを使う連続探索Workerと水匠5のノード上限別検証。`experiments/old-js` は従来JS戦200局の保存データで、ゲーム本体の固定コミットにある `scripts/benchmark-rsshogi-obstacles.mjs` を使う。
+
+探索スライス候補の再作成とスモークは次のとおり。
+
+```bash
+bash experiments/adaptive-obstacle/build-worker.sh "$OBSTACLE_SDK" /tmp/adaptive-sdk
+node experiments/adaptive-obstacle/smoke.mjs /tmp/adaptive-sdk
+g++ -O3 -std=c++20 forensics/heldout/solve.cpp -o /tmp/heldout-solve
+node forensics/heldout/check-nonshortest.mjs /tmp/heldout-solve forensics/heldout/heldout-attack.jsonl experiments/hole-eval/heldout-attack-a.jsonl experiments/adaptive-obstacle/heldout-ab.jsonl
+```
+
+最短手が違う着手も独立した全幅ソルバーで7手以内の強制勝ちを判定した。手数上限に達した対局は勝敗未確定として記録する。対局の比較では先後ペアが完了した局面だけを採用し、同じ開始局面を別の思考時間でも使った場合は1局面として区間を計算する。

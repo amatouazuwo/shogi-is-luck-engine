@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 package = Path(sys.argv[1])
-patch = Path(__file__).parent / "patches/adaptive-obstacle-worker.patch"
+patch = Path(__file__).parent / "adaptive-obstacle-worker.patch"
 manifest_path = package / "manifest.json"
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 sha = lambda filename: hashlib.sha256(filename.read_bytes()).hexdigest()

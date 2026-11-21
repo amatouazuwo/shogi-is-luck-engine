@@ -163,12 +163,25 @@ int main() {
     for (std::string line; std::getline(std::cin, line);) {
         const auto fields = split(line, '\t');
         try {
-            if (fields.size() != 4) throw std::runtime_error("expected four fields");
+            const bool singleBranch = fields[0] == "branch";
+            if (fields.size() != (singleBranch ? 5 : 4)) throw std::runtime_error("wrong field count");
             const auto p = readPosition(fields[1], fields[2]);
             const int depth = parseMilliseconds(fields[3]);
             if (depth != 1 && depth != 3 && depth != 5 && depth != 7)
                 throw std::runtime_error("expected horizon 1, 3, 5 or 7");
-            if (fields[0] == "sample") {
+            if (singleBranch) {
+                const auto moves = legalMoves(p);
+                const auto match = std::find_if(moves.begin(), moves.end(),
+                    [&](const Move move) { return usi(move) == fields[4]; });
+                if (match == moves.end()) throw std::runtime_error("illegal root move");
+                solver.configure(p.turn, false, 4500000);
+                int win = 0;
+                const auto after = apply(p, *match);
+                for (int horizon = 1; horizon <= depth; horizon += 2) {
+                    if (solver.canWin(after, horizon - 1)) { win = horizon; break; }
+                }
+                std::cout << "{\"status\":\"ok\",\"winPlies\":" << win << ",\"nodes\":" << solver.nodes << '}';
+            } else if (fields[0] == "sample") {
                 solver.configure(p.turn, true, 35000);
                 if (solver.canWin(p, 1)) describe("one", solver.nodes);
                 else {

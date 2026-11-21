@@ -64,7 +64,7 @@ for (const kind of ['normal','pit','blackhole']) {
     }
   }
 }
-const reference = spawnSync('./obstacle-reference', [], {encoding:'utf8', maxBuffer:16*1024*1024,
+const reference = spawnSync(process.env.REFERENCE_BINARY || strengthJoin(strengthArchive, 'reference/obstacle-reference'), [], {encoding:'utf8', maxBuffer:16*1024*1024,
   input:cases.map(item=>item.input.join('\t')).join('\n')+'\n'});
 assert.equal(reference.status,0,reference.stderr);
 const replies=reference.stdout.trim().split('\n');
