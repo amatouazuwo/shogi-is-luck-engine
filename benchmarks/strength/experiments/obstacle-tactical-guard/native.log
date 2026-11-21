@@ -1,0 +1,10 @@
+   Compiling rsshogi v1.7.2 (/workspace/work/strength/next-obstacle/rules/crates/rsshogi)
+   Compiling rsshogi-nnue-mini v0.4.0 (/workspace/work/strength/next-obstacle/engine)
+    Finished `release` profile [optimized] target(s) in 1m 03s
+     Running unittests src/lib.rs (/workspace/work/strength/forensics/engine/native-target/release/deps/rsshogi_nnue_mini-efe27c7686d77880)
+
+running 1 test
+test search::obstacle_guard::tests::checks_and_near_king_captures_expose_both_obstacle_traps ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 235 filtered out; finished in 0.00s
+
