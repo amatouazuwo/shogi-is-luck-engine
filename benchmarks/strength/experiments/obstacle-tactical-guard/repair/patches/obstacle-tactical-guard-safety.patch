@@ -1,0 +1,163 @@
+--- a/src/search/obstacle_guard.rs
++++ b/src/search/obstacle_guard.rs
+@@ -6,6 +6,7 @@
+ use serde::Serialize;
+ use std::time::Duration;
+
++use super::MATE_TT_THRESHOLD;
+ use super::context::tt_key;
+ use super::score::score_from_tt;
+ use super::time::Instant;
+@@ -14,6 +15,7 @@
+ use crate::position::SearchPositionExt;
+
+ const HORIZON: u8 = 5;
++const REPLACEMENT_SAFETY_HORIZON: u8 = 3;
+ const MAX_NODES: u32 = 12_000;
+
+ #[derive(Serialize)]
+@@ -25,6 +27,7 @@
+     pub(crate) proof_ms: u64,
+     pub(crate) elapsed_ms: u64,
+     pub(crate) replacement_score: Option<i32>,
++    pub(crate) exact_safety_nodes: u32,
+ }
+
+ struct Probe {
+@@ -82,6 +85,37 @@
+             Some(true)
+         }
+     }
++
++    /// Full-width terminal proof for screening a replacement. Exhaustion is unknown.
++    fn exact_forced(
++        &mut self,
++        position: &mut Position,
++        attacker: Color,
++        remaining: u8,
++    ) -> Option<bool> {
++        if !self.alive() {
++            return None;
++        }
++        self.nodes += 1;
++        let attacking = position.turn() == attacker;
++        if remaining == 0 {
++            return Some(!attacking && position.is_mated());
++        }
++        if attacking && solve_mate_in_one(position).is_some() {
++            return Some(true);
++        }
++        let mut moves = Move32List::new();
++        board::generate_legal_all_move32(position, &mut moves);
++        for &mv in moves.as_slice() {
++            position.apply_move32(mv);
++            let won = self.exact_forced(position, attacker, remaining - 1);
++            position.undo_move32(mv).expect("exact safety move was legal");
++            if won? == attacking {
++                return Some(attacking);
++            }
++        }
++        Some(!attacking)
++    }
+ }
+
+ /// Only checked moves and near-king captures can be proving attacker steps.
+@@ -130,6 +164,18 @@
+     verdict
+ }
+
++fn exact_replacement_safety(
++    probe: &mut Probe,
++    position: &mut Position,
++    attacker: Color,
++    mv: Move32,
++) -> Option<bool> {
++    position.apply_move32(mv);
++    let safe = probe.exact_forced(position, attacker, REPLACEMENT_SAFETY_HORIZON).map(|loss| !loss);
++    position.undo_move32(mv).expect("replacement was legal");
++    safe
++}
++
+ pub(crate) fn guard_obstacle_move(
+     source: &Position,
+     incumbent: Move32,
+@@ -147,6 +193,7 @@
+     let proof_ms = probe.start.elapsed().as_millis().min(u128::from(u64::MAX)) as u64;
+     let mut selected = incumbent;
+     let mut replacement_score = None;
++    let mut exact_safety_nodes = 0;
+     let mut status = match outcome {
+         Some(true) => "proved-loss",
+         Some(false) => "not-proved-in-subset",
+@@ -179,13 +226,21 @@
+         }
+         alternatives.sort_by_key(|&(score, _)| std::cmp::Reverse(score));
+         for (score, candidate) in alternatives {
+-            if compare_after(&mut probe, &mut position, attacker, candidate) == Some(false)
+-                && probe.alive()
+-            {
+-                selected = candidate;
+-                replacement_score = Some(score);
+-                status = "replaced-proved-loss";
+-                break;
++            // A known mate loss is an unsuitable substitute even if a selective
++            // proof fails to reconstruct the tactic within the remaining budget.
++            if score <= -MATE_TT_THRESHOLD {
++                continue;
++            }
++            if compare_after(&mut probe, &mut position, attacker, candidate) == Some(false) {
++                let before = probe.nodes;
++                let safe = exact_replacement_safety(&mut probe, &mut position, attacker, candidate);
++                exact_safety_nodes += probe.nodes - before;
++                if safe == Some(true) && probe.alive() {
++                    selected = candidate;
++                    replacement_score = Some(score);
++                    status = "replaced-proved-loss";
++                    break;
++                }
+             }
+             if !probe.alive() {
+                 break;
+@@ -200,6 +255,7 @@
+         proof_ms,
+         elapsed_ms: probe.start.elapsed().as_millis().min(u128::from(u64::MAX)) as u64,
+         replacement_score,
++        exact_safety_nodes,
+     }
+ }
+
+@@ -245,4 +301,34 @@
+             assert_eq!(position.obstacle_mask(), mask);
+         }
+     }
++
++    #[test]
++    fn exact_screen_rejects_a_faster_mate_that_the_selective_screen_misses() {
++        board::init();
++        let mut position = board::position_from_sfen("9/9/9/2s6/9/9/3K3b1/9/k1rg5 b g 1").unwrap();
++        let mut mask = Bitboard::EMPTY;
++        for hole in ["5d", "4d", "3d", "5e", "4e", "3e", "5f", "4f", "3f"] {
++            mask.set(Square::from_usi(hole).unwrap());
++        }
++        assert!(position.set_obstacle_mask(mask));
++        let attacker = position.turn().flip();
++        let incumbent = position.move32_from_usi("6g5h").unwrap();
++        let unsafe_alternative = position.move32_from_usi("6g6f").unwrap();
++        let mut probe = Probe { start: Instant::now(), budget: Duration::MAX, nodes: 0 };
++        assert_eq!(compare_after(&mut probe, &mut position, attacker, incumbent), Some(true));
++        assert_eq!(
++            compare_after(&mut probe, &mut position, attacker, unsafe_alternative),
++            Some(false)
++        );
++        assert_eq!(
++            exact_replacement_safety(&mut probe, &mut position, attacker, unsafe_alternative),
++            Some(false)
++        );
++        assert_eq!(
++            exact_replacement_safety(&mut probe, &mut position, attacker, incumbent),
++            Some(true)
++        );
++        probe.nodes = MAX_NODES;
++        assert_eq!(exact_replacement_safety(&mut probe, &mut position, attacker, incumbent), None);
++    }
+ }
