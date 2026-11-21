@@ -1,0 +1,44 @@
+{"beforeFirst":{"sfen":"p+p1gp4/bs+lk+p2pg/2p2n+B2/2sp1p2p/2g6/6P2/1PPP3PP/P+N+SLP2+r1/2K1SLRNG b NLP 25","holes":["2e"],"kings":[{"side":1,"square":"6b"},{"side":0,"square":"7i"}],"check":false,"legal":112},"firstCapture":{"type":"R","side":1,"pr":true},"possibleImmediateRecaptures":[],"before16":{"sfen":"p1+pgp4/bs1k3p+B/1+lp2+N3/2sp5/2g5p/6P2/1PPP3PP/P+N+SLP2G1/2K1S1RN1 w RGNL3Pl 40","holes":["2e"],"kings":[{"side":1,"square":"6b"},{"side":0,"square":"7i"}],"check":false,"legal":66},"whiteAt16":[["9a","wP"],["7a","w+P"],["6a","wG"],["5a","wP"],["9b","wB"],["8b","wS"],["6b","wK"],["2b","wP"],["8c","w+L"],["7c","wP"],["7d","wS"],["6d","wP"],["7e","wG"],["1e","wP"]],"beforeFinal":{"sfen":"p1+pgpl3/bsk4p1/1+lpsG+N3/3p5/2g2+B2p/6P2/1PPP3PP/P+N+SLP2G1/2K1S1RN1 b RNL3P 45","holes":["2e"],"kings":[{"side":1,"square":"7b"},{"side":0,"square":"7i"}],"check":false,"legal":171},"afterFinal":{"sfen":"p1+pgpl3/bsk4p1/1+lp+BG+N3/3p5/2g5p/6P2/1PPP3PP/P+N+SLP2G1/2K1S1RN1 w RSNL3P 46","holes":["2e"],"kings":[{"side":1,"square":"7b"},{"side":0,"square":"7i"}],"check":true,"legal":0}}
+{"move":17,"bestmove":"G*5c","checkWithHole":true,"replyWithHole":["6b7b"],"checkWithoutHole":true,"replyWithoutHole":["6b7b"]}
+{"move":19,"bestmove":"1b4e","checkWithHole":true,"replyWithHole":["7d6c"],"checkWithoutHole":true,"replyWithoutHole":["7d6c"]}
+{"move":21,"bestmove":"4e6c","checkWithHole":true,"replyWithHole":[],"checkWithoutHole":true,"replyWithoutHole":[]}
+{"alt":"7a7b","motif":"G*5c legal but replies differ","escapes":["6b7a"]}
+{"alt":"7a8a","motif":"G*5c legal but replies differ","escapes":["6b7b","6b7a"]}
+{"alt":"6a7b","motif":"G*5c legal but replies differ","escapes":["6b6a"]}
+{"alt":"6a5b","motif":"G*5c legal but replies differ","escapes":["6b6a","6b7b","5b5c"]}
+{"alt":"5a5b","motif":"G*5c legal but replies differ","escapes":["6b7b","6b5a","5b5c"]}
+{"alt":"9b8a","motif":"1b4e replies differ","escapes":["7d6c","L*6c","L*5d"]}
+{"alt":"8b9c","motif":"1b4e replies differ","escapes":["7b8b","7d6c","L*6c","L*5d"]}
+{"alt":"6b6c","motif":"G*5c legal but replies differ","escapes":["6c7b"]}
+{"alt":"6b7b","motif":"G*5c legal but replies differ","escapes":["7a6b","7a8a","6a6b","6a5b","5a5b","9b8a","8b9c","7b8a","2b2c","8c9d","8c8d","8c9c","7d8e","7d6e","7d6c","6d6e","7e8f","7e7f","7e6f","7e8e","7e6e","1e1f","L*8a","L*4a","L*3a","L*2a","L*1a","L*6b","L*5b","L*4b","L*3b","L*9c","L*6c","L*3c","L*2c","L*1c","L*9d","L*8d","L*5d","L*4d","L*3d","L*2d","L*1d","L*9e","L*8e","L*6e","L*5e","L*4e","L*3e","L*9f","L*8f","L*7f","L*6f","L*5f","L*4f","L*2f","L*1f","L*9g","L*5g","L*4g","L*3g","L*4h","L*3h","L*1h"]}
+{"alt":"2b2c","motif":"1b4e illegal"}
+{"alt":"8c9d","motif":"1b4e replies differ","escapes":["7b8c","7d6c","L*6c","L*5d"]}
+{"alt":"8c8d","motif":"1b4e replies differ","escapes":["7b8c","7d6c","L*6c","L*5d"]}
+{"alt":"8c9c","motif":"1b4e replies differ","escapes":["7b8c","7d6c","L*6c","L*5d"]}
+{"alt":"7d8e","motif":"1b4e replies differ","escapes":["L*6c","L*5d"]}
+{"alt":"7d6e","motif":"1b4e replies differ","escapes":["6e5d","L*6c","L*5d"]}
+{"alt":"7d6c","motif":"1b4e replies differ","escapes":["7a6b","7a8a","6a6b","6a5b","5a5b","9b8a","8b9c","7b8a","2b2c","8c9d","8c8d","8c7d","8c9c","7c7d","6c5d","6d6e","7e8f","7e7f","7e6f","7e8e","7e6e","7e7d","1e1f","L*8a","L*4a","L*3a","L*2a","L*1a","L*6b","L*5b","L*4b","L*3b","L*1b","L*9c","L*3c","L*2c","L*1c","L*9d","L*8d","L*7d","L*5d","L*4d","L*3d","L*2d","L*1d","L*9e","L*8e","L*6e","L*5e","L*3e","L*9f","L*8f","L*7f","L*6f","L*5f","L*4f","L*2f","L*1f","L*9g","L*5g","L*4g","L*3g","L*4h","L*3h","L*1h"]}
+{"alt":"6d6e","motif":"1b4e replies differ","escapes":["7d6c","L*6c","L*5d"]}
+{"alt":"7e8f","motif":"1b4e replies differ","escapes":["7d6c","L*6c","L*5d"]}
+{"alt":"7e7f","motif":"1b4e replies differ","escapes":["7d6c","L*6c","L*5d"]}
+{"alt":"7e6f","motif":"1b4e replies differ","escapes":["7d6c","L*6c","L*5d"]}
+{"alt":"7e8e","motif":"1b4e replies differ","escapes":["7d6c","L*6c","L*5d"]}
+{"alt":"7e6e","motif":"1b4e replies differ","escapes":["7d6c","L*6c","L*5d"]}
+{"alt":"1e1f","motif":"1b4e replies differ","escapes":["7d6c","L*6c","L*5d"]}
+{"alt":"L*7b","motif":"G*5c legal but replies differ","escapes":[]}
+{"alt":"L*5b","motif":"G*5c legal but replies differ","escapes":["6b7b","5b5c"]}
+{"alt":"L*6c","motif":"1b4e replies differ","escapes":["7a6b","7a8a","6a6b","6a5b","5a5b","9b8a","8b9c","7b8a","2b2c","8c9d","8c8d","8c9c","7d8e","7d6e","6d6e","7e8f","7e7f","7e6f","7e8e","7e6e","1e1f"]}
+{"alt":"L*5c","motif":"G*5c illegal"}
+{"alt":"L*2c","motif":"1b4e illegal"}
+{"alt":"L*5d","motif":"1b4e replies differ","escapes":["7a6b","7a8a","6a6b","6a5b","5a5b","9b8a","8b9c","7b8a","2b2c","8c9d","8c8d","8c9c","7d8e","7d6e","7d6c","6d6e","7e8f","7e7f","7e6f","7e8e","7e6e","1e1f"]}
+{"alt":"L*4d","motif":"1b4e replies differ","escapes":["7d6c","4d4e"]}
+{"alt":"L*3d","motif":"1b4e illegal"}
+{"nativeFor":2,"logged":"1d1e","bestmove":"1b2c","depth":5,"nodes":199360,"elapsed_ms":300,"score":-2002}
+{"nativeFor":4,"logged":"7b8c","bestmove":"4c5e","depth":5,"nodes":232960,"elapsed_ms":300,"score":-2208}
+{"nativeFor":6,"logged":"8a7a","bestmove":"5b4c","depth":5,"nodes":147648,"elapsed_ms":300,"score":-2771}
+{"nativeFor":8,"logged":"6b6c","bestmove":"6b7b","depth":6,"nodes":267392,"elapsed_ms":300,"score":-3770}
+{"nativeFor":12,"logged":"7b6b","bestmove":"7b6b","depth":5,"nodes":128704,"elapsed_ms":300,"score":-4087}
+{"nativeFor":14,"logged":"5b4c","bestmove":"5b4c","depth":4,"nodes":182080,"elapsed_ms":300,"score":-4095}
+{"nativeFor":16,"logged":"L*4a","bestmove":"6b7b","depth":5,"nodes":251584,"elapsed_ms":300,"score":-4495}
+{"nativeFor":18,"logged":"6b7b","bestmove":"6b7b","depth":4,"nodes":2884,"elapsed_ms":1,"score":-29996}
+{"nativeFor":20,"logged":"7d6c","bestmove":"7d6c","depth":2,"nodes":204,"elapsed_ms":0,"score":-29998}

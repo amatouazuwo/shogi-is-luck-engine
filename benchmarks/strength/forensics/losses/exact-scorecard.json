@@ -1,0 +1,780 @@
+[
+  {
+    "name": "pit-100",
+    "transitions": [
+      {
+        "id": "pit-100:16",
+        "distance": 5,
+        "legal": 66,
+        "line": [
+          "G*5c",
+          "6b7b",
+          "1b4e",
+          "7d6c",
+          "4e6c"
+        ],
+        "safeAtDistance": [
+          "7a7b",
+          "7a8a",
+          "6a7b",
+          "6a5b",
+          "5a5b",
+          "9b8a",
+          "8b9c",
+          "6b6c",
+          "6b7b",
+          "2b2c",
+          "8c9d",
+          "8c8d",
+          "8c9c",
+          "7d6e",
+          "7d6c",
+          "6d6e",
+          "7e8f",
+          "7e7f",
+          "7e6f",
+          "7e8e",
+          "7e6e",
+          "1e1f",
+          "L*5b",
+          "L*6c",
+          "L*5c",
+          "L*2c",
+          "L*5d",
+          "L*4d",
+          "L*3d"
+        ],
+        "safeAtLimit": [
+          "7a7b",
+          "7a8a",
+          "6a7b",
+          "6a5b",
+          "5a5b",
+          "9b8a",
+          "8b9c",
+          "6b6c",
+          "6b7b",
+          "2b2c",
+          "8c9d",
+          "8c8d",
+          "8c9c",
+          "7d6e",
+          "7d6c",
+          "6d6e",
+          "7e8f",
+          "7e7f",
+          "7e6f",
+          "7e8e",
+          "7e6e",
+          "1e1f",
+          "L*5b",
+          "L*6c",
+          "L*5c",
+          "L*2c",
+          "L*5d",
+          "L*4d",
+          "L*3d"
+        ],
+        "terminal": "mate",
+        "nodes": 179697610,
+        "ply": 16,
+        "absolutePly": 40,
+        "played": "L*4a",
+        "sfen": "p1+pgp4/bs1k3p+B/1+lp2+N3/2sp5/2g5p/6P2/1PPP3PP/P+N+SLP2G1/2K1S1RN1 w RGNL3Pl 40",
+        "holes": [
+          "2e"
+        ],
+        "legalList": [
+          "7a7b",
+          "7a8a",
+          "6a7b",
+          "6a5b",
+          "5a5b",
+          "9b8a",
+          "8b9c",
+          "6b6c",
+          "6b7b",
+          "2b2c",
+          "8c9d",
+          "8c8d",
+          "8c9c",
+          "7d8e",
+          "7d6e",
+          "7d6c",
+          "6d6e",
+          "7e8f",
+          "7e7f",
+          "7e6f",
+          "7e8e",
+          "7e6e",
+          "1e1f",
+          "L*8a",
+          "L*4a",
+          "L*3a",
+          "L*2a",
+          "L*1a",
+          "L*7b",
+          "L*5b",
+          "L*4b",
+          "L*3b",
+          "L*9c",
+          "L*6c",
+          "L*5c",
+          "L*3c",
+          "L*2c",
+          "L*1c",
+          "L*9d",
+          "L*8d",
+          "L*5d",
+          "L*4d",
+          "L*3d",
+          "L*2d",
+          "L*1d",
+          "L*9e",
+          "L*8e",
+          "L*6e",
+          "L*5e",
+          "L*4e",
+          "L*3e",
+          "L*9f",
+          "L*8f",
+          "L*7f",
+          "L*6f",
+          "L*5f",
+          "L*4f",
+          "L*2f",
+          "L*1f",
+          "L*9g",
+          "L*5g",
+          "L*4g",
+          "L*3g",
+          "L*4h",
+          "L*3h",
+          "L*1h"
+        ]
+      },
+      {
+        "id": "pit-100:18",
+        "distance": 3,
+        "legal": 1,
+        "line": [
+          "1b4e",
+          "7d6c",
+          "4e6c"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 178,
+        "ply": 18,
+        "absolutePly": 42,
+        "played": "6b7b",
+        "sfen": "p1+pgpl3/bs1k3p+B/1+lp1G+N3/2sp5/2g5p/6P2/1PPP3PP/P+N+SLP2G1/2K1S1RN1 w RNL3P 42",
+        "holes": [
+          "2e"
+        ],
+        "legalList": [
+          "6b7b"
+        ]
+      },
+      {
+        "id": "pit-100:20",
+        "distance": 1,
+        "legal": 1,
+        "line": [
+          "4e6c"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 4,
+        "ply": 20,
+        "absolutePly": 44,
+        "played": "7d6c",
+        "sfen": "p1+pgpl3/bsk4p1/1+lp1G+N3/2sp5/2g2+B2p/6P2/1PPP3PP/P+N+SLP2G1/2K1S1RN1 w RNL3P 44",
+        "holes": [
+          "2e"
+        ],
+        "legalList": [
+          "7d6c"
+        ]
+      }
+    ],
+    "ending": [
+      [
+        17,
+        "G*5c"
+      ],
+      [
+        18,
+        "6b7b"
+      ],
+      [
+        19,
+        "1b4e"
+      ],
+      [
+        20,
+        "7d6c"
+      ],
+      [
+        21,
+        "4e6c"
+      ]
+    ]
+  },
+  {
+    "name": "pit-500",
+    "transitions": [
+      {
+        "id": "pit-500:120",
+        "distance": 5,
+        "legal": 9,
+        "line": [
+          "9c8c",
+          "8a9b",
+          "5d5a",
+          "8b8a",
+          "8c9b"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 2399481,
+        "ply": 120,
+        "absolutePly": 144,
+        "played": "7b8b",
+        "sfen": "k+p3+L2+P/2g6/+L1p2+P3/4+R4/9/1+NPP2P1G/4+S3N/1K7/R8 w 2B2G3S2N2L11P 144",
+        "holes": [
+          "2e"
+        ],
+        "legalList": [
+          "8a9b",
+          "8a8b",
+          "8a7a",
+          "7b8c",
+          "7b6c",
+          "7b8b",
+          "7b6b",
+          "7b7a",
+          "7c7d"
+        ]
+      },
+      {
+        "id": "pit-500:122",
+        "distance": 3,
+        "legal": 6,
+        "line": [
+          "9c8c",
+          "8b9c",
+          "9i9c+"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 3177,
+        "ply": 122,
+        "absolutePly": 146,
+        "played": "7c7d",
+        "sfen": "k+p2+R+L2+P/1g7/+L1p2+P3/9/9/1+NPP2P1G/4+S3N/1K7/R8 w 2B2G3S2N2L11P 146",
+        "holes": [
+          "2e"
+        ],
+        "legalList": [
+          "8a7a",
+          "8b9c",
+          "8b8c",
+          "8b9b",
+          "8b7b",
+          "7c7d"
+        ]
+      },
+      {
+        "id": "pit-500:124",
+        "distance": 1,
+        "legal": 2,
+        "line": [
+          "8c9b"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 8,
+        "ply": 124,
+        "absolutePly": 148,
+        "played": "8b9b",
+        "sfen": "k+p2+R+L2+P/1g7/1+L3+P3/2p6/9/1+NPP2P1G/4+S3N/1K7/R8 w 2B2G3S2N2L11P 148",
+        "holes": [
+          "2e"
+        ],
+        "legalList": [
+          "8b9c",
+          "8b9b"
+        ]
+      }
+    ],
+    "ending": [
+      [
+        121,
+        "5d5a"
+      ],
+      [
+        122,
+        "7c7d"
+      ],
+      [
+        123,
+        "9c8c"
+      ],
+      [
+        124,
+        "8b9b"
+      ],
+      [
+        125,
+        "9i9b+"
+      ]
+    ]
+  },
+  {
+    "name": "blackhole-500",
+    "transitions": [
+      {
+        "id": "blackhole-500:70",
+        "distance": 5,
+        "legal": 18,
+        "line": [
+          "9e9d",
+          "9a9b",
+          "P*8c",
+          "8b7b",
+          "5a6a"
+        ],
+        "safeAtDistance": [
+          "6e6f",
+          "6e6g+",
+          "6e6g",
+          "6e6h+",
+          "6e6h"
+        ],
+        "safeAtLimit": [
+          "6e6f",
+          "6e6g+",
+          "6e6g",
+          "6e6h+",
+          "6e6h"
+        ],
+        "terminal": "mate",
+        "nodes": 128303141,
+        "ply": 70,
+        "absolutePly": 94,
+        "played": "9c9d",
+        "sfen": "p3+R4/1k2+P3+B/+p1ps5/3p1+R3/K2l5/9/7PP/P2PP2G1/4S2N1 w B3G2S3N3L6P 94",
+        "holes": [
+          "3d",
+          "2d",
+          "1d",
+          "3e",
+          "2e",
+          "1e",
+          "3f",
+          "2f",
+          "1f"
+        ],
+        "legalList": [
+          "9a9b",
+          "8b8c",
+          "8b7b",
+          "8b9b",
+          "9c9d",
+          "9c8d",
+          "9c8c",
+          "9c9b",
+          "7c7d",
+          "6c7d",
+          "6c5d",
+          "6c7b",
+          "6c5b",
+          "6e6f",
+          "6e6g",
+          "6e6g+",
+          "6e6h",
+          "6e6h+"
+        ]
+      },
+      {
+        "id": "blackhole-500:72",
+        "distance": 3,
+        "legal": 13,
+        "line": [
+          "5a6b",
+          "8b8a",
+          "4d4a"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 13402,
+        "ply": 72,
+        "absolutePly": 96,
+        "played": "6c7d",
+        "sfen": "p3+R4/1k2+P3+B/2ps5/K2p1+R3/3l5/9/7PP/P2PP2G1/4S2N1 w B3G2S3N3L7P 96",
+        "holes": [
+          "3d",
+          "2d",
+          "1d",
+          "3e",
+          "2e",
+          "1e",
+          "3f",
+          "2f",
+          "1f"
+        ],
+        "legalList": [
+          "9a9b",
+          "8b7b",
+          "8b9b",
+          "7c7d",
+          "6c7d",
+          "6c5d",
+          "6c7b",
+          "6c5b",
+          "6e6f",
+          "6e6g",
+          "6e6g+",
+          "6e6h",
+          "6e6h+"
+        ]
+      },
+      {
+        "id": "blackhole-500:74",
+        "distance": 1,
+        "legal": 1,
+        "line": [
+          "4d4a"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 8,
+        "ply": 74,
+        "absolutePly": 98,
+        "played": "8b8a",
+        "sfen": "p8/1k1+R+P3+B/2p6/K1sp1+R3/3l5/9/7PP/P2PP2G1/4S2N1 w B3G2S3N3L7P 98",
+        "holes": [
+          "3d",
+          "2d",
+          "1d",
+          "3e",
+          "2e",
+          "1e",
+          "3f",
+          "2f",
+          "1f"
+        ],
+        "legalList": [
+          "8b8a"
+        ]
+      }
+    ],
+    "ending": [
+      [
+        71,
+        "9e9d"
+      ],
+      [
+        72,
+        "6c7d"
+      ],
+      [
+        73,
+        "5a6b"
+      ],
+      [
+        74,
+        "8b8a"
+      ],
+      [
+        75,
+        "G*7a"
+      ]
+    ]
+  },
+  {
+    "name": "pit-1500",
+    "transitions": [
+      {
+        "id": "pit-1500:58",
+        "distance": 5,
+        "legal": 20,
+        "line": [
+          "8h7h",
+          "7a6a",
+          "4a6a",
+          "8b7a",
+          "6a7a"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 324982,
+        "ply": 58,
+        "absolutePly": 82,
+        "played": "8i7h+",
+        "sfen": "k1+p2+R3/ps2p2+B1/1+lpB5/3p5/9/1+S3lP2/2PP1+p1PP/1K1LP2G1/1s2R2N1 w 3GS3NL6P 82",
+        "holes": [
+          "2e"
+        ],
+        "legalList": [
+          "7a8a",
+          "7a6a",
+          "9b9c",
+          "8b9c",
+          "5b5c",
+          "8c9d",
+          "8c8d",
+          "8c7d",
+          "8c9c",
+          "7c7d",
+          "6d6e",
+          "4g5h",
+          "4g4h",
+          "4g3h",
+          "4g5g",
+          "4g3g",
+          "8i9h",
+          "8i9h+",
+          "8i7h",
+          "8i7h+"
+        ]
+      },
+      {
+        "id": "pit-1500:60",
+        "distance": 3,
+        "legal": 16,
+        "line": [
+          "S*8a",
+          "7a7b",
+          "L*9b"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 49134,
+        "ply": 60,
+        "absolutePly": 84,
+        "played": "9b9c",
+        "sfen": "k1+p2+R3/ps2p2+B1/1+lpB5/3p5/9/1+S3lP2/2PP1+p1PP/2KLP2G1/4R2N1 w 3G2S3NL6P 84",
+        "holes": [
+          "2e"
+        ],
+        "legalList": [
+          "7a8a",
+          "7a6a",
+          "9b9c",
+          "8b9c",
+          "5b5c",
+          "8c9d",
+          "8c8d",
+          "8c7d",
+          "8c9c",
+          "7c7d",
+          "6d6e",
+          "4g5h",
+          "4g4h",
+          "4g3h",
+          "4g5g",
+          "4g3g"
+        ]
+      },
+      {
+        "id": "pit-1500:62",
+        "distance": 1,
+        "legal": 16,
+        "line": [
+          "4a8a"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 66,
+        "ply": 62,
+        "absolutePly": 86,
+        "played": "7a8a",
+        "sfen": "kS+p2+R3/1s2p2+B1/p+lpB5/3p5/9/1+S3lP2/2PP1+p1PP/2KLP2G1/4R2N1 w 3GS3NL6P 86",
+        "holes": [
+          "2e"
+        ],
+        "legalList": [
+          "7a7b",
+          "7a6b",
+          "7a8a",
+          "7a6a",
+          "5b5c",
+          "9c9d",
+          "8c9d",
+          "8c8d",
+          "8c7d",
+          "7c7d",
+          "6d6e",
+          "4g5h",
+          "4g4h",
+          "4g3h",
+          "4g5g",
+          "4g3g"
+        ]
+      }
+    ],
+    "ending": [
+      [
+        59,
+        "8h7h"
+      ],
+      [
+        60,
+        "9b9c"
+      ],
+      [
+        61,
+        "S*8a"
+      ],
+      [
+        62,
+        "7a8a"
+      ],
+      [
+        63,
+        "6c8a+"
+      ]
+    ]
+  },
+  {
+    "name": "blackhole-1500",
+    "transitions": [
+      {
+        "id": "blackhole-1500:60",
+        "distance": 5,
+        "legal": 4,
+        "line": [
+          "5b8b",
+          "7c8c",
+          "N*7f",
+          "8d9d",
+          "S*9e"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 477975,
+        "ply": 60,
+        "absolutePly": 84,
+        "played": "8c8d",
+        "sfen": "p4+P+P2/1g2+R4/1k+l3+Lp1/1Pp6/1N7/+B2P5/1pP4PP/+N1+SLP2G1/1K2SR1N1 w B2G2SN4Pl 84",
+        "holes": [
+          "3d",
+          "2d",
+          "1d",
+          "3e",
+          "2e",
+          "1e",
+          "3f",
+          "2f",
+          "1f"
+        ],
+        "legalList": [
+          "8c8d",
+          "8c9d",
+          "8c9b",
+          "7c8d"
+        ]
+      },
+      {
+        "id": "blackhole-1500:62",
+        "distance": 3,
+        "legal": 4,
+        "line": [
+          "N*7f",
+          "8d9d",
+          "S*9e"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 2887,
+        "ply": 62,
+        "absolutePly": 86,
+        "played": "7c8c",
+        "sfen": "p4+P+P2/1+R7/2+l3+Lp1/1kp6/1N7/+B2P5/1pP4PP/+N1+SLP2G1/1K2SR1N1 w B3G2SN4Plp 86",
+        "holes": [
+          "3d",
+          "2d",
+          "1d",
+          "3e",
+          "2e",
+          "1e",
+          "3f",
+          "2f",
+          "1f"
+        ],
+        "legalList": [
+          "7c8c",
+          "8d9d",
+          "8d7e",
+          "L*8c"
+        ]
+      },
+      {
+        "id": "blackhole-1500:64",
+        "distance": 1,
+        "legal": 1,
+        "line": [
+          "9f8f"
+        ],
+        "safeAtDistance": [],
+        "safeAtLimit": [],
+        "terminal": "mate",
+        "nodes": 5,
+        "ply": 64,
+        "absolutePly": 88,
+        "played": "8d7e",
+        "sfen": "p4+P+P2/1+R7/1+l4+Lp1/1kp6/SN7/+B2P5/1pP4PP/+N1+SLP2G1/1K2SR1N1 w B3GSN4Plp 88",
+        "holes": [
+          "3d",
+          "2d",
+          "1d",
+          "3e",
+          "2e",
+          "1e",
+          "3f",
+          "2f",
+          "1f"
+        ],
+        "legalList": [
+          "8d7e"
+        ]
+      }
+    ],
+    "ending": [
+      [
+        61,
+        "5b8b"
+      ],
+      [
+        62,
+        "7c8c"
+      ],
+      [
+        63,
+        "S*9e"
+      ],
+      [
+        64,
+        "8d7e"
+      ],
+      [
+        65,
+        "G*6e"
+      ]
+    ]
+  }
+]
