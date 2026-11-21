@@ -1,4 +1,5 @@
 import json
+import math
 import statistics
 import sys
 from collections import Counter, defaultdict
@@ -48,6 +49,28 @@ def counts(rows):
     return [values[key] for key in ("win", "loss", "draw", "cap")]
 
 
+def pair_score_range(rows):
+    # Capped games are unresolved. Treat each distinct start as one clustered
+    # observation, even when it is shared across multiple budgets.
+    starts = defaultdict(list)
+    for row in rows:
+        starts[row["kind"], row["pair"]].append(row)
+    floors = []
+    ceilings = []
+    for games in starts.values():
+        wins, _, draws, capped = counts(games)
+        floors.append((wins + draws / 2) / len(games))
+        ceilings.append((wins + draws / 2 + capped) / len(games))
+    lo = statistics.mean(floors)
+    hi = statistics.mean(ceilings)
+    radius = math.sqrt(math.log(40) / (2 * len(starts)))
+    return {
+        "distinctStarts": len(starts),
+        "observedScoreRange": [round(lo, 4), round(hi, 4)],
+        "hoeffding95WithCappedGames": [max(0, round(lo - radius, 4)), min(1, round(hi + radius, 4))],
+    }
+
+
 cases = defaultdict(list)
 excluded = defaultdict(int)
 for (budget, kind, pair), sides in read_games(sys.argv[1:]).items():
@@ -60,6 +83,12 @@ summary = []
 for (budget, kind), games in sorted(cases.items()):
     reasons = Counter(row["reason"] for row in games)
     timeouts = Counter(row["detail"]["searchSide"] for row in games if row["reason"] == "search-timeout")
+    opponent = next((turn["engine"] for row in games for turn in row["turns"] if turn["engine"] != "nnue"), "reference")
+    failures = defaultdict(Counter)
+    for row in games:
+        if row["reason"] in {"search-timeout", "illegal", "clock", "resign"}:
+            actor = "nnue" if row["winner"] != row["nnueSide"] else opponent
+            failures[actor][row["reason"]] += 1
     summary.append({
         "budget": budget,
         "kind": kind,
@@ -69,8 +98,13 @@ for (budget, kind), games in sorted(cases.items()):
         "total": counts(games),
         "reasons": dict(reasons),
         "timeouts": dict(timeouts),
+        "failuresByEngine": dict(failures),
+        "score": pair_score_range(games),
         "nnue": stats(games, "nnue"),
         "opponent": stats(games, "baseline") or stats(games, "reference"),
     })
-print(json.dumps({"groups": summary, "unpaired": [{"budget": b, "kind": k, "games": v} for (b, k), v in excluded.items()]},
+all_games = [row for games in cases.values() for row in games]
+print(json.dumps({"groups": summary, "total": counts(all_games),
+                  "score": pair_score_range(all_games) if all_games else None,
+                  "unpaired": [{"budget": b, "kind": k, "games": v} for (b, k), v in excluded.items()]},
                  ensure_ascii=False, indent=2))
