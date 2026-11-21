@@ -1,0 +1,570 @@
+{
+  "inputSha256": "3cf422892ec6e8b017da2b198ce3400402842fbb1cb5955fa37086bcb5d558eb",
+  "config": {
+    "event": "config",
+    "budgets": [
+      100
+    ],
+    "kinds": [
+      "pit",
+      "blackhole"
+    ],
+    "pairCount": 3,
+    "pairOffset": 24,
+    "plyCap": 100,
+    "clockMs": 180000,
+    "holdout": true,
+    "opponent": "baseline",
+    "baselineSha256": "0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108",
+    "referenceBinary": "/workspace/work/strength/reference/obstacle-reference-v1",
+    "referenceSha256": "0ea3179bd7eb02bfa71837fb844f2bfad0c09bd2d2fcb26e1d3650dfc10559ed",
+    "gameCommit": "e8a26f16325c9f27b29fa37ba8d06a0cc70ddeec",
+    "rulesSha256": "b1acf7b7a595150d8a2766111d8171ff84ccbd718ea33239f5b5b7f513c51344",
+    "wasmSha256": "0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108",
+    "workerSha256": "91db7be88d6b103e0071fd992b7dab36054c05367c280d69c4ba0cad1cec3ef7",
+    "hashMb": 16,
+    "node": "v22.23.5"
+  },
+  "total": {
+    "games": 12,
+    "outcomes": {
+      "win": 4,
+      "loss": 4,
+      "draw": 0,
+      "cap": 4
+    },
+    "adaptiveSente": {
+      "win": 2,
+      "loss": 3,
+      "draw": 0,
+      "cap": 1
+    },
+    "adaptiveGote": {
+      "win": 2,
+      "loss": 1,
+      "draw": 0,
+      "cap": 3
+    },
+    "terminations": {
+      "mate": 8,
+      "ply-cap": 4
+    },
+    "engines": {
+      "adaptive": {
+        "turns": 445,
+        "meanRequestMs": 100,
+        "meanReportedMs": 103.24,
+        "meanWallMs": 104.31,
+        "p95WallMs": 110.16,
+        "maxWallMs": 420.08,
+        "overRequestedPlus5": 80,
+        "overRequestedPlus50": 1,
+        "meanNodes": 10455.81,
+        "meanDepth": 5.85,
+        "searchTimeouts": 0,
+        "clockFlags": 0,
+        "illegalReplies": 0,
+        "resignations": 0
+      },
+      "baseline": {
+        "turns": 444,
+        "meanRequestMs": 100,
+        "meanReportedMs": 103.15,
+        "meanWallMs": 104.04,
+        "p95WallMs": 108.32,
+        "maxWallMs": 406.29,
+        "overRequestedPlus5": 67,
+        "overRequestedPlus50": 2,
+        "meanNodes": 10794.64,
+        "meanDepth": 5.72,
+        "searchTimeouts": 0,
+        "clockFlags": 0,
+        "illegalReplies": 0,
+        "resignations": 0
+      }
+    }
+  },
+  "byKind": {
+    "blackhole": {
+      "games": 6,
+      "outcomes": {
+        "win": 1,
+        "loss": 2,
+        "draw": 0,
+        "cap": 3
+      },
+      "adaptiveSente": {
+        "win": 1,
+        "loss": 1,
+        "draw": 0,
+        "cap": 1
+      },
+      "adaptiveGote": {
+        "win": 0,
+        "loss": 1,
+        "draw": 0,
+        "cap": 2
+      },
+      "terminations": {
+        "mate": 3,
+        "ply-cap": 3
+      },
+      "engines": {
+        "adaptive": {
+          "turns": 230,
+          "meanRequestMs": 100,
+          "meanReportedMs": 102.4,
+          "meanWallMs": 103.41,
+          "p95WallMs": 109.57,
+          "maxWallMs": 133.41,
+          "overRequestedPlus5": 33,
+          "overRequestedPlus50": 0,
+          "meanNodes": 9979.34,
+          "meanDepth": 6.0,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        },
+        "baseline": {
+          "turns": 230,
+          "meanRequestMs": 100,
+          "meanReportedMs": 102.2,
+          "meanWallMs": 103.07,
+          "p95WallMs": 107.33,
+          "maxWallMs": 115.93,
+          "overRequestedPlus5": 33,
+          "overRequestedPlus50": 0,
+          "meanNodes": 10382.87,
+          "meanDepth": 5.85,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        }
+      }
+    },
+    "pit": {
+      "games": 6,
+      "outcomes": {
+        "win": 3,
+        "loss": 2,
+        "draw": 0,
+        "cap": 1
+      },
+      "adaptiveSente": {
+        "win": 1,
+        "loss": 2,
+        "draw": 0,
+        "cap": 0
+      },
+      "adaptiveGote": {
+        "win": 2,
+        "loss": 0,
+        "draw": 0,
+        "cap": 1
+      },
+      "terminations": {
+        "mate": 5,
+        "ply-cap": 1
+      },
+      "engines": {
+        "adaptive": {
+          "turns": 215,
+          "meanRequestMs": 100,
+          "meanReportedMs": 104.14,
+          "meanWallMs": 105.27,
+          "p95WallMs": 110.96,
+          "maxWallMs": 420.08,
+          "overRequestedPlus5": 47,
+          "overRequestedPlus50": 1,
+          "meanNodes": 10965.53,
+          "meanDepth": 5.69,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        },
+        "baseline": {
+          "turns": 214,
+          "meanRequestMs": 100,
+          "meanReportedMs": 104.18,
+          "meanWallMs": 105.09,
+          "p95WallMs": 109.2,
+          "maxWallMs": 406.29,
+          "overRequestedPlus5": 34,
+          "overRequestedPlus50": 2,
+          "meanNodes": 11237.19,
+          "meanDepth": 5.58,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        }
+      }
+    }
+  },
+  "byKindAndStage": {
+    "blackhole/middle": {
+      "games": 2,
+      "outcomes": {
+        "win": 1,
+        "loss": 1,
+        "draw": 0,
+        "cap": 0
+      },
+      "adaptiveSente": {
+        "win": 1,
+        "loss": 0,
+        "draw": 0,
+        "cap": 0
+      },
+      "adaptiveGote": {
+        "win": 0,
+        "loss": 1,
+        "draw": 0,
+        "cap": 0
+      },
+      "terminations": {
+        "mate": 2
+      },
+      "engines": {
+        "adaptive": {
+          "turns": 35,
+          "meanRequestMs": 100,
+          "meanReportedMs": 102.2,
+          "meanWallMs": 103.47,
+          "p95WallMs": 113.03,
+          "maxWallMs": 117.82,
+          "overRequestedPlus5": 4,
+          "overRequestedPlus50": 0,
+          "meanNodes": 13260.03,
+          "meanDepth": 7.06,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        },
+        "baseline": {
+          "turns": 35,
+          "meanRequestMs": 100,
+          "meanReportedMs": 101.63,
+          "meanWallMs": 102.77,
+          "p95WallMs": 108.66,
+          "maxWallMs": 112.87,
+          "overRequestedPlus5": 3,
+          "overRequestedPlus50": 0,
+          "meanNodes": 13573.77,
+          "meanDepth": 7.4,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        }
+      }
+    },
+    "blackhole/opening": {
+      "games": 2,
+      "outcomes": {
+        "win": 0,
+        "loss": 1,
+        "draw": 0,
+        "cap": 1
+      },
+      "adaptiveSente": {
+        "win": 0,
+        "loss": 1,
+        "draw": 0,
+        "cap": 0
+      },
+      "adaptiveGote": {
+        "win": 0,
+        "loss": 0,
+        "draw": 0,
+        "cap": 1
+      },
+      "terminations": {
+        "mate": 1,
+        "ply-cap": 1
+      },
+      "engines": {
+        "adaptive": {
+          "turns": 95,
+          "meanRequestMs": 100,
+          "meanReportedMs": 102,
+          "meanWallMs": 102.73,
+          "p95WallMs": 105.2,
+          "maxWallMs": 110.17,
+          "overRequestedPlus5": 6,
+          "overRequestedPlus50": 0,
+          "meanNodes": 11538.71,
+          "meanDepth": 5.81,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        },
+        "baseline": {
+          "turns": 95,
+          "meanRequestMs": 100,
+          "meanReportedMs": 102,
+          "meanWallMs": 102.75,
+          "p95WallMs": 106.23,
+          "maxWallMs": 115.93,
+          "overRequestedPlus5": 9,
+          "overRequestedPlus50": 0,
+          "meanNodes": 11741,
+          "meanDepth": 5.47,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        }
+      }
+    },
+    "blackhole/reduced": {
+      "games": 2,
+      "outcomes": {
+        "win": 0,
+        "loss": 0,
+        "draw": 0,
+        "cap": 2
+      },
+      "adaptiveSente": {
+        "win": 0,
+        "loss": 0,
+        "draw": 0,
+        "cap": 1
+      },
+      "adaptiveGote": {
+        "win": 0,
+        "loss": 0,
+        "draw": 0,
+        "cap": 1
+      },
+      "terminations": {
+        "ply-cap": 2
+      },
+      "engines": {
+        "adaptive": {
+          "turns": 100,
+          "meanRequestMs": 100,
+          "meanReportedMs": 102.85,
+          "meanWallMs": 104.03,
+          "p95WallMs": 110.27,
+          "maxWallMs": 133.41,
+          "overRequestedPlus5": 23,
+          "overRequestedPlus50": 0,
+          "meanNodes": 7349.7,
+          "meanDepth": 5.82,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        },
+        "baseline": {
+          "turns": 100,
+          "meanRequestMs": 100,
+          "meanReportedMs": 102.59,
+          "meanWallMs": 103.48,
+          "p95WallMs": 108.33,
+          "maxWallMs": 112.86,
+          "overRequestedPlus5": 21,
+          "overRequestedPlus50": 0,
+          "meanNodes": 7975.83,
+          "meanDepth": 5.67,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        }
+      }
+    },
+    "pit/middle": {
+      "games": 2,
+      "outcomes": {
+        "win": 1,
+        "loss": 1,
+        "draw": 0,
+        "cap": 0
+      },
+      "adaptiveSente": {
+        "win": 0,
+        "loss": 1,
+        "draw": 0,
+        "cap": 0
+      },
+      "adaptiveGote": {
+        "win": 1,
+        "loss": 0,
+        "draw": 0,
+        "cap": 0
+      },
+      "terminations": {
+        "mate": 2
+      },
+      "engines": {
+        "adaptive": {
+          "turns": 81,
+          "meanRequestMs": 100,
+          "meanReportedMs": 102.68,
+          "meanWallMs": 103.91,
+          "p95WallMs": 109.86,
+          "maxWallMs": 124.98,
+          "overRequestedPlus5": 17,
+          "overRequestedPlus50": 0,
+          "meanNodes": 10130.69,
+          "meanDepth": 4.73,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        },
+        "baseline": {
+          "turns": 81,
+          "meanRequestMs": 100,
+          "meanReportedMs": 103,
+          "meanWallMs": 103.99,
+          "p95WallMs": 109.2,
+          "maxWallMs": 169.9,
+          "overRequestedPlus5": 16,
+          "overRequestedPlus50": 1,
+          "meanNodes": 9991.14,
+          "meanDepth": 4.48,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        }
+      }
+    },
+    "pit/opening": {
+      "games": 2,
+      "outcomes": {
+        "win": 0,
+        "loss": 1,
+        "draw": 0,
+        "cap": 1
+      },
+      "adaptiveSente": {
+        "win": 0,
+        "loss": 1,
+        "draw": 0,
+        "cap": 0
+      },
+      "adaptiveGote": {
+        "win": 0,
+        "loss": 0,
+        "draw": 0,
+        "cap": 1
+      },
+      "terminations": {
+        "mate": 1,
+        "ply-cap": 1
+      },
+      "engines": {
+        "adaptive": {
+          "turns": 94,
+          "meanRequestMs": 100,
+          "meanReportedMs": 105.73,
+          "meanWallMs": 106.59,
+          "p95WallMs": 108.29,
+          "maxWallMs": 420.08,
+          "overRequestedPlus5": 15,
+          "overRequestedPlus50": 1,
+          "meanNodes": 11760.89,
+          "meanDepth": 5.91,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        },
+        "baseline": {
+          "turns": 94,
+          "meanRequestMs": 100,
+          "meanReportedMs": 105.35,
+          "meanWallMs": 106.13,
+          "p95WallMs": 105.68,
+          "maxWallMs": 406.29,
+          "overRequestedPlus5": 11,
+          "overRequestedPlus50": 1,
+          "meanNodes": 12710.04,
+          "meanDepth": 5.79,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        }
+      }
+    },
+    "pit/reduced": {
+      "games": 2,
+      "outcomes": {
+        "win": 2,
+        "loss": 0,
+        "draw": 0,
+        "cap": 0
+      },
+      "adaptiveSente": {
+        "win": 1,
+        "loss": 0,
+        "draw": 0,
+        "cap": 0
+      },
+      "adaptiveGote": {
+        "win": 1,
+        "loss": 0,
+        "draw": 0,
+        "cap": 0
+      },
+      "terminations": {
+        "mate": 2
+      },
+      "engines": {
+        "adaptive": {
+          "turns": 40,
+          "meanRequestMs": 100,
+          "meanReportedMs": 103.38,
+          "meanWallMs": 104.93,
+          "p95WallMs": 113.64,
+          "maxWallMs": 121.92,
+          "overRequestedPlus5": 15,
+          "overRequestedPlus50": 0,
+          "meanNodes": 10786.98,
+          "meanDepth": 7.12,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        },
+        "baseline": {
+          "turns": 39,
+          "meanRequestMs": 100,
+          "meanReportedMs": 103.79,
+          "meanWallMs": 104.86,
+          "p95WallMs": 128.36,
+          "maxWallMs": 146.05,
+          "overRequestedPlus5": 7,
+          "overRequestedPlus50": 0,
+          "meanNodes": 10275.18,
+          "meanDepth": 7.38,
+          "searchTimeouts": 0,
+          "clockFlags": 0,
+          "illegalReplies": 0,
+          "resignations": 0
+        }
+      }
+    }
+  },
+  "pairedScore": {
+    "distinctStarts": 6,
+    "observedScoreRange": [
+      0.3333,
+      0.6667
+    ],
+    "hoeffding95WithCappedGames": [
+      0,
+      1
+    ]
+  }
+}
