@@ -13,7 +13,7 @@
 | 穴対応の探索スライス調整 | 現行Workerを継続。100msの未使用問題では改善した。現行版との100ms対局は4勝4敗、4局打ち切り。独立C++戦は同じ2開始局面に限られる。 |
 | 通常盤面の連続探索 | ゲーム側で100msだけをテスト環境の希望者向けに試す。100msの2つの開始局面群でそれぞれ12勝し、合計24勝7敗、1局打ち切り。通常の入口と500・1500msでは公式Workerを使う。 |
 
-連続探索を試すときは、該当するゲーム側ビルドがテスト環境に反映されたことを確かめ、`?engine=continuous100` を付けて「普通」を選ぶ。穴ありは現行の穴対応Workerに切り替わる。ローカルのデスクトップ Chromium と Pixel 7 相当では、通常・特殊の切り替えと中断処理を確認した。100msでも初回読み込みと探索を個別に測る。 [試験対象と検証結果](benchmarks/strength/RESULTS.md) · [テスト環境](https://shogi-is-luck-test.onrender.com/)
+連続探索を試すときは、ゲーム側 [PR #9](https://github.com/amatouazuwo/shogi-is-luck/pull/9) の結果を確認し、該当ビルドがテスト環境に反映されていれば `?engine=continuous100` を付けて「普通」を選ぶ。穴ありは現行の穴対応Workerに切り替わる。ローカルのデスクトップ Chromium と Pixel 7 相当では、通常・特殊の切り替え、中断処理、応答停止時の合法手フォールバックを確認した。準備探索の比較36試行は別の実験として保存した。深さ0は準備なしで12回中3回、準備ありの2条件は各12回中0回で、初期化から初手までの時間は伸びた。 [試験対象と検証結果](benchmarks/strength/RESULTS.md) · [初回探索の比較](benchmarks/strength/experiments/normal-continuous/startup-prime/README.md) · [テスト環境](https://shogi-is-luck-test.onrender.com/)
 
 ## 再開時に参照する記録
 
