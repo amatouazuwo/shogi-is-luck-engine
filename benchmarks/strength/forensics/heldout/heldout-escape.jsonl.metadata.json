@@ -1,0 +1,21 @@
+{
+  "seed": 157435473,
+  "file": "heldout-escape.jsonl",
+  "sha256": "2dad2de49470013786c84d8bdb33396429a477bec90c23ac734c72a4fc6451a9",
+  "records": 12,
+  "search": {
+    "submitted": 25,
+    "limit": 0
+  },
+  "strata": {
+    "pit/3": 2,
+    "pit/5": 2,
+    "pit/7": 2,
+    "blackhole/3": 2,
+    "blackhole/5": 2,
+    "blackhole/7": 2
+  },
+  "objective": "Choose a move that prevents the opponent from forcing a no-legal-move win in the configured following horizon. All first moves are enumerated.",
+  "relation": "Some defensive starting positions precede a held-out attack position. The two fixtures are reported as separate strata.",
+  "leaf": "Full-width independent C++ shogi/obstacle rules; every root legal set verified with game getLegal."
+}

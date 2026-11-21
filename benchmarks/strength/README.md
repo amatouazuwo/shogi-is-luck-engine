@@ -42,3 +42,18 @@ node normal/normal-scorecard.mjs /tmp/normal-matches.jsonl
 | 同一盤面の通常版・穴対応版対照とブラウザ経路 | `switch/` |
 
 フォレンジックの再現は `forensics/losses/replay.mjs` など、各記録と同じディレクトリのソースを使う。C++プローブには実行バイナリを含めず、対応する `.cpp` をC++20でビルドする。ビルド、棋譜確認、候補の実験状況は [引継ぎ](../../HANDOVER.md) を参照。
+
+## 改善候補と未使用データ
+
+穴評価補正のビルド手順は `experiments/hole-eval/build-hole-aware-sdk.sh`。第1引数はこのエンジンリポジトリ、第2引数は生成先、第3引数は公式SDK ZIP（省略時は公式配布から取得）。マニフェストと元の計測バイナリのSHA-256は同ディレクトリに保存した。別ディレクトリでの再ビルドは過去にバイト差が出ているため、各試験は実行したSDKのSHAを記録する。
+
+`forensics/heldout` の攻め24問・受け12問と `experiments/holdout-openings.jsonl` は候補による採点前に確定。受け問題は攻め問題の前駆局面を含むため、両者を独立標本とみなさない。
+
+```bash
+bash experiments/hole-eval/build-hole-aware-sdk.sh ../.. /tmp/hole-eval-sdk
+node forensics/heldout/run-heldout.mjs --corpus forensics/heldout/heldout-attack.jsonl --sdk before="$OBSTACLE_SDK" --sdk after=/tmp/hole-eval-sdk --budget 100,500,1500
+node obstacle-matches.mjs --candidate-sdk /tmp/hole-eval-sdk --opponent baseline --holdout --offset 21 --pairs 3 --ply-cap 120 > /tmp/hole-eval-games.jsonl
+python3 summarize-obstacle.py /tmp/hole-eval-games.jsonl
+```
+
+独立C++との再対局では同じ局面のフラグに `--opponent reference` を指定する。`experiments/normal-continuous` は通常版公式WASMを使う連続探索Workerと水匠5のノード上限別検証。`experiments/old-js` は従来JS戦200局の保存データで、ゲーム本体の固定コミットにある `scripts/benchmark-rsshogi-obstacles.mjs` を使う。

@@ -1,0 +1,99 @@
+--- a/bindings/wasm/worker.js
++++ b/bindings/wasm/worker.js
+@@ -1,14 +1,18 @@
+ import { MiniEngine } from "./mini.js";
+ 
+-// Each slice is a separate search retaining TT/history, with a 35 ms deadline.
+-// This is cooperative cancellation, not native fixed-time search equivalence.
++// Each slice is a separate search retaining TT/history. Obstacle positions use
++// a longer bounded slice for deep or stalled iterations. Normal positions retain
++// the original 35 ms interval for cooperative cancellation.
+ // Messages: {command, id?, ...}; replies echo id and command. Search progress is
+ // {event:"info"}; exactly one {event:"bestmove"} ends a current go/stop pair.
+ let engine = null;
+ let generation = 0;
+ let active = null;
+ let initialization = 0;
++let obstaclePosition = false;
+ const sliceMs = 35;
++const deepObstacleSliceMs = 70;
++const stalledObstacleSliceMs = 90;
+ 
+ const reply = (message, data) => postMessage({ id: message.id, command: message.command, ...data });
+ const requireEngine = () => {
+@@ -38,7 +42,11 @@
+   }
+   try {
+     const remainingMs = job.time === undefined ? sliceMs : Math.max(1, Math.ceil(job.time - (performance.now() - job.started)));
+-    const request = { command: "search", depth: job.depth, movetime_ms: Math.min(sliceMs, remainingMs) };
++    const sliceLimit = !job.obstacles || job.time === undefined ? sliceMs
++      : job.retries >= 2 ? stalledObstacleSliceMs
++      : job.retries > 0 || job.depth >= 5 ? deepObstacleSliceMs
++      : sliceMs;
++    const request = { command: "search", depth: job.depth, movetime_ms: Math.min(sliceLimit, remainingMs) };
+     if (job.nodes !== undefined) request.nodes = Math.max(1, job.nodes - job.usedNodes);
+     const { result } = unwrap(requireEngine().request(request));
+     job.usedNodes += result.nodes;
+@@ -52,7 +60,12 @@
+       finish(job);
+       return;
+     }
+-    if (result.depth >= job.depth) job.depth++;
++    if (result.depth >= job.depth) {
++      job.depth++;
++      job.retries = 0;
++    } else {
++      job.retries++;
++    }
+     setTimeout(() => slice(job), 0);
+   } catch (error) {
+     if (active === job) {
+@@ -70,6 +83,7 @@
+         const token = ++initialization;
+         engine?.dispose();
+         engine = null;
++        obstaclePosition = false;
+         const created = await MiniEngine.create(message.url ?? message.wasm);
+         if (token !== initialization) { created.dispose(); return; }
+         try {
+@@ -87,9 +101,13 @@
+         }
+         if (message.holes?.length) {
+           if (message.moves?.length) throw new Error("obstacle positions require current SFEN without replay");
+-          reply(message, requireEngine().request({ command: "set_obstacle_position", sfen: message.sfen, holes: message.holes }));
++          const result = requireEngine().request({ command: "set_obstacle_position", sfen: message.sfen, holes: message.holes });
++          if (result.ok) obstaclePosition = true;
++          reply(message, result);
+         } else {
+-          reply(message, requireEngine().request({ command: "set_position", sfen: message.sfen ?? "startpos", moves: message.moves ?? [] }));
++          const result = requireEngine().request({ command: "set_position", sfen: message.sfen ?? "startpos", moves: message.moves ?? [] });
++          if (result.ok) obstaclePosition = false;
++          reply(message, result);
+         }
+         break;
+       case "legalMoves":
+@@ -97,6 +115,7 @@
+         break;
+       case "new_game":
+         invalidate();
++        obstaclePosition = false;
+         reply(message, requireEngine().request({ command: "new_game" }));
+         break;
+       case "go": {
+@@ -110,7 +129,7 @@
+           throw new Error("worker go requires movetime_ms or nodes; depth alone cannot bound cooperative slices");
+         }
+         invalidate();
+-        const job = { message, generation, target, depth: 1, nodes: message.nodes, time: message.movetime_ms, usedNodes: 0, started: performance.now(), latest: null };
++        const job = { message, generation, target, depth: 1, obstacles: obstaclePosition, retries: 0, nodes: message.nodes, time: message.movetime_ms, usedNodes: 0, started: performance.now(), latest: null };
+         active = job;
+         // Run one bounded slice before yielding, so an immediate stop has a move.
+         slice(job);
+@@ -125,6 +144,7 @@
+         initialization++;
+         engine?.dispose();
+         engine = null;
++        obstaclePosition = false;
+         reply(message, { ok: true });
+         break;
+       default:

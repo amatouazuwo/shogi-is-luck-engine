@@ -10,7 +10,7 @@ import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 const {MiniEngine} = await import(strengthFileURL(strengthJoin(strengthGame, 'ai/obstacle-sdk/mini.js')));
 const {toSfen,toUsi} = await import(strengthFileURL(strengthJoin(strengthGame, 'ai/rsshogi-position.mjs')));
-import {gameRules,gainScore,label,legal,play,positionFromSfen,pieceUnits,square} from strengthJoin(strengthArchive, 'tactics/rules.mjs');
+import {gameRules,gainScore,label,legal,play,positionFromSfen,pieceUnits,square} from '../../tactics/rules.mjs';
 
 const source=strengthJoin(strengthArchive, 'tactics');
 const reference=process.env.AUDIT_REFERENCE||source+'/reference-check';

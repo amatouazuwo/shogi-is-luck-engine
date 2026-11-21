@@ -1,0 +1,22 @@
+{
+  "seed": 138291142,
+  "file": "heldout-attack.jsonl",
+  "sha256": "97d57fa12cf6da80aae007520bbd6841e6b61c8b8520d5bf96b32f1842ea0f72",
+  "records": 24,
+  "search": {
+    "submitted": 6396,
+    "fastFound": 393,
+    "fastLimit": 0,
+    "fullLimit": 1
+  },
+  "strata": {
+    "blackhole/5": 4,
+    "blackhole/3": 4,
+    "pit/3": 4,
+    "blackhole/7": 4,
+    "pit/5": 4,
+    "pit/7": 4
+  },
+  "objective": "Force opponent to have no legal move in the shortest checked horizon, through every opposing response. All first moves are enumerated. Captures and positional scores do not affect labels.",
+  "leaf": "Full-width independent C++ shogi/obstacle rules; every root legal set verified with game getLegal."
+}

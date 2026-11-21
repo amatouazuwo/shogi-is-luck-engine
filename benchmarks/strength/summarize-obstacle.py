@@ -70,7 +70,7 @@ for (budget, kind), games in sorted(cases.items()):
         "reasons": dict(reasons),
         "timeouts": dict(timeouts),
         "nnue": stats(games, "nnue"),
-        "reference": stats(games, "reference"),
+        "opponent": stats(games, "baseline") or stats(games, "reference"),
     })
 print(json.dumps({"groups": summary, "unpaired": [{"budget": b, "kind": k, "games": v} for (b, k), v in excluded.items()]},
                  ensure_ascii=False, indent=2))

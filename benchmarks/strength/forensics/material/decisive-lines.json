@@ -1,0 +1,88 @@
+[
+  {
+    "id": "pit/material-gain/10",
+    "root": "8f7e",
+    "note": "Exact mate was verified with full minimax; this is one legal maximum-length line.",
+    "line": [
+      {
+        "move": "8f7e",
+        "captured": null,
+        "material": 0,
+        "sfen": "p1kl5/9/1S4GPB/5N3/1nb3s2/8p/4R2L1/8r/P5K1g b - 99",
+        "inCheck": false,
+        "legalReplies": 32
+      },
+      {
+        "move": "8c8b+",
+        "captured": null,
+        "material": 0,
+        "sfen": "p1kl5/1+S7/6GPB/5N3/1nb3s2/8p/4R2L1/8r/P5K1g w - 100",
+        "inCheck": true,
+        "legalReplies": 2
+      },
+      {
+        "move": "7a8b",
+        "captured": "S",
+        "material": 5,
+        "sfen": "p2l5/1k7/6GPB/5N3/1nb3s2/8p/4R2L1/8r/P5K1g b s 101",
+        "inCheck": false,
+        "legalReplies": 22
+      },
+      {
+        "move": "3i4i",
+        "captured": null,
+        "material": 5,
+        "sfen": "p2l5/1k7/6GPB/5N3/1nb3s2/8p/4R2L1/8r/P4K2g w s 102",
+        "inCheck": false,
+        "legalReplies": 116
+      },
+      {
+        "move": "7e5g+",
+        "captured": "R",
+        "material": 15,
+        "sfen": "p2l5/1k7/6GPB/5N3/1n4s2/8p/4+b2L1/8r/P4K2g b rs 103",
+        "inCheck": false,
+        "legalReplies": 22
+      },
+      {
+        "move": "1c3e+",
+        "captured": "S",
+        "material": 10,
+        "sfen": "p2l5/1k7/6GP1/5N3/1n4+B2/8p/4+b2L1/8r/P4K2g w Srs 104",
+        "inCheck": false,
+        "legalReplies": 180
+      },
+      {
+        "move": "1h5h+",
+        "captured": null,
+        "material": 10,
+        "sfen": "p2l5/1k7/6GP1/5N3/1n4+B2/8p/4+b2L1/4+r4/P4K2g b Srs 105",
+        "inCheck": true,
+        "legalReplies": 0
+      }
+    ]
+  },
+  {
+    "id": "blackhole/material-gain/09",
+    "root": "3h3i",
+    "note": "The short-horizon label permits an immediate terminal reply.",
+    "line": [
+      {
+        "move": "3h3i",
+        "captured": "R",
+        "material": 10,
+        "sfen": "1kB2p2S/8b/1P5r1/9/5p1Nl/1P2G4/1K4n2/1s5L1/6g2 b r 115",
+        "inCheck": false,
+        "legalReplies": 37
+      },
+      {
+        "move": "7a8b+",
+        "captured": null,
+        "material": 10,
+        "sfen": "1k3p2S/1+B6b/1P5r1/9/5p1Nl/1P2G4/1K4n2/1s5L1/6g2 w r 116",
+        "inCheck": true,
+        "legalReplies": 0
+      }
+    ]
+  }
+]

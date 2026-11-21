@@ -7,7 +7,7 @@ const strengthSdk = strengthJoin(process.env.OBSTACLE_SDK || strengthJoin(streng
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
-import {chromium,devices} from '/workspace/shogi-is-luck/node_modules/playwright/index.mjs';
+const {chromium,devices} = await import(strengthFileURL(strengthJoin(strengthGame, 'node_modules/playwright/index.mjs')));
 
 const game=strengthGame;
 const port=8871;

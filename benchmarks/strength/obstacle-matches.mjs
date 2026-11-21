@@ -9,12 +9,16 @@ import { parseArgs } from 'node:util';
 import { Worker } from 'node:worker_threads';
 
 const {values: options} = parseArgs({options: {
-  'game-root': {type: 'string', default: fileURLToPath(new URL('../game-develop/', import.meta.url))},
+  'game-root': {type: 'string', default: process.env.GAME_REPO || fileURLToPath(new URL('../../../shogi-is-luck/', import.meta.url))},
   reference: {type: 'string', default: fileURLToPath(new URL('./reference/obstacle-reference', import.meta.url))},
   pairs: {type: 'string', default: '1'},
   offset: {type: 'string', default: '0'},
   budgets: {type: 'string', default: '100,500,1500'},
   kind: {type: 'string', default: 'both'},
+  'candidate-sdk': {type: 'string'},
+  'baseline-sdk': {type: 'string'},
+  opponent: {type: 'string', default: 'reference'},
+  holdout: {type: 'boolean', default: false},
   'ply-cap': {type: 'string', default: '180'},
   'validate-openings': {type: 'boolean', default: false},
 }});
@@ -26,6 +30,7 @@ const pairOffset = Number(options.offset);
 const plyCap = Number(options['ply-cap']);
 assert.ok(budgets.length && budgets.every(ms => [100, 500, 1500].includes(ms)));
 assert.ok(kinds.every(kind => ['pit', 'blackhole'].includes(kind)));
+assert.ok(['reference', 'baseline'].includes(options.opponent));
 assert.ok(Number.isSafeInteger(pairCount) && pairCount > 0);
 assert.ok(Number.isSafeInteger(pairOffset) && pairOffset >= 0);
 assert.ok(Number.isSafeInteger(plyCap) && plyCap > 0);
@@ -91,11 +96,26 @@ function hasOnePlyWin(position, moves) {
 }
 
 function opening(kind, pair) {
-  const random = seededRandom(0x144f4ea9 ^ Math.imul(pair + 1, 0x9e3779b9));
+  const random = seededRandom((options.holdout ? 0x7b69fe12 : 0x144f4ea9) ^ Math.imul(pair + 1, 0x9e3779b9));
   matchMath.random = random;
-  const warmup = pair % 2 ? 24 : 8;
+  const stage = options.holdout ? ['opening', 'middle', 'reduced'][pair % 3] : pair % 2 ? 'middle' : 'opening';
+  const warmup = stage === 'opening' ? 8 : stage === 'middle' ? 24 : 16;
   for (let attempt = 0; attempt < 400; attempt++) {
     let original = {board: game.independentBoard(), hands: [{}, {}], turn: 0, steps: 0, holes: []};
+    if (stage === 'reduced') {
+      const types = ['R', 'B', 'G', 'S', 'N', 'L', 'P'];
+      const keepTypes = Array.from({length: 5}, () => types[Math.floor(random() * types.length)]);
+      for (const side of [0, 1]) {
+        const keep = keepTypes.slice();
+        original.board = original.board.map(piece => {
+          if (!piece || piece.side !== side || piece.type === 'K') return piece;
+          const index = keep.indexOf(piece.type);
+          if (index < 0) return null;
+          keep.splice(index, 1);
+          return piece;
+        });
+      }
+    }
     while (original.steps < warmup) {
       const moves = game.getLegal(original, original.turn);
       if (!moves.length) break;
@@ -120,7 +140,7 @@ function opening(kind, pair) {
       const moves = game.getLegal(start, turn);
       return moves.length >= 12 && !hasOnePlyWin(start, moves);
     });
-    if (bothSidesPlayable) return {position: after, absorbed, warmup, gap: materialGap(after)};
+    if (bothSidesPlayable) return {position: after, absorbed, warmup, gap: materialGap(after), stage};
   }
   throw Error('No eligible opening for ' + kind + ' pair ' + pair);
 }
@@ -226,7 +246,12 @@ async function confirmLegal(engine, position, legal) {
   return payload;
 }
 
-async function playGame(worker, binary, openingPosition, nnueSide, budget) {
+async function timedWorkerSearch(worker, payload, budget) {
+  await worker.request('position', payload);
+  return worker.request('go', {depth: 64, movetime_ms: budget}, budget + 1750);
+}
+
+async function playGame(worker, baseline, binary, openingPosition, nnueSide, budget) {
   const reference = new Reference(binary);
   let position = structuredClone(openingPosition);
   const turns = [];
@@ -234,6 +259,7 @@ async function playGame(worker, binary, openingPosition, nnueSide, budget) {
   const clocks = [clockMs, clockMs];
   try {
     await worker.request('new_game');
+    if (baseline) await baseline.request('new_game');
     for (let ply = 0; ply <= plyCap; ply++) {
       const side = position.turn;
       const legal = game.getLegal(position, side);
@@ -241,13 +267,14 @@ async function playGame(worker, binary, openingPosition, nnueSide, budget) {
       if (!legal.length) return {winner: 1 - side, reason: game.inCheck(position, side) ? 'mate' : 'no-legal', turns, clocks};
       if (ply === plyCap) return {winner: null, reason: 'ply-cap', turns, clocks};
       const requestMs = Math.max(1, Math.min(budget, Math.floor(clocks[side] / 20), clocks[side] - 150));
-      const searchSide = side === nnueSide ? 'nnue' : 'reference';
+      const searchSide = side === nnueSide ? 'nnue' : baseline ? 'baseline' : 'reference';
       const started = performance.now();
       let result;
       try {
         if (side === nnueSide) {
-          await worker.request('position', payload);
-          result = await worker.request('go', {depth: 64, movetime_ms: requestMs}, requestMs + 1750);
+          result = await timedWorkerSearch(worker, payload, requestMs);
+        } else if (baseline) {
+          result = await timedWorkerSearch(baseline, payload, requestMs);
         } else {
           result = await reference.request(['go', requestMs, payload.sfen, payload.holes.join(',')], requestMs + 1750);
         }
@@ -282,38 +309,44 @@ for (let pair = pairOffset; pair < pairOffset + pairCount; pair++) {
     prepared.set(pair + kind, fixture);
     if (options['validate-openings']) {
       log('opening', {pair, kind, ...toObstaclePosition(fixture.position),
-        absorbed: fixture.absorbed, warmup: fixture.warmup, gap: fixture.gap,
+        absorbed: fixture.absorbed, warmup: fixture.warmup, gap: fixture.gap, stage: fixture.stage,
         legal: game.getLegal(fixture.position, fixture.position.turn).length});
     }
   }
 }
 
 if (!options['validate-openings']) {
-  const directory = resolve(root, 'ai/obstacle-sdk');
+  const directory = resolve(options['candidate-sdk'] || resolve(root, 'ai/obstacle-sdk'));
   const wasm = await readFile(resolve(directory, 'rsshogi_nnue_mini.wasm'));
   const workerSource = resolve(directory, 'worker.js');
   const binary = resolve(options.reference);
+  const baselineRoot = resolve(options['baseline-sdk'] || resolve(root, 'ai/obstacle-sdk'));
+  const baselineWasm = options.opponent === 'baseline' ? await readFile(resolve(baselineRoot, 'rsshogi_nnue_mini.wasm')) : null;
   log('config', {budgets, kinds, pairCount, pairOffset, plyCap, clockMs,
+    holdout: options.holdout, opponent: options.opponent, baselineSha256: baselineWasm ? hash(baselineWasm) : null,
     referenceBinary: binary, referenceSha256: hash(await readFile(binary)),
     gameCommit: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(),
     rulesSha256: hash(ruleSource), wasmSha256: hash(wasm), workerSha256: hash(await readFile(workerSource)),
     hashMb: 16, node: process.version});
   const worker = new BrowserWorker(workerSource);
+  const baseline = baselineWasm ? new BrowserWorker(resolve(baselineRoot, 'worker.js')) : null;
   try {
     await worker.request('init', {wasm, hash_mb: 16});
+    if (baseline) await baseline.request('init', {wasm: baselineWasm, hash_mb: 16});
     for (let pair = pairOffset; pair < pairOffset + pairCount; pair++) {
       for (const budget of budgets) {
         for (const kind of kinds) {
-          const {position, absorbed, warmup, gap} = prepared.get(pair + kind);
+          const {position, absorbed, warmup, gap, stage} = prepared.get(pair + kind);
           for (const nnueSide of [pair % 2, 1 - pair % 2]) {
-            const labels = {budget, kind, pair, nnueSide, start: toObstaclePosition(position), absorbed, warmup, gap};
+            const labels = {budget, kind, pair, nnueSide, start: toObstaclePosition(position), absorbed, warmup, gap, stage};
             log('game-start', labels);
-            log('game', {...labels, ...await playGame(worker, binary, position, nnueSide, budget)});
+            log('game', {...labels, ...await playGame(worker, baseline, binary, position, nnueSide, budget)});
           }
         }
       }
     }
   } finally {
     await worker.worker.terminate();
+    if (baseline) await baseline.worker.terminate();
   }
 }
