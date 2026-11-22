@@ -1,0 +1,591 @@
+{
+  "schema": 1,
+  "corpusSha256": "86a44f84a928b506ca6d82e21d5bab63d7d5e26a9316ad9961b67a1b270e31bc",
+  "sdkWasmSha256": "1fa1e14fe6519676de41eb189c8c9fb2bc65154c1dc5cc62c14890f6ecff143d",
+  "opponentBudgetMs": 500,
+  "caseCount": 8,
+  "cases": [
+    {
+      "id": "pit/ray-blocking/06",
+      "kind": "pit",
+      "sfen": "7k1/5n3/9/6G2/R7r/9/9/9/1K7 w - 68",
+      "holes": [
+        "5e"
+      ],
+      "actualMove": "1e1i+",
+      "labelledGoodMove": "4b3d",
+      "rootSearchDepth": 9,
+      "rootSearchBudgetMs": 100,
+      "branches": [
+        {
+          "kind": "played",
+          "move": "1e1i+",
+          "afterSfen": "7k1/5n3/9/6G2/R8/9/9/9/1K6+r b - 69",
+          "opponentBestmove": "8i7h",
+          "opponentLegalMoves": 3,
+          "opponentScore": -914,
+          "opponentDepth": 8,
+          "opponentNodes": 65916,
+          "opponentPv": [
+            "8i7h",
+            "4b3d",
+            "9e9a+",
+            "2a2b",
+            "9a4a",
+            "G*7f",
+            "4a4c",
+            "1i3i",
+            "7h8h",
+            "2b3a",
+            "8h9h",
+            "7f7g"
+          ]
+        },
+        {
+          "kind": "labelled",
+          "move": "4b3d",
+          "afterSfen": "7k1/9/9/6n2/R7r/9/9/9/1K7 b g 69",
+          "opponentBestmove": "9e9a+",
+          "opponentLegalMoves": 19,
+          "opponentScore": -821,
+          "opponentDepth": 9,
+          "opponentNodes": 97743,
+          "opponentPv": [
+            "9e9a+",
+            "2a1b",
+            "8i7h",
+            "1e1h+",
+            "7h8g",
+            "1h6h",
+            "9a3a",
+            "1b2c",
+            "8g7f",
+            "G*3b",
+            "3a2a",
+            "3b2b",
+            "2a3a",
+            "6h6d",
+            "7f8g",
+            "6d6g",
+            "8g9f"
+          ]
+        }
+      ],
+      "scope": "opponent searches after fixed root moves, not fully searched root alternatives"
+    },
+    {
+      "id": "blackhole/ray-blocking/09",
+      "kind": "blackhole",
+      "sfen": "1k7/3n5/9/2G6/r7R/9/9/9/7K1 w - 71",
+      "holes": [
+        "6d",
+        "5d",
+        "4d",
+        "6e",
+        "5e",
+        "4e",
+        "6f",
+        "5f",
+        "4f"
+      ],
+      "actualMove": "9e9i+",
+      "labelledGoodMove": "6b7d",
+      "rootSearchDepth": 8,
+      "rootSearchBudgetMs": 100,
+      "branches": [
+        {
+          "kind": "played",
+          "move": "9e9i+",
+          "afterSfen": "1k7/3n5/9/2G6/8R/9/9/9/+r6K1 b - 72",
+          "opponentBestmove": "2i3h",
+          "opponentLegalMoves": 3,
+          "opponentScore": -934,
+          "opponentDepth": 9,
+          "opponentNodes": 95160,
+          "opponentPv": [
+            "2i3h",
+            "6b7d",
+            "1e1a+",
+            "8a8b",
+            "1a6a",
+            "9i5i",
+            "6a6c",
+            "G*7c",
+            "6c6b",
+            "7c7b",
+            "6b6a",
+            "7d8f",
+            "3h2g",
+            "5i2i",
+            "2g3f"
+          ]
+        },
+        {
+          "kind": "labelled",
+          "move": "6b7d",
+          "afterSfen": "1k7/9/9/2n6/r7R/9/9/9/7K1 b g 72",
+          "opponentBestmove": "1e1a+",
+          "opponentLegalMoves": 18,
+          "opponentScore": -970,
+          "opponentDepth": 9,
+          "opponentNodes": 106077,
+          "opponentPv": [
+            "1e1a+",
+            "G*7a",
+            "1a1c",
+            "9e9i+",
+            "2i3h",
+            "9i8h",
+            "3h4g",
+            "7a7b",
+            "1c1a",
+            "8a8b",
+            "4g3g",
+            "8h8i",
+            "1a6a",
+            "8i3i",
+            "3g2f",
+            "7b7a"
+          ]
+        }
+      ],
+      "scope": "opponent searches after fixed root moves, not fully searched root alternatives"
+    },
+    {
+      "id": "pit/ray-blocking/09",
+      "kind": "pit",
+      "sfen": "1k7/3n5/9/2G6/r7R/9/9/9/7K1 w - 71",
+      "holes": [
+        "5e"
+      ],
+      "actualMove": "9e9i+",
+      "labelledGoodMove": "6b7d",
+      "rootSearchDepth": 8,
+      "rootSearchBudgetMs": 100,
+      "branches": [
+        {
+          "kind": "played",
+          "move": "9e9i+",
+          "afterSfen": "1k7/3n5/9/2G6/8R/9/9/9/+r6K1 b - 72",
+          "opponentBestmove": "2i1h",
+          "opponentLegalMoves": 3,
+          "opponentScore": -970,
+          "opponentDepth": 11,
+          "opponentNodes": 89551,
+          "opponentPv": [
+            "2i1h",
+            "9i8h",
+            "1h2g",
+            "8h7g",
+            "2g3f",
+            "7g7d",
+            "1e1a+",
+            "8a7b",
+            "1a5a",
+            "G*6a",
+            "5a5c",
+            "7d3d",
+            "3f2g",
+            "7b7a",
+            "2g2h",
+            "3d3f"
+          ]
+        },
+        {
+          "kind": "labelled",
+          "move": "6b7d",
+          "afterSfen": "1k7/9/9/2n6/r7R/9/9/9/7K1 b g 72",
+          "opponentBestmove": "1e1a",
+          "opponentLegalMoves": 19,
+          "opponentScore": -923,
+          "opponentDepth": 9,
+          "opponentNodes": 90006,
+          "opponentPv": [
+            "1e1a",
+            "G*7a",
+            "1a1c+",
+            "9e9i+",
+            "2i2h",
+            "9i8h",
+            "2h2g",
+            "7d6f",
+            "1c6c",
+            "6f5h+",
+            "2g2f",
+            "8h8e",
+            "2f2e",
+            "7a7b",
+            "6c6a",
+            "7b7a"
+          ]
+        }
+      ],
+      "scope": "opponent searches after fixed root moves, not fully searched root alternatives"
+    },
+    {
+      "id": "blackhole/ray-blocking/04",
+      "kind": "blackhole",
+      "sfen": "1k7/9/9/9/r7R/6g2/9/5N3/7K1 b - 65",
+      "holes": [
+        "6d",
+        "5d",
+        "4d",
+        "6e",
+        "5e",
+        "4e",
+        "6f",
+        "5f",
+        "4f"
+      ],
+      "actualMove": "1e1a+",
+      "labelledGoodMove": "4h3f",
+      "rootSearchDepth": 7,
+      "rootSearchBudgetMs": 100,
+      "branches": [
+        {
+          "kind": "played",
+          "move": "1e1a+",
+          "afterSfen": "1k6+R/9/9/9/r8/6g2/9/5N3/7K1 w - 66",
+          "opponentBestmove": "8a7b",
+          "opponentLegalMoves": 3,
+          "opponentScore": -950,
+          "opponentDepth": 10,
+          "opponentNodes": 96546,
+          "opponentPv": [
+            "8a7b",
+            "1a2b",
+            "7b7c",
+            "4h3f",
+            "9e9i+",
+            "2i2h",
+            "9i4i",
+            "2b9b",
+            "4i4g",
+            "G*3g",
+            "4g4i",
+            "3g3h"
+          ]
+        },
+        {
+          "kind": "labelled",
+          "move": "4h3f",
+          "afterSfen": "1k7/9/9/9/r7R/6N2/9/9/7K1 w G 66",
+          "opponentBestmove": "9e9i+",
+          "opponentLegalMoves": 18,
+          "opponentScore": -1045,
+          "opponentDepth": 9,
+          "opponentNodes": 107014,
+          "opponentPv": [
+            "9e9i+",
+            "G*3i",
+            "9i7i",
+            "1e1a+",
+            "8a8b",
+            "1a6a",
+            "7i7c",
+            "3f2d",
+            "7c7b",
+            "6a7b",
+            "8b7b"
+          ]
+        }
+      ],
+      "scope": "opponent searches after fixed root moves, not fully searched root alternatives"
+    },
+    {
+      "id": "blackhole/ray-blocking/06",
+      "kind": "blackhole",
+      "sfen": "7k1/5n3/9/6G2/R7r/9/9/9/1K7 w - 68",
+      "holes": [
+        "6d",
+        "5d",
+        "4d",
+        "6e",
+        "5e",
+        "4e",
+        "6f",
+        "5f",
+        "4f"
+      ],
+      "actualMove": "1e1i+",
+      "labelledGoodMove": "4b3d",
+      "rootSearchDepth": 8,
+      "rootSearchBudgetMs": 100,
+      "branches": [
+        {
+          "kind": "played",
+          "move": "1e1i+",
+          "afterSfen": "7k1/5n3/9/6G2/R8/9/9/9/1K6+r b - 69",
+          "opponentBestmove": "8i7h",
+          "opponentLegalMoves": 3,
+          "opponentScore": -845,
+          "opponentDepth": 9,
+          "opponentNodes": 81902,
+          "opponentPv": [
+            "8i7h",
+            "1i2h",
+            "7h8g",
+            "4b3d",
+            "9e9a+",
+            "2a2b",
+            "9a4a",
+            "2h6h",
+            "4a4c",
+            "G*3c",
+            "4c4a",
+            "6h7i",
+            "8g8f",
+            "7i7h",
+            "8f8e",
+            "7h7d",
+            "8e7d"
+          ]
+        },
+        {
+          "kind": "labelled",
+          "move": "4b3d",
+          "afterSfen": "7k1/9/9/6n2/R7r/9/9/9/1K7 b g 69",
+          "opponentBestmove": "9e9a+",
+          "opponentLegalMoves": 18,
+          "opponentScore": -800,
+          "opponentDepth": 9,
+          "opponentNodes": 107558,
+          "opponentPv": [
+            "9e9a+",
+            "2a1b",
+            "9a3a",
+            "1e1h+",
+            "3a3b",
+            "1b1a",
+            "8i7i",
+            "G*7g",
+            "3b2c"
+          ]
+        }
+      ],
+      "scope": "opponent searches after fixed root moves, not fully searched root alternatives"
+    },
+    {
+      "id": "blackhole/ray-blocking/01",
+      "kind": "blackhole",
+      "sfen": "7k1/9/9/9/R7r/2g6/9/3N5/1K7 b - 62",
+      "holes": [
+        "6d",
+        "5d",
+        "4d",
+        "6e",
+        "5e",
+        "4e",
+        "6f",
+        "5f",
+        "4f"
+      ],
+      "actualMove": "9e9a+",
+      "labelledGoodMove": "6h7f",
+      "rootSearchDepth": 7,
+      "rootSearchBudgetMs": 100,
+      "branches": [
+        {
+          "kind": "played",
+          "move": "9e9a+",
+          "afterSfen": "+R6k1/9/9/9/8r/2g6/9/3N5/1K7 w - 63",
+          "opponentBestmove": "2a3b",
+          "opponentLegalMoves": 3,
+          "opponentScore": -921,
+          "opponentDepth": 9,
+          "opponentNodes": 88681,
+          "opponentPv": [
+            "2a3b",
+            "6h7f",
+            "1e1i+",
+            "8i7h",
+            "1i5i",
+            "9a5a",
+            "5i4h",
+            "7h7g",
+            "4h5g",
+            "7g8f",
+            "3b4c",
+            "G*2d",
+            "5g4h"
+          ]
+        },
+        {
+          "kind": "labelled",
+          "move": "6h7f",
+          "afterSfen": "7k1/9/9/9/R7r/2N6/9/9/1K7 w G 63",
+          "opponentBestmove": "1e1i+",
+          "opponentLegalMoves": 18,
+          "opponentScore": -857,
+          "opponentDepth": 9,
+          "opponentNodes": 100293,
+          "opponentPv": [
+            "1e1i+",
+            "8i9h",
+            "1i1h",
+            "G*8h",
+            "1h6h",
+            "9e9a+",
+            "2a2b",
+            "9h8g",
+            "6h5g",
+            "8g9f",
+            "5g6g",
+            "9f8e",
+            "2b3c",
+            "9a3a",
+            "3c4c"
+          ]
+        }
+      ],
+      "scope": "opponent searches after fixed root moves, not fully searched root alternatives"
+    },
+    {
+      "id": "pit/ray-blocking/04",
+      "kind": "pit",
+      "sfen": "1k7/9/9/9/r7R/6g2/9/5N3/7K1 b - 65",
+      "holes": [
+        "5e"
+      ],
+      "actualMove": "1e1a+",
+      "labelledGoodMove": "4h3f",
+      "rootSearchDepth": 8,
+      "rootSearchBudgetMs": 100,
+      "branches": [
+        {
+          "kind": "played",
+          "move": "1e1a+",
+          "afterSfen": "1k6+R/9/9/9/r8/6g2/9/5N3/7K1 w - 66",
+          "opponentBestmove": "8a9b",
+          "opponentLegalMoves": 3,
+          "opponentScore": -1009,
+          "opponentDepth": 11,
+          "opponentNodes": 104280,
+          "opponentPv": [
+            "8a9b",
+            "1a2b",
+            "9b8c",
+            "2b3c",
+            "8c8d",
+            "3c3f",
+            "9e9i+",
+            "2i2h",
+            "9i5i",
+            "G*3h",
+            "8d7e",
+            "3f4f",
+            "7e7d",
+            "4f6f",
+            "7d8e",
+            "3h3i",
+            "5i8i",
+            "2h3h",
+            "8e9e",
+            "6f7f",
+            "9e8d"
+          ]
+        },
+        {
+          "kind": "labelled",
+          "move": "4h3f",
+          "afterSfen": "1k7/9/9/9/r7R/6N2/9/9/7K1 w G 66",
+          "opponentBestmove": "9e9i+",
+          "opponentLegalMoves": 19,
+          "opponentScore": -956,
+          "opponentDepth": 8,
+          "opponentNodes": 92076,
+          "opponentPv": [
+            "9e9i+",
+            "G*3i",
+            "9i5i",
+            "1e1a+",
+            "8a7b",
+            "1a5a",
+            "7b7c",
+            "3f2d",
+            "7c7d",
+            "2d1b+",
+            "7d8e",
+            "5a5d"
+          ]
+        }
+      ],
+      "scope": "opponent searches after fixed root moves, not fully searched root alternatives"
+    },
+    {
+      "id": "pit/ray-blocking/01",
+      "kind": "pit",
+      "sfen": "7k1/9/9/9/R7r/2g6/9/3N5/1K7 b - 62",
+      "holes": [
+        "5e"
+      ],
+      "actualMove": "9e9a+",
+      "labelledGoodMove": "6h7f",
+      "rootSearchDepth": 7,
+      "rootSearchBudgetMs": 100,
+      "branches": [
+        {
+          "kind": "played",
+          "move": "9e9a+",
+          "afterSfen": "+R6k1/9/9/9/8r/2g6/9/3N5/1K7 w - 63",
+          "opponentBestmove": "2a3b",
+          "opponentLegalMoves": 3,
+          "opponentScore": -959,
+          "opponentDepth": 8,
+          "opponentNodes": 86886,
+          "opponentPv": [
+            "2a3b",
+            "6h7f",
+            "1e1i+",
+            "8i7h",
+            "1i1h",
+            "7h8g",
+            "1h6h",
+            "G*3d",
+            "6h6g",
+            "8g8f",
+            "6g7h",
+            "8f8e",
+            "7h8g",
+            "8e7e"
+          ]
+        },
+        {
+          "kind": "labelled",
+          "move": "6h7f",
+          "afterSfen": "7k1/9/9/9/R7r/2N6/9/9/1K7 w G 63",
+          "opponentBestmove": "1e1i+",
+          "opponentLegalMoves": 19,
+          "opponentScore": -836,
+          "opponentDepth": 9,
+          "opponentNodes": 97961,
+          "opponentPv": [
+            "1e1i+",
+            "8i9h",
+            "2a3b",
+            "9e9b+",
+            "3b2c",
+            "9b8c",
+            "2c3d",
+            "8c7d",
+            "3d2e",
+            "7d4d",
+            "2e3f",
+            "4d3d",
+            "3f2f",
+            "3d3h",
+            "1i7i",
+            "G*7h"
+          ]
+        }
+      ],
+      "scope": "opponent searches after fixed root moves, not fully searched root alternatives"
+    }
+  ],
+  "caveats": [
+    "The saved tactical labels use a one-reply material metric and do not prove the strongest game move.",
+    "Opponent score is engine-dependent and is not a game-theoretic proof. Both branches use identical search limits.",
+    "All cases were chosen from archived 100ms misses; this is diagnostic, not fresh holdout evaluation.",
+    "Do not change the engine or promote it based on this diagnostic alone."
+  ]
+}
