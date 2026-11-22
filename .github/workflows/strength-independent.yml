@@ -46,6 +46,7 @@ jobs:
           node --test benchmarks/strength/ci/reply-probes.test.mjs
           node --test benchmarks/strength/ci/codex-review.test.mjs
           node --test benchmarks/strength/ci/terminal-proof.test.mjs
+          node --test benchmarks/strength/ci/proof-priority.test.mjs
           node --test benchmarks/strength/ci/holdout-admit.test.mjs
       - run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
       - name: Build obstacle SDK
