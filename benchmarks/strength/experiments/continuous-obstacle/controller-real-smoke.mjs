@@ -55,12 +55,12 @@ try{
  const afterCancel=performance.now();
  const recovered=await ctrl.think({sfen,holes:['5e'],movetimeMs:100});
  const restartAndMoveMs=performance.now()-afterCancel;
- assert.match(recovered.bestmove,/^[1-9][a-i][1-9][a-i]\\+?$/);
+ assert.match(recovered.bestmove,/^[1-9][a-i][1-9][a-i]\+?$/);
  assert.ok(recovered.elapsedWallMs>0);
  assert.equal(shims.length,2,'Expected exactly one restart');
  const beforeNext=shims.length;
  const normal=await ctrl.think({sfen,holes:[],movetimeMs:100});
- assert.match(normal.bestmove,/^[1-9][a-i][1-9][a-i]\\+?$/);
+ assert.match(normal.bestmove,/^[1-9][a-i][1-9][a-i]\+?$/);
  assert.equal(shims.length,beforeNext,'Healthy Worker should be reused');
  console.log(JSON.stringify({status:'PASS',workersCreated:shims.length,
   cancelledBestmoveReturned:false,cancelMs,restartAndMoveMs,
