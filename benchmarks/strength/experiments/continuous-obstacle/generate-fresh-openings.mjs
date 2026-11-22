@@ -39,11 +39,12 @@ const possibleBlackholes=(board)=>{
  const result=[];
  for(let row=1;row<=6;row++)for(let col=1;col<=6;col++){
   const coords=[];
+  let empty=true;
   for(let dy=0;dy<3;dy++)for(let dx=0;dx<3;dx++){
-   if(board[row+dy][col+dx])coords.length=0;
-   if(coords.length===dy*3+dx)coords.push(square(row+dy,col+dx));
+   if(board[row+dy][col+dx])empty=false;
+   coords.push(square(row+dy,col+dx));
   }
-  if(coords.length===9)result.push(coords);
+  if(empty)result.push(coords);
  }
  return result;
 };
