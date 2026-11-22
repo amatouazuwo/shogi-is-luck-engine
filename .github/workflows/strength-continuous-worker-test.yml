@@ -7,6 +7,8 @@ on:
       - 'benchmarks/strength/experiments/continuous-obstacle/worker.js'
       - 'benchmarks/strength/experiments/continuous-obstacle/worker.test.mjs'
       - 'benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/report.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/report.test.mjs'
 permissions:
   contents: read
 jobs:
@@ -24,3 +26,5 @@ jobs:
           node --check benchmarks/strength/experiments/continuous-obstacle/worker.js
           node --check benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs
           node --test benchmarks/strength/experiments/continuous-obstacle/worker.test.mjs
+          node --check benchmarks/strength/experiments/continuous-obstacle/report.mjs
+          node --test benchmarks/strength/experiments/continuous-obstacle/report.test.mjs
