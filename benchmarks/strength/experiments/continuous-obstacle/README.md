@@ -1,3 +1,35 @@
+# VERIFIED RESULT — existing rsshogi's uninterrupted search is promising but NOT yet production-ready
+
+GitHub Actions [45026414339](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45026414339) passed all builds, same-WASM equivalence, independent full legal-move cross-checks, 40 color-swapped direct games, 100/500ms tactical safety checks and archived complete logs. An independent [archive replay / timing check 45027566626](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45027566626) also passed.
+
+| Opening configuration | Think time | Move limit | Continuous wins | Losses | Neutral undecided |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| earlier reserve-pressure openings, 4 opening families | 100ms | 300 | **8** | 6 | 2 |
+| different earlier holdout openings, 4 families | 100ms | 120 | **10** | 4 | 2 |
+| first two earlier reserve-pressure families | 500ms | 120 | **4** | 2 | 2 |
+| **All** | | | **22** | **12** | **6** |
+
+- Only **34/40** games were decided by the independent no-legal-move rule; the other **six capped games are neutral UNDECIDED**, not inferior play or losses.
+- Among **15 fully decided** color-swapped board pairs, **5** pairs were swept by continuous search, **1** by the baseline sliced Worker and **9** split one win apiece. **5** pairs have one or more unfinished games.
+- Both competitors used **BYTE-IDENTICAL WASM engines and embedded NNUE models within this run**; only the Worker search scheduling differed.
+- Mean reported search depth, continuous versus sliced: **6.75 vs 6.09** (100ms/300), **6.85 vs 6.19** (100ms/120), **8.42 vs 7.12** (500ms/120). The continuous search therefore reaches deeper iterations in the observed games.
+- Mean wall times were approximately **102.2ms** per move at 100ms, and **502.7ms** at 500ms for the candidate, similar to the baseline. **Neither Worker had a move exceeding the configured budget by 50ms** in these samples.
+- Reported node counts are NOT directly comparable as node-per-second speed measures: the sliced Worker accumulates nodes from repeatedly restarted searches, whereas continuous search is one request. Do not equate the candidate's lower node count with a CPU slowdown.
+- 36 archived obstacle tactical problems yielded **35/36 strict label matches for BOTH** engines at 100ms and 500ms, without any between-engine correctness gains/regressions. These labels are auxiliary safety evidence, not the target or a universal best-move oracle.
+- Interpretation: **PROMISING, NOT PROVEN**. Archived and partially overlapping opening families, time-bound move variability, and only 40 games are not a reliable general playing-strength proof. Do not confuse shorter games, deeper search and isolated winning records with stronger general play.
+
+## Additional special-board configurations
+
+A dedicated fixture smoke test [45027747743](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45027747743) passed: `generate-fresh-openings.mjs` selects **six distinct previously archived normal-board SFEN formations**, three hirate-derived and three randomly-formed, and applies **new deterministic single-hole and 3×3 black-hole placements** that do not overlap pieces. The referee verifies the legal move counts; the generator does not query the referee for strongest moves.
+
+This is **fresh obstacle placement on older normal openings**, not a genuinely secret or previously unpublished corpus. The new direct-game experiment is [45027863125](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45027863125): **24 games** at 100ms/300-ply cap plus **12 games** at 500ms/120-ply cap, all with same WASM/NNUE/rules and both colors. The result must be assessed independently, with undecided still neutral.
+
+## Mandatory pre-deployment caveat
+
+The continuous Worker performs a synchronous WASM call and **cannot process `stop` until search returns**. This prevents adopting it as-is for real three-minute play where interrupts, navigation or disconnection must work safely. A safe abort/restart design plus validation under full game interaction is mandatory even if independent fresh-board games favor it. Nothing has been merged into production or the game's deployment branch.
+
+---
+
 # Experimental continuous search on already-realized obstacle boards
 
 ## User-defined objective
