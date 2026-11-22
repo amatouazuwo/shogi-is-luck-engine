@@ -48,7 +48,7 @@ jobs:
             100 300 6 0 "$RUNNER_TEMP/base-sdk" obstacle \
             results/continuous-fresh-openings.jsonl \
             | tee results/continuous-fresh-100.jsonl
-      - name: Different think budget: first three fresh openings, 500ms, 120 plies
+      - name: Different think budget - first three fresh openings, 500ms, 120 plies
         run: |
           set -euo pipefail
           node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/continuous-sdk" \
