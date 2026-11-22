@@ -40,7 +40,7 @@ const ctrl=new ContinuousSearchController({
  createWorker:()=>new BrowserStyleNodeWorker(),
  wasm,commandTimeoutMs:15000,searchGraceMs:2000
 });
-const sfen='4k4/9/9/9/9/9/4R4/9/8K b - 1';
+const sfen='lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1';
 const start=performance.now();
 try{
  const pending=ctrl.think({sfen,holes:['5e'],movetimeMs:1500});
