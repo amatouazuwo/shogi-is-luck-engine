@@ -11,8 +11,8 @@ const budget=Number(budgetStr), cap=Number(capStr), pairs=Number(pairsStr), offs
 assert.ok([100,500,1500].includes(budget));
 assert.ok(Number.isInteger(cap)&&cap>=1&&cap<=300, 'Ply cap must be within 1–300');
 assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&&offset>=0);
-assert.ok(['normal','obstacle'].includes(mode));
-const normal=mode==='normal';
+assert.ok(['normal','normal-worker','obstacle'].includes(mode));
+const normal=mode==='normal'||mode==='normal-worker';
 const raw=readFileSync(customFixture ? resolve(customFixture) :
  new URL(normal?'../experiments/normal-continuous/expansion/openings.jsonl':'../experiments/holdout-openings.jsonl',import.meta.url),'utf8');
 const fixtures=raw.trim().split('\n').map(JSON.parse).filter(f=>!normal||f.event==='opening').map(f=>normal?{...f,kind:f.family,sfen:f.opening,holes:[]}:f);
@@ -35,7 +35,12 @@ async function request(...fields){
 }
 function engine(dir,continuous=false){
   const wasm=readFileSync(resolve(dir,'rsshogi_nnue_mini.wasm'));
-  const js=continuous?resolve(new URL('../experiments/normal-continuous/expansion/continuous-worker.mjs',import.meta.url).pathname):resolve(dir,'worker.js');
+  // Legacy 'normal' mode deliberately keeps the old historical Worker used
+  // by the continuous-normal benchmark; 'normal-worker' compares the actual
+  // supplied SDK Workers without substituting either Worker implementation.
+  const js=continuous&&mode==='normal'
+    ?resolve(new URL('../experiments/normal-continuous/expansion/continuous-worker.mjs',import.meta.url).pathname)
+    :resolve(dir,'worker.js');
   const thread=new Worker(`
     const {parentPort,workerData}=require('node:worker_threads');
     globalThis.self=globalThis;
