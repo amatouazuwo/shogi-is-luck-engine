@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "source": "results/reply-probes.json",
+  "caseCount": 4,
+  "cases": [
+    {
+      "sourceFile": "results/direct.jsonl",
+      "boardKind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 46,
+      "startSfen": "sp3n1+L1/p1p1+R1lp1/1kg2ppg1/2Pp5/1nSG4+p/L3P4/3+RK1N2/1SB+N1PGP1/PP1P2P2 w BS2P 54",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "budgetMs": 100,
+      "actualMove": "8c8b",
+      "actualReferenceReply": "7d7c+",
+      "alternatives": [
+        {
+          "move": "1e1d",
+          "referenceReply": "B*9d",
+          "referenceContinuation": {
+            "move": "8c8b",
+            "afterSfen": "sp3n1+L1/pkp1+R1lp1/2g2ppg1/B1Pp4+p/1nSG5/L3P4/3+RK1N2/1SB+N1PGP1/PP1P2P2 b S2P 57",
+            "legalCount": 2,
+            "depth": 1,
+            "nodes": 77,
+            "elapsedMs": 0
+          }
+        },
+        {
+          "move": "1e1f",
+          "referenceReply": "B*9d",
+          "referenceContinuation": {
+            "move": "8c8b",
+            "afterSfen": "sp3n1+L1/pkp1+R1lp1/2g2ppg1/B1Pp5/1nSG5/L3P3+p/3+RK1N2/1SB+N1PGP1/PP1P2P2 b S2P 57",
+            "legalCount": 2,
+            "depth": 1,
+            "nodes": 77,
+            "elapsedMs": 0
+          }
+        }
+      ],
+      "differingReferenceReplies": true,
+      "terminalBranches": 0,
+      "inspectionTier": "RESPONSE_DIVERGENCE",
+      "interpretation": "Diagnostic priority only; not a move-quality ranking or proof that the played move was bad."
+    },
+    {
+      "sourceFile": "results/direct.jsonl",
+      "boardKind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 48,
+      "startSfen": "sp3n1+L1/pkp1+R1lp1/2+P2ppg1/3p5/1nSG4+p/L3P4/3+RK1N2/1SB+N1PGP1/PP1P2P2 w BGS2P 56",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "budgetMs": 100,
+      "actualMove": "8b7c",
+      "actualReferenceReply": "B*6c",
+      "alternatives": [
+        {
+          "move": "8b7a",
+          "referenceReply": "5b4a",
+          "referenceContinuation": null
+        }
+      ],
+      "differingReferenceReplies": true,
+      "terminalBranches": 0,
+      "inspectionTier": "RESPONSE_DIVERGENCE",
+      "interpretation": "Diagnostic priority only; not a move-quality ranking or proof that the played move was bad."
+    },
+    {
+      "sourceFile": "results/direct.jsonl",
+      "boardKind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 50,
+      "startSfen": "sp3n1+L1/p1p1+R1lp1/2kG1ppg1/3p5/1nSG4+p/L3P4/3+RK1N2/1SB+N1PGP1/PP1P2P2 w BS2Pp 58",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "budgetMs": 100,
+      "actualMove": "7c8c",
+      "actualReferenceReply": "5b7b",
+      "alternatives": [
+        {
+          "move": "7c8b",
+          "referenceReply": "5b7b",
+          "referenceContinuation": null
+        }
+      ],
+      "differingReferenceReplies": false,
+      "terminalBranches": 0,
+      "inspectionTier": "SAME_REFERENCE_REPLY",
+      "interpretation": "Diagnostic priority only; not a move-quality ranking or proof that the played move was bad."
+    },
+    {
+      "sourceFile": "results/direct.jsonl",
+      "boardKind": "pit",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 44,
+      "startSfen": "sppb1n2+L/p3p1lp1/k1Sp1ppg1/n1N6/GB7/KG+R3L2/2gPP1+p2/1S3P1P1/PP1s2P2 w RLPnp 52",
+      "holes": [
+        "3e"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "budgetMs": 100,
+      "actualMove": "7g7f",
+      "actualReferenceReply": "7c8d+",
+      "alternatives": [
+        {
+          "move": "2c1c",
+          "referenceReply": "7c8d+",
+          "referenceContinuation": null
+        },
+        {
+          "move": "2c1d",
+          "referenceReply": "7c8d+",
+          "referenceContinuation": null
+        }
+      ],
+      "differingReferenceReplies": false,
+      "terminalBranches": 0,
+      "inspectionTier": "SAME_REFERENCE_REPLY",
+      "interpretation": "Diagnostic priority only; not a move-quality ranking or proof that the played move was bad."
+    }
+  ],
+  "caveats": [
+    "Original starts are archived; this is not a fresh held-out evaluation.",
+    "A different reference reply does not imply a better alternative move.",
+    "Search results have not been checked for tactical correctness against all legal replies.",
+    "Do not promote or deploy a candidate based on this diagnostic list."
+  ]
+}
