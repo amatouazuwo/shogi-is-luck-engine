@@ -2,7 +2,11 @@ name: Real rsshogi controller cancellation and recovery
 on:
   push:
     branches: [chatgpt/strength-ci]
-    paths: ['.github/workflows/strength-continuous-controller-real.yml']
+    paths:
+      - '.github/workflows/strength-continuous-controller-real.yml'
+      - 'benchmarks/strength/experiments/continuous-obstacle/controller-real-smoke.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.test.mjs'
 permissions:
   contents: read
 jobs:
