@@ -69,3 +69,15 @@ All 24 direct games preserve their full per-move search traces. Comparing the **
 Across all **1,707 recorded plies**: candidate 854 searches, mean depth **5.690**, mean nodes **22,397**, mean nodes/sec **100,298**; baseline 853 searches, mean depth **5.771**, mean nodes **22,547**, mean nodes/sec **100,762**. The aggregate includes both 100ms and 500ms budgets and correlated repeated openings. There is no evidence of a **large** slowdown from this small sample, but the numbers do not establish a statistically reliable throughput difference.
 
 A new strict, tested analyzer at `benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs` reports only **decided** games as wins/losses, requires both colors for each opening, measures same-root first move discrepancies and search throughput, and retains the distinction between capped games and genuine draws. CI run [45016821717](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45016821717) passed all analyzer unit tests.
+
+## Strict report replay and first-divergence comparisons (2026-11-22)
+
+A separate report-only GitHub Actions check [45017078189](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45017078189) successfully downloaded the **actual archived 24-game ZIP**, ran `summarize-native-eval.mjs` against it, and asserted the expected counts of 3 wins, 2 losses, 19 unresolved, 12 opening pairs and 3 changed first moves. The summary JSON is preserved as its workflow artifact; this validation does not rebuild or modify rsshogi.
+
+More granular matched-position results, comparing the two color-swapped runs **only until they choose different moves and reach different positions**:
+- 100ms: **30 matching moves across 38 identical-position comparisons**; root first moves differed in 3/8 opening/budget pairs.
+- 500ms: **13 matching moves across 17 identical-position comparisons**; root first moves differed in 0/4 pairs.
+- Therefore, 43 matching decisions across 55 genuinely identical-root comparisons, but these decisions are strongly correlated within game trajectories and tiny in independent opening-family count; do NOT interpret 43/55 as a binomial skill probability. The first point of divergence is recorded for each match.
+- **Crucial confounder:** same WASM may give different time-limited moves on two independent runs because of CPU scheduling, search search-depth timing and initialization. A *same-engine-vs-same-engine null control* has therefore been launched as [45017142828](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45017142828) on precisely the original 100/500ms openings/caps. Until that control is available, treat observed move differences as possible candidate influence, not proof of a genuine evaluation improvement.
+
+The longer 48-game follow-up run is [45015813757](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45015813757). Preserve winning, losing and undecided end states separately.
