@@ -6,6 +6,8 @@ on:
       - '.github/workflows/strength-report-check.yml'
       - 'benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs'
       - 'benchmarks/strength/experiments/hole-eval/summarize-native-eval.test.mjs'
+      - 'benchmarks/strength/experiments/hole-eval/compare-ply-cap-replays.mjs'
+      - 'benchmarks/strength/experiments/hole-eval/compare-ply-cap-replays.test.mjs'
 permissions:
   contents: read
   actions: read
@@ -23,6 +25,8 @@ jobs:
           set -euo pipefail
           node --check benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs
           node --test benchmarks/strength/experiments/hole-eval/summarize-native-eval.test.mjs
+          node --check benchmarks/strength/experiments/hole-eval/compare-ply-cap-replays.mjs
+          node --test benchmarks/strength/experiments/hole-eval/compare-ply-cap-replays.test.mjs
       - name: Download previous finished native A/B games
         env:
           GH_TOKEN: ${{ github.token }}
