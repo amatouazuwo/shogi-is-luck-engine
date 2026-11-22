@@ -1,0 +1,67 @@
+name: Strength CI - independent tactics
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-independent.yml', 'benchmarks/strength/ci/**']
+  workflow_dispatch:
+    inputs:
+      budget:
+        description: Search budget in milliseconds
+        type: choice
+        options: ['100', '500', '1500']
+        default: '100'
+permissions:
+  contents: read
+concurrency:
+  group: strength-independent-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  tactics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build obstacle SDK
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/obstacle-sdk"
+      - name: Run archived tactical fixtures without private game checkout
+        env:
+          BUDGET: ${{ inputs.budget || '100' }}
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          cd benchmarks/strength
+          node forensics/heldout/run-heldout.mjs --corpus forensics/heldout/heldout-attack.jsonl --sdk incumbent="$RUNNER_TEMP/obstacle-sdk" --budget "$BUDGET" | tee ../../results/attack.jsonl
+          node forensics/heldout/run-heldout.mjs --corpus forensics/heldout/heldout-escape.jsonl --sdk incumbent="$RUNNER_TEMP/obstacle-sdk" --budget "$BUDGET" | tee ../../results/escape.jsonl
+      - name: Record results and enforce legality
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib, os
+          print("## Independent tactical validation")
+          print("Commit:", os.environ["GITHUB_SHA"])
+          for name in ("attack", "escape"):
+              p = pathlib.Path("results") / (name + ".jsonl")
+              if not p.exists(): raise SystemExit("Missing result: " + name)
+              records = [json.loads(l) for l in p.read_text().splitlines()]
+              trials = [r for r in records if r.get("event") == "trial"]
+              configs = [r for r in records if r.get("event") == "config"]
+              assert len(configs) == 1 and len(trials) == configs[0]["positions"]
+              summary = [r for r in records if r.get("event") == "summary" and r.get("group") == "all"]
+              assert len(summary) == 1
+              print("### " + name)
+              print("\x60\x60\x60json")
+              print(json.dumps({"config": configs[0], "summary": summary[0]}, indent=2))
+              print("\x60\x60\x60")
+              assert all(r.get("legal") is True and not r.get("error") for r in trials), "Illegal move or search failure"
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: strength-tactics-${{ github.run_id }}
+          path: results/*.jsonl
+          retention-days: 3
+          if-no-files-found: warn
