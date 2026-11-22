@@ -1,3 +1,33 @@
+# UPDATED: 300-ply obstacle games fully completed, neutral undecided policy confirmed
+
+**Completed 300-ply experiment:** [GitHub Actions 45022210336](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45022210336), all stages successful, builds/rule parity/paired matches/safety checks archived. Comparison is the historic `hole-aware-eval.patch` versus the unchanged rsshogi obstacle SDK, not a newly promoted engine.
+
+| Opening set | Think budget | Cap | Candidate wins | Candidate losses | Neutral undecided |
+|---|---:|---:|---:|---:|---:|
+| reserve-pressure four families, both obstacle types/colors | 100ms | **300 plies** | **8** | **7** | **1** |
+| separate older four opening families | 100ms | 120 plies | 7 | 7 | 2 |
+| reserve-pressure four families again | 500ms | 120 plies | 4 | 8 | 4 |
+| **All three groups** | | | **19** | **22** | **7** |
+
+- Of the **16 games** with a 300-ply cap, **15 were legally decided** because the next player had no legal move (`reason=no-legal`); **1 black-hole game reached exactly 300 plies** without a verdict. These are not necessarily orthodox shogi checkmates under all special rules; the reference legality evaluator determines whether any legal move remains. The 300-ply cap is a **measurement limit, not a target win deadline**; a neutral capped game is not an error, a bad move, a loss or an adjudicated draw.
+- The 300-ply group contains 8 pit games (5W/3L/0 undecided) and 8 black-hole games (3W/4L/**1 neutral undecided**). Across its eight color-swapped board openings, 7 pairs have two decided outcomes: 2 candidate sweeps, 1 baseline sweep, 4 split pairs; one pair was incomplete.
+- This still **does not support adopting the extra obstacle-only evaluation heuristic**. Broad native playing strength, rather than a shorter mean finish length or oracle label match, remains the only reason to consider an engine change.
+- Archived tactical safety check in the new run: both compared engines satisfied 36/36 at 100ms, 35/36 at 500ms; no candidate-vs-baseline label gains or losses. This is an auxiliary limited-horizon score, not an assertion that a different unlabeled winning line is bad.
+
+### Correct interpretation versus the earlier 160-ply experiment
+
+An independent [result validation run 45026114409](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45026114409) downloaded both complete test archives and validated all 48 newer games, 16 exact same starting games for 160-to-300 comparison and the neutral `UNDECIDED` handling. Its tests and archive checks **passed**.
+
+- Old 100ms group with 160-ply cap: **7W / 6L / 3 undecided**.
+- Newly replayed 100ms group with 300-ply cap: **8W / 7L / 1 undecided**.
+- **Critically, none of the 16 newly played games reproduced the old complete move sequence. All 16 diverged before the end of the older match.** Their compiled WASM digests also differ across the two runs, despite equivalent source/revision/model. Thus **there were ZERO genuine continuations of an earlier 160-ply game.** A reduction in capped-game count (3 to 1) is NOT proof that extending the cap itself resolved those earlier exact games.
+- The distinct color-swapped 500ms and 100ms starting layouts are correlated; avoid treating all 48 cases as independent skill samples.
+- An automated test exists at `benchmarks/strength/experiments/hole-eval/compare-ply-cap-replays.mjs` to track the exact prefix length before divergence. This ensures "a replay happened to finish" is not misreported as "the earlier unfinished game was continued to the end."
+
+**Decision:** preserve the unmodified obstacle rsshogi baseline, no production or PR merge. For future work, prioritize obstacle-aware evaluation / continuous search ideas only when they demonstrate actual improvement in varied paired games and without hurting legal-move performance. Unfinished long games remain **neutral**.
+
+---
+
 # FINAL ADDENDUM — identical-rsshogi null control also completed
 
 Independent GitHub Actions [45017142828](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45017142828) **passed** with the **same immutable WASM SHA-256 on both competing engine roles**: `113325872d27db39e152b281bc28b954c06db6e87257a38ef8860a387d665227`. The null control played the same four paired opening families at 100ms/80 plies and first two at 500ms/60 plies as the original 24-game experiment. It records:
