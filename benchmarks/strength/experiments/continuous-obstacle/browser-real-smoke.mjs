@@ -15,9 +15,11 @@ assert.ok(deps,'PLAYWRIGHT_NODE_MODULES must point to npm installation');
 const require=createRequire(join(resolve(deps),'package.json'));
 const {chromium,devices}=require('playwright');
 const controllerPath=fileURLToPath(new URL('./continuous-controller.mjs',import.meta.url));
+const adapterPath=fileURLToPath(new URL('./game-turn-adapter.mjs',import.meta.url));
 const served={
  '/':{data:'<!doctype html><title>rsshogi Worker browser check</title><meta charset="utf-8">',mime:'text/html'},
  '/controller.mjs':{data:readFileSync(controllerPath),mime:'text/javascript'},
+ '/game-turn-adapter.mjs':{data:readFileSync(adapterPath),mime:'text/javascript'},
 };
 for(const name of ['worker.js','mini.js','rsshogi_nnue_mini.wasm','package.json']){
  const type=name.endsWith('.wasm')?'application/wasm':name.endsWith('.json')?'application/json':'text/javascript';
@@ -133,6 +135,59 @@ try{
     }catch(error){return error.message;}
    });
    assert.match(clock,/Clock exhausted during search/);
+   const gameFirst=await page.evaluate(async()=>{
+    const {SafeRsshogiGameTurn}=await import('/game-turn-adapter.mjs');
+    // This is a controlled mock GAME STATE around real browser/WASM moves.
+    // The deployed UI and special-event dispatcher are NOT involved.
+    await window.subject.think({sfen:window.startSfen,holes:['5e'],movetimeMs:100});
+    const legal=await window.subject._send(window.subject.session,'legalMoves');
+    window.mockGame={
+     sessionId:'test-game-1',version:10,nativeCompatible:true,
+     sfen:window.startSfen,holes:['5e'],legalUsiMoves:legal,
+     clockRemainingMs:180000
+    };
+    window.gameApplied=[];
+    window.gameTurn=new SafeRsshogiGameTurn({
+     controller:window.subject,snapshot:()=>window.mockGame,
+     applyMove:(move,expected)=>{
+      if(expected.version!==window.mockGame.version)return false;
+      window.gameApplied.push(move);window.mockGame.version++;return true;
+     }
+    });
+    const played=await window.gameTurn.play({movetimeMs:100});
+    window.mockGame.nativeCompatible=false;
+    const unsupported=await window.gameTurn.play({movetimeMs:100});
+    window.mockGame.nativeCompatible=true;
+    return {played:played.status,move:played.bestmove,
+     applied:window.gameApplied.length,unsupported:unsupported.status};
+   });
+   assert.equal(gameFirst.played,'played');
+   assert.equal(gameFirst.applied,1);
+   assert.equal(gameFirst.unsupported,'unsupported-special-event');
+   await page.evaluate(()=>{
+    window.gameAbortOffset=window.trace.length;
+    window.gamePending=window.gameTurn.play({movetimeMs:1500});
+   });
+   await page.waitForFunction(()=>
+    window.trace.slice(window.gameAbortOffset).some(x=>x.command==='go'),null,{timeout:15000});
+   const gameChanged=await page.evaluate(async()=>{
+    await new Promise(r=>setTimeout(r,45));
+    // A special event changed the obstacle placement, invalidating turn #1.
+    window.mockGame.version++;
+    window.mockGame.holes=['4e'];
+    await window.gameTurn.invalidate();
+    const abandoned=await window.gamePending;
+    const before=window.gameApplied.length;
+    const newTurn=await window.gameTurn.play({movetimeMs:100});
+    const appliedOnlyNew=window.gameApplied.length===before+1;
+    await window.gameTurn.close();
+    return {abandoned:abandoned.status,newTurn:newTurn.status,
+     appliedOnlyNew,applied:window.gameApplied.length};
+   });
+   assert.equal(gameChanged.abandoned,'cancelled');
+   assert.equal(gameChanged.newTurn,'played');
+   assert.equal(gameChanged.appliedOnlyNew,true);
+   assert.equal(gameChanged.applied,2);
    const afterClock=await page.evaluate(async()=>{
     const recovered=await window.subject.think({
      sfen:window.startSfen,holes:['5e'],movetimeMs:100,clockRemainingMs:180000
@@ -146,7 +201,7 @@ try{
    assert.ok(afterClock.terminated>=2);
    assert.deepEqual(errors,[],'Unexpected page errors: '+errors.join('; '));
    const info={event:'browser-continuous-check',profile,...old,...result,clock,
-    afterClock,scriptErrors:errors};
+    gameFirst,gameChanged,afterClock,scriptErrors:errors};
    console.log(JSON.stringify(info));results.push(info);
   }catch(e){
    console.log(JSON.stringify({event:'browser-failure',profile,error:String(e),scriptErrors:errors}));
@@ -158,4 +213,5 @@ assert.equal(results.length,2,'Desktop and emulated Pixel7 must both pass');
 console.log(JSON.stringify({event:'summary',status:'PASS',profiles:results.map(x=>x.profile),
  checks:['same WASM in Chromium module Worker','normal/pit/blackhole legal play',
   'Worker reuse','real terminate','stale callback discarded','new obstacle scene',
-  'late result prohibited by 3-minute wall clock','post-timeout recovery']}));
+  'late result prohibited by 3-minute wall clock','post-timeout recovery',
+  'game-side special-event revision invalidation','game-authoritative move acceptance']}));
