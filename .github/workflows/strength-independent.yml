@@ -108,6 +108,11 @@ jobs:
           PY
       - name: Compile independent referee
         run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Re-evaluate opponent response after missed ray-blocking choices
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/tactical-counterfactual.mjs
+          node benchmarks/strength/ci/tactical-counterfactual.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/obstacle-sdk" results/tactical-candidate.jsonl benchmarks/strength/tactics/corpus.jsonl
       - name: Paired obstacle matches
         env:
           BUDGET: ${{ inputs.budget || '100' }}
@@ -160,6 +165,7 @@ jobs:
             results/codex-review.json
             results/terminal-proofs.json
             results/tactical-delta.json
+            results/tactical-counterfactual.json
           retention-days: 3
           if-no-files-found: warn
 
@@ -204,6 +210,8 @@ jobs:
           cp incoming/terminal-proofs.json "$target/terminal-proofs.json"
           test -s incoming/tactical-delta.json
           cp incoming/tactical-delta.json "$target/tactical-delta.json"
+          test -s incoming/tactical-counterfactual.json
+          cp incoming/tactical-counterfactual.json "$target/tactical-counterfactual.json"
           printf '%s\n' "$SOURCE_SHA" > "$target/source-commit.txt"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
