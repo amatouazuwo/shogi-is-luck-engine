@@ -14,7 +14,7 @@ const result={schema:1,generatedFrom:filePaths,experiments:[],total:{games:0,can
   identicalPositionComparisons:0,identicalPositionMoveAgreements:0,
   firstDivergenceCount:0,completedPairedOpenings:0,incompletePairedOpenings:0,
   candidateSweeps:0,baselineSweeps:0,splitPairs:0},
- warning:'Native-playing-strength A/B only. Undecided ply-capped games are neither wins nor draws. First root move similarity is a diagnostic, not playing strength. Starts reused across budgets and previous experiments are correlated; do not auto-promote.'};
+ warning:'Native rsshogi playing-strength A/B only. Ply-capped and unadjudicated repetition games are NEUTRAL UNKNOWN outcomes, neither draws nor losses nor candidate wins; such outcomes can be normal for difficult or blocked openings. First-root move agreement is not playing strength. Opening families and budgets are correlated; do not auto-promote.'};
 for(const path of filePaths) {
  const entries=readFileSync(path,'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
  const configs=entries.filter(x=>x.event==='config');
@@ -34,8 +34,17 @@ for(const path of filePaths) {
   assert.ok(game.winner===null||[0,1].includes(game.winner));
   assert.ok(Array.isArray(game.turns));
   assert.ok(game.turns.length<=config.cap,'Game exceeded move cap');
-  assert.ok(game.reason==='ply-cap'||game.winner!==null,'Unresolved result without ply cap');
-  if(game.reason==='ply-cap')assert.equal(game.winner,null,'Ply cap incorrectly adjudicated as a win');
+  // Neutral, unadjudicated end states are *not* evidence of poor play.
+  // A repeated position is not automatically a draw: perpetual check or
+  // game-specific repetition rules would need an independently grounded verdict.
+  const unresolvedReasons=['ply-cap','repetition-unadjudicated'];
+  const decidedReasons=['no-legal','clock','resign'];
+  assert.ok([...unresolvedReasons,...decidedReasons].includes(game.reason),'Unknown game end reason');
+  if(unresolvedReasons.includes(game.reason))
+   assert.equal(game.winner,null,'Unadjudicated game incorrectly assigned a winner');
+  else assert.ok([0,1].includes(game.winner),'Decided game missing winner');
+  if(game.reason==='ply-cap')
+   assert.equal(game.turns.length,config.cap,'Ply cap game did not actually reach the cap');
   const key=game.kind+'/'+game.pair;
   if(!byId.has(key))byId.set(key,[]);
   byId.get(key).push(game);
@@ -139,14 +148,14 @@ assert.equal(result.total.candidateWins+result.total.candidateLosses+result.tota
 mkdirSync(dirname(outputPath),{recursive:true});
 writeFileSync(outputPath,JSON.stringify(result,null,2)+'\n');
 const summary=[
- '## Paired obstacle rsshogi playing strength, capped games are UNDECIDED',
+ '## Paired obstacle rsshogi playing strength (undecided is neutral, not bad)',
  '| Sample / budget | Candidate wins | Losses | Undecided | Fully decided swapped pairs | Different first moves | Same-position move agreement |',
  '|---|---:|---:|---:|---:|---:|---:|',
  ...result.experiments.map(x=>'| '+x.path+' / '+x.budgetMs+'ms | '+x.wins+' | '+x.losses+' | '+x.undecided+
  ' | '+x.completedPairedOpenings+'/'+(x.completedPairedOpenings+x.incompletePairedOpenings)+
   ' | '+x.firstMoveDifferences+'/'+x.firstMoveComparisons+' | '+
   x.identicalPositionMoveAgreements+'/'+x.identicalPositionComparisons+' |'),
- '**Only finalized results establish a game win/loss. This is a correlated, historical-opening experiment, not a new strength certificate.**'
+ '**Undecided is not a negative grade.** A hard blocked position can reasonably remain unadjudicated. Only actual adjudicated results count as wins/losses. Old opening families are correlated, so this is not a strength certificate.'
 ].join('\n')+'\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
 console.log(summary);
