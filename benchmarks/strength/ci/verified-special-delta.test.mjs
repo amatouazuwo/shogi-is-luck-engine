@@ -24,9 +24,9 @@ function run(rows={}) {
    {id:'pit-attack',name:'baseline',move:'B'},
    {id:'blackhole-defense',name:'candidate',move:'A'},
    {id:'blackhole-defense',name:'baseline',move:'B'}
-  ]).map(x=>({...x,event:'trial',budget:100,kind:x.id.startsWith('pit')?'pit':'blackhole',
+  ]).map(x=>({event:'trial',budget:100,kind:x.id.startsWith('pit')?'pit':'blackhole',
    category:x.id.startsWith('pit')?'forced-win-5':'forced-loss-escape-3',
-   legal:true,correct:x.id.startsWith('pit')?x.move==='A':x.move==='B'}));
+   legal:true,correct:x.id.startsWith('pit')?x.move==='A':x.move==='B',...x}));
   writeFileSync(join(cwd,'fixtures.jsonl'),data);
   writeFileSync(join(cwd,'pairs.jsonl'),[config,...trials].map(JSON.stringify).join('\n')+'\n');
   const p=spawnSync(process.execPath,[script,'pairs.jsonl','fixtures.jsonl'],{cwd,encoding:'utf8',env:{...process.env,GITHUB_STEP_SUMMARY:''},timeout:5000});
