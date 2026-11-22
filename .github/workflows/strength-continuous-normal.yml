@@ -1,0 +1,77 @@
+name: Normal-board regression control for continuous rsshogi search
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-continuous-normal.yml']
+permissions:
+  contents: read
+concurrency:
+  group: strength-continuous-normal-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-strength:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned normal and obstacle rules compiler
+        run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build unchanged current rsshogi SDK (also supports normal boards)
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/baseline-sdk"
+      - name: Build exact-same-model and engine continuous Worker SDK
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs \
+            "$RUNNER_TEMP/baseline-sdk" "$RUNNER_TEMP/continuous-sdk"
+          cmp "$RUNNER_TEMP/baseline-sdk/rsshogi_nnue_mini.wasm" "$RUNNER_TEMP/continuous-sdk/rsshogi_nnue_mini.wasm"
+          cmp "$RUNNER_TEMP/baseline-sdk/mini.js" "$RUNNER_TEMP/continuous-sdk/mini.js"
+      - name: Build independent normal-board legality referee
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Actual normal-board worker A/B on eight distinct positions (100ms)
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/continuous-sdk" \
+            100 200 4 0 "$RUNNER_TEMP/baseline-sdk" normal-worker \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            | tee results/continuous-normal-100.jsonl
+      - name: Independent normal-board sample at 500ms
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/continuous-sdk" \
+            500 120 2 4 "$RUNNER_TEMP/baseline-sdk" normal-worker \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            | tee results/continuous-normal-500.jsonl
+      - name: Summarize native playing strength and neutral capped games
+        if: always()
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,pathlib
+          print('## Normal board: same rsshogi WASM, only Worker search scheduling differs')
+          for budget in (100,500):
+              p=pathlib.Path(f'results/continuous-normal-{budget}.jsonl')
+              if not p.exists():
+                  print(f'- {budget}ms: incomplete');continue
+              items=[json.loads(x) for x in p.read_text().splitlines() if x.strip()]
+              conf=next(x for x in items if x['event']=='config')
+              assert conf['candidateSha']==conf['baselineSha'],'Different engines!'
+              games=[x for x in items if x['event']=='game']
+              assert len(games)==4*conf['pairs']
+              assert set(x['kind'] for x in games)=={'hirate','game'}
+              w=sum(x['winner']==x['candidateSide'] for x in games)
+              l=sum(x['winner'] is not None and x['winner']!=x['candidateSide'] for x in games)
+              u=sum(x['winner'] is None for x in games)
+              print(f'- {budget}ms: {w} continuous wins, {l} losses, {u} neutral undecided')
+          print('Ordinary-board regression check, not proof of absolute strength or production cancellation safety.')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-rsshogi-normal-${{ github.run_id }}
+          path: results/continuous-normal-*
+          retention-days: 14
+          if-no-files-found: warn
