@@ -117,6 +117,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check benchmarks/strength/ci/report.mjs
+          node --test benchmarks/strength/ci/report.test.mjs
           node benchmarks/strength/ci/report.mjs results/matches.jsonl results/direct.jsonl results/normal.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
