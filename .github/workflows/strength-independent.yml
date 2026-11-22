@@ -118,7 +118,9 @@ jobs:
           set -euo pipefail
           node --check benchmarks/strength/ci/report.mjs
           node --test benchmarks/strength/ci/report.test.mjs
+          node --test benchmarks/strength/ci/review-queue.test.mjs
           node benchmarks/strength/ci/report.mjs results/matches.jsonl results/direct.jsonl results/normal.jsonl
+          node benchmarks/strength/ci/review-queue.mjs results/direct.jsonl results/normal.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -126,6 +128,7 @@ jobs:
           path: |
             results/*.jsonl
             results/scorecard.json
+            results/review-queue.json
           retention-days: 3
           if-no-files-found: warn
 
@@ -158,6 +161,8 @@ jobs:
           done
           test -s incoming/scorecard.json
           cp incoming/scorecard.json "$target/scorecard.json"
+          test -s incoming/review-queue.json
+          cp incoming/review-queue.json "$target/review-queue.json"
           printf '%s\n' "$SOURCE_SHA" > "$target/source-commit.txt"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
