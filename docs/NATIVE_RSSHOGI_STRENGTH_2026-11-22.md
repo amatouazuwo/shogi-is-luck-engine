@@ -44,3 +44,15 @@ These are historically prepared openings, **not newly sealed holdouts**. The eva
 If the candidate fails to demonstrate a robust improvement, do not promote it and do not tune arbitrary weights to make a few oracle move labels match. Examine whether the observable leaf correction is too small / too localized, whether extra evaluation work reduces actual search speed, and whether loss of piece mobility or king escape caused missed moves in real games. The previously tested `experiments/reserve-pressure` candidate measures **different** checking-drop paths; it should be treated as a separate hypothesis and A/B tested before combining anything.
 
 No production deployment, game modification, or PR merge is authorized.
+
+## Diagnostic: obstacle correction changes leaf values, but rarely archived decisions
+
+Measured directly from `benchmarks/strength/experiments/hole-eval/compare.jsonl` and the completed native A/B run `45013783788` (these are different experiments and must not be pooled as one statistical sample):
+
+- In the historical 100-position exact-static-value comparison, **78/100** eval scores changed. The **20 terminal/no-legal** test cases all changed, but those do not demonstrate a useful change in live search because normal terminal scoring overrides ordinary leaf evaluation.
+- In the **80 nonterminal cases**, **58/80** changed in static value. By tactical class: mate-in-one 20/20; evade-forced-win 12/20; material-gain 14/20; ray-blocking 12/20. Nonterminal absolute shifts were mostly on the order of a few tens of evaluation units; the historical sample's maximum absolute static shift was 64.
+- In the new native direct same-position tactic comparison (36 positions × 100ms and 500ms), **only 1/72** paired candidate-vs-baseline best moves differed, and *both* alternative moves were verified label matches within the fixed proof horizon.
+
+Interpretation: the obstacle-only correction is indeed reaching the static evaluator, but this does not establish that it changes practical strategic decisions often enough to improve strength. It may merely adjust numerical scores without materially altering search choices; alternatively, it may matter in longer, less artificial games. The direct games, including games that end undecided at the ply cap, are necessary to distinguish those possibilities.
+
+Do not misinterpret the 78/100 changed static numbers as 78% better decisions. Do not treat the one differing tactical choice as a regression or benefit absent further evidence. Evaluate search throughput and first-move differences on the *same* root position, especially with blocked rays and actual king threats, rather than tuning to the archive.
