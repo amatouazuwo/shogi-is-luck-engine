@@ -1,0 +1,127 @@
+{
+  "schema": 3,
+  "certificateScheme": "exists-win / forall-loss / terminal-no-legal",
+  "maxPositions": 2,
+  "selectionRule": "fewest maximum legal opponent replies then total replies",
+  "depthAfterCandidateMove": 3,
+  "maxNodesPerBranch": 300,
+  "analyzed": 2,
+  "records": [
+    {
+      "boardKind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 46,
+      "sfen": "spp1p3p/p3l2p1/3p1+Rp2/1+Bk5g/2g6/LL2P4/N2g2NS1/2B1+NPGP1/PP1P1KP2 w 2SN2Prp 54",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "rootLegalMoveCount": 2,
+      "examinedCandidateMoveCount": 2,
+      "allCandidateMovesCovered": true,
+      "selectionCost": {
+        "maxLegalOpponentReplies": 125,
+        "totalLegalOpponentReplies": 250
+      },
+      "branches": [
+        {
+          "move": "7d6e",
+          "played": true,
+          "outcomeForCandidate": "UNKNOWN",
+          "forcedPliesAfterMove": null,
+          "visitedNodes": 300,
+          "completeWithoutNodeCap": false,
+          "certificate": null,
+          "certificateVerified": false,
+          "certificateNodes": null
+        },
+        {
+          "move": "7d6d",
+          "played": false,
+          "outcomeForCandidate": "UNKNOWN",
+          "forcedPliesAfterMove": null,
+          "visitedNodes": 300,
+          "completeWithoutNodeCap": false,
+          "certificate": null,
+          "certificateVerified": false,
+          "certificateNodes": null
+        }
+      ],
+      "localContrast": "NOT_PROVEN",
+      "proofScope": "Independent referee terminal/no-legal outcomes within 3 further plies after each candidate move; repetition and special live events not adjudicated."
+    },
+    {
+      "boardKind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 48,
+      "sfen": "spp1p3p/p3l2p1/3p1+Rp2/1+B6g/2gk5/LLS1P4/N2g2NS1/2B1+NPGP1/PP1P1KP2 w SN2Prp 56",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "rootLegalMoveCount": 5,
+      "examinedCandidateMoveCount": 3,
+      "allCandidateMovesCovered": false,
+      "selectionCost": {
+        "maxLegalOpponentReplies": 133,
+        "totalLegalOpponentReplies": 387
+      },
+      "branches": [
+        {
+          "move": "6e5f",
+          "played": true,
+          "outcomeForCandidate": "UNKNOWN",
+          "forcedPliesAfterMove": null,
+          "visitedNodes": 300,
+          "completeWithoutNodeCap": false,
+          "certificate": null,
+          "certificateVerified": false,
+          "certificateNodes": null
+        },
+        {
+          "move": "6e6d",
+          "played": false,
+          "outcomeForCandidate": "UNKNOWN",
+          "forcedPliesAfterMove": null,
+          "visitedNodes": 300,
+          "completeWithoutNodeCap": false,
+          "certificate": null,
+          "certificateVerified": false,
+          "certificateNodes": null
+        },
+        {
+          "move": "6e6f",
+          "played": false,
+          "outcomeForCandidate": "UNKNOWN",
+          "forcedPliesAfterMove": null,
+          "visitedNodes": 300,
+          "completeWithoutNodeCap": false,
+          "certificate": null,
+          "certificateVerified": false,
+          "certificateNodes": null
+        }
+      ],
+      "localContrast": "NOT_PROVEN",
+      "proofScope": "Independent referee terminal/no-legal outcomes within 3 further plies after each candidate move; repetition and special live events not adjudicated."
+    }
+  ],
+  "warning": "Finite-horizon exhaustive terminal checks only. UNKNOWN is not a draw. Short-horizon contrasts must be checked against full game rules, new holdout cases, and stronger search before declaring a general blunder."
+}
