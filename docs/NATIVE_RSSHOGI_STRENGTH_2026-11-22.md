@@ -1,3 +1,26 @@
+# UPDATED: 48 paired obstacle games completed — no demonstrated strength gain
+
+GitHub Actions [45015813757](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45015813757) **succeeded** (all two SDK builds, rule parity, three batches of A/B games, 36 verified tactical positions at two budgets, artifact archiving).
+
+**Primary native playing-strength result (hole-aware NNUE candidate vs unchanged rsshogi obstacle SDK):**
+
+| Opening sample | Budget | Candidate wins | Candidate losses | Not decided by ply cap | Completed color-swapped pairs |
+|---|---:|---:|---:|---:|---:|
+| prior reserve-pressure openings (four paired families) | 100ms, 160 ply | 7 | 6 | 3 | 6 / 8 |
+| different historical holdout openings (four paired families) | 100ms, 120 ply | 5 | 8 | 3 | 5 / 8 |
+| prior reserve-pressure openings (same four families) | 500ms, 120 ply | 6 | 4 | 6 | 5 / 8 |
+| **Total** | | **18** | **18** | **12** | **16 / 24** |
+
+Among the 16 fully decided color-swapped pairs, the candidate won both color assignments in **2** pairs; the baseline won both in **1** pair; **13** were split one win each. The other **8 pairs were incomplete** and cannot be treated as draws or wins. The 500ms games reuse the 100ms opening identities and therefore do not supply eight additional independent starting positions. **No reliable advantage is demonstrated.**
+
+The original 36 archived, proof-labelled tactical positions at 100ms and 500ms were **35/36 for each engine** (no label improvements or regressions). Those labels are auxiliary safety checks and not proof of relative strength; the sole label disagreement in each budget was shared by both engines. No illegal move or worker timeout was reported in the tactical results.
+
+Matching starting positions under swapped colors: among 24 matched initial positions, **3 candidate-vs-baseline first moves differed**. Across the same root positions followed only until the two game paths diverged, the three batches gave **23/31, 35/43, 10/18** matching moves, respectively (68/92 total). Search scheduling may explain some of the differences; a same-SDK-vs-itself [null control](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45017142828) was launched to measure that directly. These correlated agreement ratios are diagnostics, **not win-rate estimators**.
+
+A separately triggered [report verification workflow](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45017485679) downloads the completed 48-game artifact, validates all 48 games and 24 opening color swaps, checks that the win-loss-undecided counts are 18-18-12, and saves a structured record. **Do not promote this eval supplement or modify production at this stage.** Preserve the existing rsshogi obstacle SDK as the baseline.
+
+---
+
 # Native rsshogi playing strength on obstacle boards — ongoing A/B
 
 ## Primary objective, agreed with the user
