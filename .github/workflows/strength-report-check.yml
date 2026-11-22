@@ -1,0 +1,24 @@
+name: Obstacle strength report checks
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/strength-report-check.yml'
+      - 'benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs'
+      - 'benchmarks/strength/experiments/hole-eval/summarize-native-eval.test.mjs'
+permissions:
+  contents: read
+jobs:
+  verify-report:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check native strength report parser and unit tests
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs
+          node --test benchmarks/strength/experiments/hole-eval/summarize-native-eval.test.mjs
