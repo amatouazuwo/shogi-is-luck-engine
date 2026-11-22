@@ -63,7 +63,12 @@ const result={schema:2,maxPositions:2,selectionRule:'fewest maximum legal oppone
   analyzed:records.length,records,warning:'Finite-horizon exhaustive terminal checks only. UNKNOWN is not a draw. Short-horizon contrasts must be checked against full game rules, new holdout cases, and stronger search before declaring a general blunder.'};
 writeFileSync('results/terminal-proofs.json',JSON.stringify(result,null,2)+'\n');
 const proved=records.filter(r=>r.localContrast!=='NOT_PROVEN').length;
+const allBranches=records.flatMap(r=>r.branches);
+const unknown=allBranches.filter(b=>b.outcomeForCandidate==='UNKNOWN').length;
+const capped=allBranches.filter(b=>!b.completeWithoutNodeCap).length;
 const summary='## Bounded terminal proof checks\nInvestigated '+records.length+
-  ' archived diagnostic positions, found '+proved+' short-horizon forced contrasts. NOT a global blunder or AI promotion claim.\n';
+  ' archived positions, '+allBranches.length+' candidate branches; '+unknown+
+  ' UNKNOWN, '+capped+' node-capped; '+proved+
+  ' short-horizon forced contrasts. NOT a global blunder or AI promotion claim.\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
 console.log(summary);
