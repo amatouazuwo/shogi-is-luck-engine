@@ -79,3 +79,19 @@ GitHub Actions [45026414339](https://github.com/amatouazuwo/shogi-is-luck-engine
 - Report parser tests in `report.test.mjs` verify **same WASM bytes on both contestants**, neutral classification of unadjudicated repetition and move-cap outcomes, and preservation of matched color-swapped games. CI [45027004415](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45027004415) succeeded.
 - After the full experiment completes, use `report.mjs` on its three saved per-game JSONL archives. It reports actually decided games, neutral undecided, complete/incomplete two-color pairs, search depth, node throughput, actual per-move wall time including p95, and calls exceeding the requested budget by 50ms or 200ms.
 - Never interpret shorter games, deeper search or a limited number of archived position wins by themselves as proof of stronger general play. Even if direct games favor continuous search, safe mid-search interruption remains a mandatory future engineering requirement before promotion.
+
+## Stopping a synchronous search — real binary evidence and restrictions
+
+Independent [real native WASM cancel/restart check 45028387266](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45028387266) **passed**. It started a **1500ms uninterrupted search** on an actual pit position, gave the worker time to enter the synchronous native call, forcibly terminated its thread, and created a fresh worker with the same WASM/NNUE to play a legal obstacle move.
+
+- Hard thread abort: **9.06ms** in this single Linux runner trial (not a latency guarantee).
+- Restart + new actual search + legal response: **352.14ms** in this single trial.
+- **No stale bestmove** from the aborted calculation was delivered; recovered move was legal.
+- This test does NOT provide the best intermediate move from the aborted search. Mid-search graceful `stop` remains unsupported; the experimental Worker now returns **`ok:false` for `stop` requests**, instead of pretending it can cancel native synchronous calls. That explicit error is covered by [unit test 45028641425](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45028641425).
+- For actual 3-minute play, a parent orchestration layer must track request generations, terminate/cancel the old worker when abandoning a turn, keep stale callbacks from applying old moves, reinitialize the new worker before the next search, count elapsed real time consistently, and test disconnection/reentry/late replies. Browser Worker termination needs its own validation; a Node Worker test alone does not establish browser safety.
+- Never return a fabricated/fallback move from an aborted search solely to shorten a game. Returning **no move** on cancellation is safer than risking illegal or strategically meaningless moves.
+
+## Normal-board regression comparison
+
+[Normal-board control run 45028524249](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45028524249) compares the same two actual SDK Worker implementations (continuous vs official sliced, identical embedded NNUE/WASM, **no holes**) over distinct hirate-derived and random starting boards. The test runner uses new `normal-worker` mode in `benchmarks/strength/ci/match.mjs` to avoid silently replacing the supplied Worker with a legacy normal experiment Worker. The purpose is to check **preservation of ordinary-board playing ability**, NOT to rank candidate by short-mate labels. Do not claim a normal-board result until this CI run has actually completed.
+
