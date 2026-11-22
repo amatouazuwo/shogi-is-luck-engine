@@ -423,3 +423,75 @@ index 44c3a9d92f6dec62912f464a08aad0c5029c5bb2..984c65f1eb703fb714cb4aef97a3fcfc
 +        assert!(!static_exchange_ge(&p, m, shielded + 1, params));
 +    }
 +}
+diff --git a/src/search/root.rs b/src/search/root.rs
+--- a/src/search/root.rs
++++ b/src/search/root.rs
+@@ -84,5 +84,21 @@
+     pub(super) score: i32,
+     pub(super) complete: bool,
+ }
+ 
++/// Candidate experiment: search promising captures first in the first root iteration
++/// on obstacle boards. No move is removed or force-selected; subsequent root
++/// iterations use the existing effort-based ordering.
++fn seed_obstacle_root_order(
++    position: &Position,
++    moves: &mut [Move32],
++    params: crate::eval::EvalParams,
++) {
++    if position.obstacle_mask().is_empty() {
++        return;
++    }
++    moves.sort_by_key(|&mv| {
++        std::cmp::Reverse(super::see::static_exchange_eval(position, mv, params).unwrap_or(0))
++    });
++}
++
+ pub(super) fn search_root(
+@@ -96,5 +112,8 @@
+     let original_alpha = alpha;
+     context.reset_cutoffs(1);
+     context.reset_cutoffs(2);
++    if depth == 1 {
++        seed_obstacle_root_order(position, moves, context.evaluator.params());
++    }
+     let mut best_move = moves[0];
+     let key = tt_key(position, context.limits.max_moves_to_draw);
+@@ -247,5 +266,37 @@
+         assert!(!outcome.complete, "the node budget must cut this iteration short");
+         assert!(moves.contains(&outcome.best_move));
+         assert!(position.is_legal_move32(outcome.best_move));
+     }
+ }
++
++#[cfg(test)]
++mod obstacle_root_order_tests {
++    use super::*;
++    use rsshogi::types::{Bitboard, Square};
++    #[test]
++    fn captures_get_the_first_try_on_obstacle_boards() {
++        rsshogi::board::init();
++        let mut p = rsshogi::board::position_from_sfen(
++            "4k4/9/9/4p4/4R4/9/9/9/8K b - 1",
++        ).unwrap();
++        assert!(p.set_obstacle_mask(Bitboard::from_square(Square::from_usi("1e").unwrap())));
++        let capture = rsshogi::board::move_from_usi(&p, "5e5d").unwrap();
++        let quiet = rsshogi::board::move_from_usi(&p, "5e5f").unwrap();
++        let mut moves = [quiet, capture];
++        seed_obstacle_root_order(&p, &mut moves, crate::eval::EvalParams::default());
++        assert_eq!(moves[0], capture);
++        assert!(p.is_legal_move32(moves[0]));
++    }
++    #[test]
++    fn ordinary_board_order_is_unchanged() {
++        rsshogi::board::init();
++        let p = rsshogi::board::position_from_sfen(
++            "4k4/9/9/4p4/4R4/9/9/9/8K b - 1",
++        ).unwrap();
++        let capture = rsshogi::board::move_from_usi(&p, "5e5d").unwrap();
++        let quiet = rsshogi::board::move_from_usi(&p, "5e5f").unwrap();
++        let mut moves = [quiet, capture];
++        seed_obstacle_root_order(&p, &mut moves, crate::eval::EvalParams::default());
++        assert_eq!(moves, [quiet, capture]);
++    }
++}
