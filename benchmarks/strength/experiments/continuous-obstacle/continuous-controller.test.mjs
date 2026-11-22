@@ -72,3 +72,22 @@ test('closed and expired clocks cannot dispatch a move',async()=>{
  await c.close();
  await assert.rejects(c.think(position),{name:'AbortError'});
 });
+
+test('three-minute clock includes worker initialization; never apply a late move',async()=>{
+ const workers=[];
+ const c=new ContinuousSearchController({
+  createWorker:()=>{const w=new MockWorker({initDelay:35,goDelay:10});workers.push(w);return w;},
+  wasm:new Uint8Array(8)
+ });
+ try{
+  // A native go can fit its allocated budget even when startup time exceeds
+  // the actual remaining turn clock. That still must not produce a move.
+  await assert.rejects(c.think({...position,clockRemainingMs:20}),/Clock exhausted during search/);
+  assert.equal(workers.length,1);
+  assert.equal(workers[0].terminated,true,'Expired search must retire the worker');
+  const recovered=await c.think({...position,clockRemainingMs:3000});
+  assert.equal(recovered.bestmove,'7g7f');
+  assert.ok(recovered.remainingClockMs>0);
+  assert.equal(workers.length,2);
+ }finally{await c.close();}
+});
