@@ -32,7 +32,8 @@ test('counts decisive games and leaves every capped game unresolved',()=>{
  const {status,stderr,summary}=testRun();
  assert.equal(status,0,stderr);
  assert.deepEqual(summary.total,{games:4,candidateWins:1,candidateLosses:1,
-  undecided:2,openingPairs:2,firstMoveDifferences:1,firstMoveComparisons:2});
+  undecided:2,openingPairs:2,firstMoveDifferences:1,firstMoveComparisons:2,
+  identicalPositionComparisons:2,identicalPositionMoveAgreements:1,firstDivergenceCount:1});
  assert.equal(summary.experiments[0].byBoard.find(x=>x.kind==='pit').wins,1);
  assert.equal(summary.experiments[0].byBoard.find(x=>x.kind==='blackhole').undecided,2);
  assert.equal(summary.experiments[0].throughput.candidate.turns,2);
