@@ -9,6 +9,8 @@ on:
       - 'benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs'
       - 'benchmarks/strength/experiments/continuous-obstacle/report.mjs'
       - 'benchmarks/strength/experiments/continuous-obstacle/report.test.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.test.mjs'
 permissions:
   contents: read
 jobs:
@@ -28,3 +30,5 @@ jobs:
           node --test benchmarks/strength/experiments/continuous-obstacle/worker.test.mjs
           node --check benchmarks/strength/experiments/continuous-obstacle/report.mjs
           node --test benchmarks/strength/experiments/continuous-obstacle/report.test.mjs
+          node --check benchmarks/strength/experiments/continuous-obstacle/continuous-controller.mjs
+          node --test benchmarks/strength/experiments/continuous-obstacle/continuous-controller.test.mjs
