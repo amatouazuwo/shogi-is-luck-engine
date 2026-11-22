@@ -9,7 +9,7 @@ import {Worker} from 'node:worker_threads';
 const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline, mode='obstacle', customFixture]=process.argv.slice(2);
 const budget=Number(budgetStr), cap=Number(capStr), pairs=Number(pairsStr), offset=Number(offsetStr);
 assert.ok([100,500,1500].includes(budget));
-assert.ok(Number.isInteger(cap)&&cap>=1&&cap<=180);
+assert.ok(Number.isInteger(cap)&&cap>=1&&cap<=300, 'Ply cap must be within 1–300');
 assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&&offset>=0);
 assert.ok(['normal','obstacle'].includes(mode));
 const normal=mode==='normal';
