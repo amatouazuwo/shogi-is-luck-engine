@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,mkdirSync,appendFileSync} from 'node:fs';
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
-import {proveTerminal,candidateOutcome} from './terminal-proof.mjs';
+import {proveTerminal,candidateOutcome,verifyTerminalCertificate} from './terminal-proof.mjs';
 import {prioritizeProofPositions} from './proof-priority.mjs';
 
 // Prove finite terminal outcomes for at most two archived diagnostic positions.
@@ -41,10 +41,19 @@ try {
       const next=await step(point.sfen,holes,branch.move);
       assert.equal(next,branch.afterCandidateSfen,'Replay mismatch before proof');
       const proof=await proveTerminal({sfen:next,holes,legal,step,depth:3,nodeLimit:300});
+      // Independently re-read legal moves and apply moves for every certified
+      // branch, rejecting a missing defender response or tampered position.
+      const audit=proof.certificate
+        ?await verifyTerminalCertificate({sfen:next,holes,certificate:proof.certificate,legal,step,maxNodes:300})
+        :null;
+      if(audit)assert.equal(audit.outcome,proof.outcome,'Certificate result disagrees with search');
       branches.push({move:branch.move,played:branch.played,
         outcomeForCandidate:candidateOutcome(proof.outcome),
         forcedPliesAfterMove:proof.distance,visitedNodes:proof.nodes,
-        completeWithoutNodeCap:proof.exhausted});
+        completeWithoutNodeCap:proof.exhausted,
+        certificate:proof.certificate,
+        certificateVerified:audit?.valid??false,
+        certificateNodes:audit?.verifiedNodes??null});
     }
     const actual=branches.find(x=>x.played);
     assert.ok(actual,'No played branch');
@@ -62,7 +71,7 @@ try {
   }
 }finally{child.stdin.end();child.kill();}
 mkdirSync('results',{recursive:true});
-const result={schema:2,maxPositions:2,selectionRule:'fewest maximum legal opponent replies then total replies',depthAfterCandidateMove:3,maxNodesPerBranch:300,
+const result={schema:3,certificateScheme:'exists-win / forall-loss / terminal-no-legal',maxPositions:2,selectionRule:'fewest maximum legal opponent replies then total replies',depthAfterCandidateMove:3,maxNodesPerBranch:300,
   analyzed:records.length,records,warning:'Finite-horizon exhaustive terminal checks only. UNKNOWN is not a draw. Short-horizon contrasts must be checked against full game rules, new holdout cases, and stronger search before declaring a general blunder.'};
 writeFileSync('results/terminal-proofs.json',JSON.stringify(result,null,2)+'\n');
 const proved=records.filter(r=>r.localContrast!=='NOT_PROVEN').length;
