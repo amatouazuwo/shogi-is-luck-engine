@@ -48,6 +48,7 @@ jobs:
           node --test benchmarks/strength/ci/terminal-proof.test.mjs
           node --test benchmarks/strength/ci/proof-priority.test.mjs
           node --test benchmarks/strength/ci/holdout-admit.test.mjs
+          node --test benchmarks/strength/ci/tactical-delta.test.mjs
       - run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
       - name: Build obstacle SDK
         run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/obstacle-sdk"
@@ -63,6 +64,19 @@ jobs:
           test "$(git -C "$RUNNER_TEMP/baseline-source" rev-parse HEAD)" = "$BASELINE_SHA"
           bash "$RUNNER_TEMP/baseline-source/scripts/build-obstacle-sdk.sh" "$RUNNER_TEMP/baseline-sdk"
           echo "BASELINE_SHA=$BASELINE_SHA" >> "$GITHUB_ENV"
+      - name: Paired tactical category comparisons against pinned baseline
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          (
+            cd benchmarks/strength
+            OBSTACLE_SDK="$RUNNER_TEMP/obstacle-sdk" node tactics/score-worker.mjs 100
+          ) | tee results/tactical-candidate.jsonl
+          (
+            cd benchmarks/strength
+            OBSTACLE_SDK="$RUNNER_TEMP/baseline-sdk" node tactics/score-worker.mjs 100
+          ) | tee results/tactical-baseline.jsonl
+          node benchmarks/strength/ci/tactical-delta.mjs results/tactical-candidate.jsonl results/tactical-baseline.jsonl 100
       - name: Run archived tactical fixtures without private game checkout
         env:
           BUDGET: ${{ inputs.budget || '100' }}
@@ -147,6 +161,7 @@ jobs:
             results/reply-probes.json
             results/codex-review.json
             results/terminal-proofs.json
+            results/tactical-delta.json
           retention-days: 3
           if-no-files-found: warn
 
@@ -173,7 +188,7 @@ jobs:
           target="results/$GITHUB_RUN_ID/$GITHUB_RUN_ATTEMPT"
           test ! -e "$target"
           mkdir -p "$target"
-          for name in attack escape matches direct revisions normal; do
+          for name in attack escape matches direct revisions normal tactical-candidate tactical-baseline; do
             test -s "incoming/$name.jsonl"
             cp "incoming/$name.jsonl" "$target/$name.jsonl"
           done
@@ -189,6 +204,8 @@ jobs:
           cp incoming/codex-review.json "$target/codex-review.json"
           test -s incoming/terminal-proofs.json
           cp incoming/terminal-proofs.json "$target/terminal-proofs.json"
+          test -s incoming/tactical-delta.json
+          cp incoming/tactical-delta.json "$target/tactical-delta.json"
           printf '%s\n' "$SOURCE_SHA" > "$target/source-commit.txt"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
