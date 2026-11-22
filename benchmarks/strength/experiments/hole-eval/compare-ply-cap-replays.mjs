@@ -47,7 +47,9 @@ for(const [key,a] of old.games){
   if(x.sfenBefore!==y.sfenBefore||x.move!==y.move||x.side!==y.side)break;
  }
  const exactFullOldTrace=matchingPlies===ol.length&&nl.length>=ol.length;
- const strictContinuation=exactFullOldTrace&&nl.length>ol.length;
+ // A game already adjudicated as won/lost CANNOT legitimately continue.
+ // Only a formerly capped or otherwise unadjudicated game could continue.
+ const strictContinuation=exactFullOldTrace&&a.winner===null&&nl.length>ol.length;
  const oldDecided=a.winner!==null,newDecided=b.winner!==null;
  const board=boardTotals[a.kind];
  assert.ok(board,'Unknown board kind');
