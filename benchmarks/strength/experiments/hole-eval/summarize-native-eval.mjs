@@ -12,7 +12,8 @@ const asNumber=v=>Number.isFinite(v)?v:null;
 const result={schema:1,generatedFrom:filePaths,experiments:[],total:{games:0,candidateWins:0,candidateLosses:0,undecided:0,
   openingPairs:0,firstMoveDifferences:0,firstMoveComparisons:0,
   identicalPositionComparisons:0,identicalPositionMoveAgreements:0,
-  firstDivergenceCount:0},
+  firstDivergenceCount:0,completedPairedOpenings:0,incompletePairedOpenings:0,
+  candidateSweeps:0,baselineSweeps:0,splitPairs:0},
  warning:'Native-playing-strength A/B only. Undecided ply-capped games are neither wins nor draws. First root move similarity is a diagnostic, not playing strength. Starts reused across budgets and previous experiments are correlated; do not auto-promote.'};
 for(const path of filePaths) {
  const entries=readFileSync(path,'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
@@ -25,7 +26,8 @@ for(const path of filePaths) {
  assert.ok(Number.isInteger(config.cap)&&config.cap>0);
  const byId=new Map(),stats={games:games.length,wins:0,losses:0,undecided:0,reasonCounts:{},
   byBoard:[],pairs:[],firstMoveDifferences:0,firstMoveComparisons:0,
-  identicalPositionComparisons:0,identicalPositionMoveAgreements:0,firstDivergenceCount:0};
+  identicalPositionComparisons:0,identicalPositionMoveAgreements:0,firstDivergenceCount:0,
+  completedPairedOpenings:0,incompletePairedOpenings:0,candidateSweeps:0,baselineSweeps:0,splitPairs:0};
  for(const game of games) {
   assert.ok(['pit','blackhole'].includes(game.kind));
   assert.ok([0,1].includes(game.candidateSide));
@@ -92,7 +94,18 @@ for(const path of filePaths) {
   stats.identicalPositionComparisons+=comparable;
   stats.identicalPositionMoveAgreements+=identical;
   if(firstDivergencePly!==null)stats.firstDivergenceCount++;
+  const bothDecided=start.winner!==null&&switchSides.winner!==null;
+  if(bothDecided) {
+   stats.completedPairedOpenings++;
+   const winCount=[start,switchSides].filter(x=>x.winner===x.candidateSide).length;
+   if(winCount===2)stats.candidateSweeps++;
+   else if(winCount===1)stats.splitPairs++;
+   else stats.baselineSweeps++;
+  } else stats.incompletePairedOpenings++;
   stats.pairs.push({key,kind:start.kind,pair:start.pair,
+   pairedResult:bothDecided?[start,switchSides].every(x=>x.winner===x.candidateSide)?'candidate-sweep':
+    [start,switchSides].every(x=>x.winner!==x.candidateSide)?'baseline-sweep':'split'
+    :'incomplete',
    candidateRootMove:firstA.move,baselineRootMove:firstB.move,firstMoveDiff,
    identicalPositionComparisons:comparable,identicalPositionMoveAgreements:identical,
    firstDivergencePly,
@@ -119,16 +132,19 @@ for(const path of filePaths) {
  result.total.identicalPositionComparisons+=stats.identicalPositionComparisons;
  result.total.identicalPositionMoveAgreements+=stats.identicalPositionMoveAgreements;
  result.total.firstDivergenceCount+=stats.firstDivergenceCount;
+ for(const key of ['completedPairedOpenings','incompletePairedOpenings','candidateSweeps','baselineSweeps','splitPairs'])
+  result.total[key]+=stats[key];
 }
 assert.equal(result.total.candidateWins+result.total.candidateLosses+result.total.undecided,result.total.games);
 mkdirSync(dirname(outputPath),{recursive:true});
 writeFileSync(outputPath,JSON.stringify(result,null,2)+'\n');
 const summary=[
  '## Paired obstacle rsshogi playing strength, capped games are UNDECIDED',
- '| Sample / budget | Candidate wins | Losses | Undecided | Different first moves | Same-position move agreement (before divergence) |',
- '|---|---:|---:|---:|---:|---:|',
+ '| Sample / budget | Candidate wins | Losses | Undecided | Fully decided swapped pairs | Different first moves | Same-position move agreement |',
+ '|---|---:|---:|---:|---:|---:|---:|',
  ...result.experiments.map(x=>'| '+x.path+' / '+x.budgetMs+'ms | '+x.wins+' | '+x.losses+' | '+x.undecided+
- ' | '+x.firstMoveDifferences+'/'+x.firstMoveComparisons+' | '+
+ ' | '+x.completedPairedOpenings+'/'+(x.completedPairedOpenings+x.incompletePairedOpenings)+
+  ' | '+x.firstMoveDifferences+'/'+x.firstMoveComparisons+' | '+
   x.identicalPositionMoveAgreements+'/'+x.identicalPositionComparisons+' |'),
  '**Only finalized results establish a game win/loss. This is a correlated, historical-opening experiment, not a new strength certificate.**'
 ].join('\n')+'\n';
