@@ -57,8 +57,18 @@ for(const budgetMs of config.budgets)for(const f of fixtures) {
  const part=f.category.startsWith('forced-loss-escape')||f.category.startsWith('avoid-forced-mate')?'defense':'attack';
  const outcome=candidate.correct&&!baseline.correct?'improved':
   !candidate.correct&&baseline.correct?'regressed':'unchanged';
+ // A label mismatch is not by itself a proved blunder. For the independently
+ // solved defense corpus, a mismatching legal move admits a forced loss within
+ // the stated horizon; attack mismatches may still win by a slower route.
+ const evidence=(trial)=>{
+  if(trial.correct)return f.proof?.status==='ok'?'VERIFIED_LABEL_MATCH':'ARCHIVED_LABEL_MATCH';
+  if(part==='defense' && f.proof?.status==='ok')return 'PROVEN_SHORT_HORIZON_LOSS';
+  return 'UNRESOLVED_LABEL_MISMATCH';
+ };
  const entry={id:f.id,kind:f.kind,category:f.category,part,budgetMs,
   candidateMove:candidate.move,baselineMove:baseline.move,
+  candidateEvidence:evidence(candidate),baselineEvidence:evidence(baseline),
+  candidateLabelMatch:candidate.correct,baselineLabelMatch:baseline.correct,
   candidateCorrect:candidate.correct,baselineCorrect:baseline.correct,
   changedMove:candidate.move!==baseline.move,outcome,
   candidateDepth:candidate.depth??null,baselineDepth:baseline.depth??null};
@@ -77,16 +87,16 @@ const record={schema:1,sourceCorpus:fixtureFile,corpusSha256:config.corpusSha256
  baselineWasmSha256:config.sdk.find(x=>x.name==='baseline').wasmSha256,
  candidateWasmSha256:config.sdk.find(x=>x.name==='candidate').wasmSha256,
  positionCount:fixtures.length,budgetsMs:config.budgets,byBoardAndPurpose:summary,cases,
- warning:'Archived, previously studied positions, NOT newly unseen cases. Forced-loss-escape labels concern only the fixed proof horizon. No skill improvement or promotion without additional genuinely new positions and paired games.'};
+ warning:'Correct fields are STRICT LABEL MATCHES, not general move quality. Attack-label mismatches remain UNRESOLVED unless longer forced wins are independently tested. Defense-label mismatch is a proven short-horizon loss ONLY for proof.status=ok. All results are archived and not freshly held-out; do not promote without new independent positions and games.'};
 mkdirSync('results',{recursive:true});
 writeFileSync(outFile,JSON.stringify(record,null,2)+'\n');
 const lines=['## Independently labelled obstacle tactical comparisons (archived)',
- '| Budget | Board | Type | Candidate | Baseline | Fixed | Regressed | Moves changed |',
+ '| Budget | Board | Type | Candidate labels | Baseline labels | Labels gained | Labels lost | Moves changed |',
  '|---|---|---|---:|---:|---:|---:|---:|',
  ...summary.map(g=>'| '+g.budgetMs+'ms | '+g.kind+' | '+g.part+' | '+
  g.candidateCorrect+'/'+g.total+' | '+g.baselineCorrect+'/'+g.total+' | '+
  g.improved+' | '+g.regressed+' | '+g.changedMoves+' |'),
- 'Archive-based and limited-horizon: not evidence of general playing strength.'];
+ 'Labels are not strength certificates: inspect candidateEvidence before interpreting a disagreement.'];
 const report=lines.join('\n')+'\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,report);
 console.log(report);
