@@ -34,6 +34,7 @@ try {
     assert.ok(Array.isArray(point.branches) && point.branches.some(x=>x.played));
     const holes=point.holes.join(',');
     const rootLegal=await legal(point.sfen,holes);
+    assert.ok(point.rootLegalMoveCount===undefined || point.rootLegalMoveCount===rootLegal.length,'Recorded root legal count mismatch');
     const branches=[];
     for(const branch of point.branches.slice(0,3)) {
       assert.ok(rootLegal.includes(branch.move),'Missing move in source position');
@@ -54,6 +55,8 @@ try {
     records.push({boardKind:point.kind,pair:point.pair,candidateSide:point.candidateSide,
       candidatePly:point.candidatePly,sfen:point.sfen,holes:point.holes,
       sourceFixtureSha256:point.sourceFixtureSha256??null,
+      rootLegalMoveCount:rootLegal.length,examinedCandidateMoveCount:branches.length,
+      allCandidateMovesCovered:branches.length===rootLegal.length,
       selectionCost:{maxLegalOpponentReplies:selected.maxReplies,totalLegalOpponentReplies:selected.totalReplies},
       branches,localContrast,proofScope:'Independent referee terminal/no-legal outcomes within 3 further plies after each candidate move; repetition and special live events not adjudicated.'});
   }
