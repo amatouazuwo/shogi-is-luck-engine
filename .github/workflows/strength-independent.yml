@@ -126,6 +126,8 @@ jobs:
           node --check benchmarks/strength/ci/reply-probes.mjs
           node --test benchmarks/strength/ci/reply-probes.test.mjs
           node benchmarks/strength/ci/reply-probes.mjs "$RUNNER_TEMP/referee" results/replay-checkpoints.json
+          node --test benchmarks/strength/ci/codex-review.test.mjs
+          node benchmarks/strength/ci/codex-review.mjs results/reply-probes.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -136,6 +138,7 @@ jobs:
             results/review-queue.json
             results/replay-checkpoints.json
             results/reply-probes.json
+            results/codex-review.json
           retention-days: 3
           if-no-files-found: warn
 
@@ -174,6 +177,8 @@ jobs:
           cp incoming/replay-checkpoints.json "$target/replay-checkpoints.json"
           test -s incoming/reply-probes.json
           cp incoming/reply-probes.json "$target/reply-probes.json"
+          test -s incoming/codex-review.json
+          cp incoming/codex-review.json "$target/codex-review.json"
           printf '%s\n' "$SOURCE_SHA" > "$target/source-commit.txt"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
