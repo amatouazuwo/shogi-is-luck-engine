@@ -1,0 +1,108 @@
+{
+  "schema": 3,
+  "certificateScheme": "exists-win / forall-loss / terminal-no-legal",
+  "maxPositions": 2,
+  "selectionRule": "fewest maximum legal opponent replies then total replies",
+  "depthAfterCandidateMove": 3,
+  "maxNodesPerBranch": 300,
+  "analyzed": 2,
+  "records": [
+    {
+      "boardKind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 30,
+      "sfen": "spp2n2+L/pkb3lp1/2S+R1ppg1/nsG6/9/Ln7/2KBP+RN+p1/1S1P1PGP1/PP4P2 w G3Pp 38",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "rootLegalMoveCount": 2,
+      "examinedCandidateMoveCount": 2,
+      "allCandidateMovesCovered": true,
+      "selectionCost": {
+        "maxLegalOpponentReplies": 97,
+        "totalLegalOpponentReplies": 187
+      },
+      "branches": [
+        {
+          "move": "8d7c",
+          "played": true,
+          "outcomeForCandidate": "UNKNOWN",
+          "forcedPliesAfterMove": null,
+          "visitedNodes": 300,
+          "completeWithoutNodeCap": false,
+          "certificate": null,
+          "certificateVerified": false,
+          "certificateNodes": null
+        },
+        {
+          "move": "8b9c",
+          "played": false,
+          "outcomeForCandidate": "UNKNOWN",
+          "forcedPliesAfterMove": null,
+          "visitedNodes": 300,
+          "completeWithoutNodeCap": false,
+          "certificate": null,
+          "certificateVerified": false,
+          "certificateNodes": null
+        }
+      ],
+      "localContrast": "NOT_PROVEN",
+      "proofScope": "Independent referee terminal/no-legal outcomes within 3 further plies after each candidate move; repetition and special live events not adjudicated."
+    },
+    {
+      "boardKind": "pit",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 32,
+      "sfen": "sppb1n2+L/pkg1p1lp1/2Sp1ppg1/2SR5/1n7/1G+R3L2/3BP1N+p1/1SK2PGP1/PP1P+N1P2 w LPp 40",
+      "holes": [
+        "3e"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "rootLegalMoveCount": 2,
+      "examinedCandidateMoveCount": 2,
+      "allCandidateMovesCovered": true,
+      "selectionCost": {
+        "maxLegalOpponentReplies": 115,
+        "totalLegalOpponentReplies": 226
+      },
+      "branches": [
+        {
+          "move": "7b7c",
+          "played": true,
+          "outcomeForCandidate": "UNKNOWN",
+          "forcedPliesAfterMove": null,
+          "visitedNodes": 300,
+          "completeWithoutNodeCap": false,
+          "certificate": null,
+          "certificateVerified": false,
+          "certificateNodes": null
+        },
+        {
+          "move": "8b9c",
+          "played": false,
+          "outcomeForCandidate": "UNKNOWN",
+          "forcedPliesAfterMove": null,
+          "visitedNodes": 300,
+          "completeWithoutNodeCap": false,
+          "certificate": null,
+          "certificateVerified": false,
+          "certificateNodes": null
+        }
+      ],
+      "localContrast": "NOT_PROVEN",
+      "proofScope": "Independent referee terminal/no-legal outcomes within 3 further plies after each candidate move; repetition and special live events not adjudicated."
+    }
+  ],
+  "warning": "Finite-horizon exhaustive terminal checks only. UNKNOWN is not a draw. Short-horizon contrasts must be checked against full game rules, new holdout cases, and stronger search before declaring a general blunder."
+}
