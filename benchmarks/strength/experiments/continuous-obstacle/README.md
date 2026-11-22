@@ -1,3 +1,37 @@
+# Real Chromium browser Worker and game-turn gating (2026-11-23)
+
+The first **real Chromium browser-worker** test [45042607568](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45042607568) **PASSED** with desktop and a Playwright Pixel 7 **device emulation** profile. Both profiles executed actual compiled `rsshogi-nnue-mini` WASM from a localhost HTTP server and:
+- Successfully ran normal, pit and 3×3 black-hole searches with one reusable **module Worker**.
+- Terminated a `1500ms` native search mid-computation; the abandoned promise returned `AbortError`, the controller ignored a deliberately injected stale bestmove and a fresh Worker searched a newly positioned pit.
+- Refused a legal search result when its end-to-end wall-clock time exceeded the remaining 3-minute clock. The result was **not** applied and the Worker was retired and recreated before the next search.
+- Completed a legal native move after the timeout. No page scripting errors were observed.
+- No actual mobile phone hardware or deployed game UI was used: the Pixel 7 is Chromium device emulation. This result does NOT establish performance on a real smartphone or correctness of the game's live clock.
+
+The `continuous-controller.mjs` now prohibits returning any result if total elapsed **Worker initialization + state transmission + legal move query + native search + messaging** exceeds the caller's `clockRemainingMs`. Its previous guard was only preventing the dispatch of a turn that had already timed out; without the post-search guard, a Worker with long initialization could return a legal but time-forfeit move.
+
+A separate experiment-only `game-turn-adapter.mjs` was added for future game integration. The game's **authoritative** `snapshot()` callback must contain:
+
+```js
+{
+  sessionId: 'current-game-unique-id', // changes on new game/navigation
+  version: 41,                         // increments on every turn/board/event mutation
+  nativeCompatible: true,               // false for unsupported special events
+  sfen: '...', holes: ['5e'],
+  legalUsiMoves: ['7g7f', '2g2f'],       // MUST come from the GAME's rules, not the AI
+  clockRemainingMs: 180000
+}
+```
+
+The game's **synchronous** `applyMove(bestmove, expectedPosition)` must itself confirm that the same session/version/current board remain and return `true` only if the move has been applied. On special events that change obstacles or available moves, position changes, disconnect, navigation or a game end, call **`await adapter.invalidate()`**. If a position changes without this call, the adapter still rejects the old result after it completes because the current session/version/SFEN/hole mask no longer matches; calling invalidate immediately also *stops* unnecessary work.
+
+The adapter rejects moves after wall-clock expiry, unsupported special effects, stale sessions/revisions, and moves absent from either the before/after **game** legal lists. It never fabricates a fallback move, guesses game-rule adjudication or penalizes neutral unfinished games. It is NOT wired into the production game's `kickCPU` / clock / 1% event workflow. The real event dispatcher must set `nativeCompatible=false` for events with semantics rsshogi cannot evaluate directly, otherwise the game may apply an inapplicable move despite engine legality.
+
+The adapter's isolated game-session, event, timer and move-acceptance tests passed in [45042875267](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45042875267). A second Chromium [browser integration trial 45043023102](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45043023102) was started to combine the actual WASM Worker with a **simulated** game session and special-event invalidation. Do not claim that second trial succeeded or that the live game is integrated unless the actual run is verified.
+
+Keep draft PR #3 experimental and unmerged. The static hole-aware NNUE correction has no observed native-strength gain; the native-continuous Worker was promising on some archived and normal starts but **did not establish consistent improvement on newly sampled hole placements**. Production adoption must require both that playing-strength gate and true UI/clock/cancellation integration.
+
+---
+
 # FOLLOW-UP RESULTS — novel obstacle combinations and normal-board fidelity verified
 
 The newer tests **COMPLETED successfully** in GitHub Actions and use the exact same engine and embedded NNUE (only the Worker differs):
