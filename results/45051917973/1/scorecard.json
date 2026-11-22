@@ -1,0 +1,468 @@
+{
+  "schema": 1,
+  "workflowCommit": "2f79a422446297b3eccd0d2b393e6cfeec61393e",
+  "generatedAt": "2026-11-22T17:56:21.310Z",
+  "notice": "Archived openings, not independent fresh holdout; do not automatically promote AI. Unfinished games are bounds, not draws. Do not pool overlapping seeds across budgets or types.",
+  "reports": [
+    {
+      "file": "results/matches.jsonl",
+      "config": {
+        "event": "config",
+        "budget": 100,
+        "opponentBudget": 100,
+        "cap": 60,
+        "pairs": 1,
+        "offset": 0,
+        "fixtureSha": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+        "candidateSha": "0d88d8f2fb1f13390f8ea017d1df35e9444873ebf01e56dceaef0f4a4c0425a4",
+        "candidateWorkerSha": "fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2",
+        "referenceSha": "1fb71d0527998728b00deb4bc10a5c40aa17bbe912d59df82cdc0719e5404aed",
+        "node": "v22.23.5",
+        "opponent": "reference",
+        "clockMs": 180000
+      },
+      "overall": {
+        "win": 2,
+        "loss": 1,
+        "draw": 0,
+        "unfinished": 1,
+        "games": 4,
+        "scoreBoundsPct": [
+          50,
+          75
+        ],
+        "candidateMoves": 80,
+        "meanSearchWallMs": 102,
+        "meanDepth": 6.26,
+        "meanNodes": 16090.44,
+        "overBudget50": 0
+      },
+      "byKind": [
+        {
+          "kind": "pit",
+          "uniquePairs": 1,
+          "win": 1,
+          "loss": 0,
+          "draw": 0,
+          "unfinished": 1,
+          "games": 2,
+          "scoreBoundsPct": [
+            50,
+            100
+          ],
+          "candidateMoves": 51,
+          "meanSearchWallMs": 101.95,
+          "meanDepth": 5.82,
+          "meanNodes": 16203.78,
+          "overBudget50": 0,
+          "candidateSente": {
+            "win": 1,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 0,
+            "games": 1,
+            "scoreBoundsPct": [
+              100,
+              100
+            ],
+            "candidateMoves": 21,
+            "meanSearchWallMs": 102.06,
+            "meanDepth": 5.43,
+            "meanNodes": 14128.95,
+            "overBudget50": 0
+          },
+          "candidateGote": {
+            "win": 0,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 1,
+            "games": 1,
+            "scoreBoundsPct": [
+              0,
+              100
+            ],
+            "candidateMoves": 30,
+            "meanSearchWallMs": 101.87,
+            "meanDepth": 6.1,
+            "meanNodes": 17656.17,
+            "overBudget50": 0
+          },
+          "pairDirections": {
+            "positive": 0,
+            "negative": 0,
+            "tied": 0,
+            "unresolved": 1
+          },
+          "exploratoryExactSignP": null,
+          "assessment": "INSUFFICIENT_SAMPLE_OR_UNFINISHED"
+        },
+        {
+          "kind": "blackhole",
+          "uniquePairs": 1,
+          "win": 1,
+          "loss": 1,
+          "draw": 0,
+          "unfinished": 0,
+          "games": 2,
+          "scoreBoundsPct": [
+            50,
+            50
+          ],
+          "candidateMoves": 29,
+          "meanSearchWallMs": 102.08,
+          "meanDepth": 7.03,
+          "meanNodes": 15891.1,
+          "overBudget50": 0,
+          "candidateSente": {
+            "win": 1,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 0,
+            "games": 1,
+            "scoreBoundsPct": [
+              100,
+              100
+            ],
+            "candidateMoves": 13,
+            "meanSearchWallMs": 102.1,
+            "meanDepth": 7.08,
+            "meanNodes": 15738.15,
+            "overBudget50": 0
+          },
+          "candidateGote": {
+            "win": 0,
+            "loss": 1,
+            "draw": 0,
+            "unfinished": 0,
+            "games": 1,
+            "scoreBoundsPct": [
+              0,
+              0
+            ],
+            "candidateMoves": 16,
+            "meanSearchWallMs": 102.05,
+            "meanDepth": 7,
+            "meanNodes": 16015.38,
+            "overBudget50": 0
+          },
+          "pairDirections": {
+            "positive": 0,
+            "negative": 0,
+            "tied": 1,
+            "unresolved": 0
+          },
+          "exploratoryExactSignP": null,
+          "assessment": "INSUFFICIENT_SAMPLE_OR_UNFINISHED"
+        }
+      ]
+    },
+    {
+      "file": "results/direct.jsonl",
+      "config": {
+        "event": "config",
+        "budget": 100,
+        "opponentBudget": 100,
+        "cap": 60,
+        "pairs": 1,
+        "offset": 0,
+        "fixtureSha": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+        "candidateSha": "0d88d8f2fb1f13390f8ea017d1df35e9444873ebf01e56dceaef0f4a4c0425a4",
+        "candidateWorkerSha": "fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2",
+        "baselineSha": "18916f297bc428a9167f1656ce5f865c9b7a9beb13a832dd8722b35f1bf26448",
+        "baselineWorkerSha": "fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2",
+        "referenceSha": "1fb71d0527998728b00deb4bc10a5c40aa17bbe912d59df82cdc0719e5404aed",
+        "node": "v22.23.5",
+        "opponent": "baseline",
+        "clockMs": 180000
+      },
+      "overall": {
+        "win": 2,
+        "loss": 1,
+        "draw": 0,
+        "unfinished": 1,
+        "games": 4,
+        "scoreBoundsPct": [
+          50,
+          75
+        ],
+        "candidateMoves": 98,
+        "meanSearchWallMs": 102.02,
+        "meanDepth": 5.74,
+        "meanNodes": 13895.4,
+        "overBudget50": 0
+      },
+      "byKind": [
+        {
+          "kind": "pit",
+          "uniquePairs": 1,
+          "win": 1,
+          "loss": 0,
+          "draw": 0,
+          "unfinished": 1,
+          "games": 2,
+          "scoreBoundsPct": [
+            50,
+            100
+          ],
+          "candidateMoves": 54,
+          "meanSearchWallMs": 101.99,
+          "meanDepth": 5.54,
+          "meanNodes": 13981.76,
+          "overBudget50": 0,
+          "candidateSente": {
+            "win": 1,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 0,
+            "games": 1,
+            "scoreBoundsPct": [
+              100,
+              100
+            ],
+            "candidateMoves": 24,
+            "meanSearchWallMs": 102.01,
+            "meanDepth": 6.33,
+            "meanNodes": 14596.29,
+            "overBudget50": 0
+          },
+          "candidateGote": {
+            "win": 0,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 1,
+            "games": 1,
+            "scoreBoundsPct": [
+              0,
+              100
+            ],
+            "candidateMoves": 30,
+            "meanSearchWallMs": 101.98,
+            "meanDepth": 4.9,
+            "meanNodes": 13490.13,
+            "overBudget50": 0
+          },
+          "pairDirections": {
+            "positive": 0,
+            "negative": 0,
+            "tied": 0,
+            "unresolved": 1
+          },
+          "exploratoryExactSignP": null,
+          "assessment": "INSUFFICIENT_SAMPLE_OR_UNFINISHED"
+        },
+        {
+          "kind": "blackhole",
+          "uniquePairs": 1,
+          "win": 1,
+          "loss": 1,
+          "draw": 0,
+          "unfinished": 0,
+          "games": 2,
+          "scoreBoundsPct": [
+            50,
+            50
+          ],
+          "candidateMoves": 44,
+          "meanSearchWallMs": 102.04,
+          "meanDepth": 6,
+          "meanNodes": 13789.41,
+          "overBudget50": 0,
+          "candidateSente": {
+            "win": 1,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 0,
+            "games": 1,
+            "scoreBoundsPct": [
+              100,
+              100
+            ],
+            "candidateMoves": 21,
+            "meanSearchWallMs": 102.23,
+            "meanDepth": 5.19,
+            "meanNodes": 13536.38,
+            "overBudget50": 0
+          },
+          "candidateGote": {
+            "win": 0,
+            "loss": 1,
+            "draw": 0,
+            "unfinished": 0,
+            "games": 1,
+            "scoreBoundsPct": [
+              0,
+              0
+            ],
+            "candidateMoves": 23,
+            "meanSearchWallMs": 101.87,
+            "meanDepth": 6.74,
+            "meanNodes": 14020.43,
+            "overBudget50": 0
+          },
+          "pairDirections": {
+            "positive": 0,
+            "negative": 0,
+            "tied": 1,
+            "unresolved": 0
+          },
+          "exploratoryExactSignP": null,
+          "assessment": "INSUFFICIENT_SAMPLE_OR_UNFINISHED"
+        }
+      ]
+    },
+    {
+      "file": "results/normal.jsonl",
+      "config": {
+        "event": "config",
+        "budget": 100,
+        "opponentBudget": 100,
+        "cap": 60,
+        "pairs": 1,
+        "offset": 0,
+        "fixtureSha": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11",
+        "candidateSha": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+        "candidateWorkerSha": "316830de7b28042f36c118762e978d139016c2f469f2b5651f3f8f9756a1cc7f",
+        "baselineSha": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+        "baselineWorkerSha": "7357552f5cf6bcea12fa6105f336cc612f790f1d1d6d01577856332584a5a0da",
+        "referenceSha": "1fb71d0527998728b00deb4bc10a5c40aa17bbe912d59df82cdc0719e5404aed",
+        "node": "v22.23.5",
+        "opponent": "baseline",
+        "clockMs": 180000
+      },
+      "overall": {
+        "win": 1,
+        "loss": 0,
+        "draw": 0,
+        "unfinished": 3,
+        "games": 4,
+        "scoreBoundsPct": [
+          25,
+          100
+        ],
+        "candidateMoves": 115,
+        "meanSearchWallMs": 101.67,
+        "meanDepth": 7.31,
+        "meanNodes": 13262.99,
+        "overBudget50": 0
+      },
+      "byKind": [
+        {
+          "kind": "hirate",
+          "uniquePairs": 1,
+          "win": 0,
+          "loss": 0,
+          "draw": 0,
+          "unfinished": 2,
+          "games": 2,
+          "scoreBoundsPct": [
+            0,
+            100
+          ],
+          "candidateMoves": 60,
+          "meanSearchWallMs": 101.74,
+          "meanDepth": 7.65,
+          "meanNodes": 13507.93,
+          "overBudget50": 0,
+          "candidateSente": {
+            "win": 0,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 1,
+            "games": 1,
+            "scoreBoundsPct": [
+              0,
+              100
+            ],
+            "candidateMoves": 30,
+            "meanSearchWallMs": 101.91,
+            "meanDepth": 7.53,
+            "meanNodes": 13787.83,
+            "overBudget50": 0
+          },
+          "candidateGote": {
+            "win": 0,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 1,
+            "games": 1,
+            "scoreBoundsPct": [
+              0,
+              100
+            ],
+            "candidateMoves": 30,
+            "meanSearchWallMs": 101.57,
+            "meanDepth": 7.77,
+            "meanNodes": 13228.03,
+            "overBudget50": 0
+          },
+          "pairDirections": {
+            "positive": 0,
+            "negative": 0,
+            "tied": 0,
+            "unresolved": 1
+          },
+          "exploratoryExactSignP": null,
+          "assessment": "INSUFFICIENT_SAMPLE_OR_UNFINISHED"
+        },
+        {
+          "kind": "game",
+          "uniquePairs": 1,
+          "win": 1,
+          "loss": 0,
+          "draw": 0,
+          "unfinished": 1,
+          "games": 2,
+          "scoreBoundsPct": [
+            50,
+            100
+          ],
+          "candidateMoves": 55,
+          "meanSearchWallMs": 101.59,
+          "meanDepth": 6.95,
+          "meanNodes": 12995.78,
+          "overBudget50": 0,
+          "candidateSente": {
+            "win": 1,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 0,
+            "games": 1,
+            "scoreBoundsPct": [
+              100,
+              100
+            ],
+            "candidateMoves": 25,
+            "meanSearchWallMs": 101.78,
+            "meanDepth": 7.96,
+            "meanNodes": 13434.6,
+            "overBudget50": 0
+          },
+          "candidateGote": {
+            "win": 0,
+            "loss": 0,
+            "draw": 0,
+            "unfinished": 1,
+            "games": 1,
+            "scoreBoundsPct": [
+              0,
+              100
+            ],
+            "candidateMoves": 30,
+            "meanSearchWallMs": 101.43,
+            "meanDepth": 6.1,
+            "meanNodes": 12630.1,
+            "overBudget50": 0
+          },
+          "pairDirections": {
+            "positive": 0,
+            "negative": 0,
+            "tied": 0,
+            "unresolved": 1
+          },
+          "exploratoryExactSignP": null,
+          "assessment": "INSUFFICIENT_SAMPLE_OR_UNFINISHED"
+        }
+      ]
+    }
+  ]
+}
