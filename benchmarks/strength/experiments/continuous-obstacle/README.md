@@ -40,3 +40,10 @@ GitHub Actions [45026414339](https://github.com/amatouazuwo/shogi-is-luck-engine
 3. If no clear benefit or unacceptable overtime, keep stock sliced Worker and record result as negative/unknown.
 4. If promising, continue to fresh opening families, implement safe cancellation, then rerun actual 3-minute game tests. No production merge or PR merge without explicit user authorization.
 
+
+## Verification and result reporting
+
+- Worker mock protocol tests in `worker.test.mjs` confirm obstacle SFEN and legal move routing, exactly one engine search per `go`, exact requested search budget, and invalid argument handling.
+- Report parser tests in `report.test.mjs` verify **same WASM bytes on both contestants**, neutral classification of unadjudicated repetition and move-cap outcomes, and preservation of matched color-swapped games. CI [45027004415](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45027004415) succeeded.
+- After the full experiment completes, use `report.mjs` on its three saved per-game JSONL archives. It reports actually decided games, neutral undecided, complete/incomplete two-color pairs, search depth, node throughput, actual per-move wall time including p95, and calls exceeding the requested budget by 50ms or 200ms.
+- Never interpret shorter games, deeper search or a limited number of archived position wins by themselves as proof of stronger general play. Even if direct games favor continuous search, safe mid-search interruption remains a mandatory future engineering requirement before promotion.
