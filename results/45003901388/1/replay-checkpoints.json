@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "verifiedGames": 8,
+  "verifiedMoves": 415,
+  "skippedTerminalMoves": 0,
+  "checkpointCount": 2,
+  "checkpoints": [
+    {
+      "file": "results/direct.jsonl",
+      "kind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "reason": "no-legal",
+      "start": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6r/9/9/G2BP+RNS1/1SlK1PGPL/PP1P+N1P2 b 2p 9",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "sourceCandidateWasmSha256": "41cf2a05ef8ffbb7279cb934e6018292aaebaf244a568199a9d0aefe8ee08b48",
+      "sourceBaselineWasmSha256": "ed491eb8426b6c8f102911c79144ee5dc4beac3354c91a1d237ca0ab280dcc75",
+      "budgetMs": 100,
+      "lastCandidatePly": 30,
+      "sfen": "spp2n2+L/p1b3lp1/2n+R1ppg1/ksG6/1N7/L1B6/4P+RN+p1/1S1K1PGP1/PP1P2P2 w GS3Pp 38",
+      "playedMove": "8d9e",
+      "legalMoveCount": 1,
+      "legalMoves": [
+        "8d9e"
+      ],
+      "notice": "Legal alternatives only, not recommended moves. No best-move or causal assessment."
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateSide": 1,
+      "reason": "no-legal",
+      "start": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6r/9/6L2/G2BP+RNS1/1SlK1PGPL/PP1P+N1P2 b 2p 9",
+      "holes": [
+        "3e"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "sourceCandidateWasmSha256": "41cf2a05ef8ffbb7279cb934e6018292aaebaf244a568199a9d0aefe8ee08b48",
+      "sourceBaselineWasmSha256": "ed491eb8426b6c8f102911c79144ee5dc4beac3354c91a1d237ca0ab280dcc75",
+      "budgetMs": 100,
+      "lastCandidatePly": 52,
+      "sfen": "spp2n2+L/p3p1lp1/5ppg1/kG7/3s5/N1Lp2L2/2G1P+RN2/1SK+N1PPP1/PP1P5 w G2Pr2bsp 60",
+      "playedMove": "9d9e",
+      "legalMoveCount": 1,
+      "legalMoves": [
+        "9d9e"
+      ],
+      "notice": "Legal alternatives only, not recommended moves. No best-move or causal assessment."
+    }
+  ],
+  "warning": "Reference-rules replay only. Does not prove parity with private game, strength improvement, or blunder causality."
+}
