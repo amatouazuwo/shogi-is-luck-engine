@@ -20,3 +20,9 @@ Separate branch: chatgpt/strength-ci. No game repository or deployment changes.
 6. PR is a draft against codex/strength-evaluation; merge only after verification. Manual dispatch may require workflow on default branch; do not merge main merely to enable it. Branch push smoke is available.
 
 Prior development history remains in HANDOVER.md and benchmarks/strength/RESULTS.md. This checkpoint is a preliminary foundation, not a completed validated benchmark system.
+
+## Follow-up checkpoint
+- Run 44999465588 succeeded including archive job. Permanent records: chatgpt/strength-results, results/44999465588/1. 100ms, 120 plies, 7 wins / 4 losses / 1 undecided against independent reference, all six candidate-black games won. Archived openings, not new evidence of improvement.
+- Legal set reconciliation added at 2eac0225; check run 44999479871 for actual outcome.
+- Workflow c9886cce adds direct paired comparison versus a separately built pinned baseline (default 56d5c1ca0e651bd73aaa717ca520b7f9309fb3e6); push smoke 1 pair per variant, 60 plies, 100ms; identical engine source smoke is not evidence of improvement. Verify CI and results branch before adoption.
+- Archive job now implemented and verified for earlier workflow; direct.jsonl and revisions.jsonl added to next archive schema. No normal-board comparison yet. Earlier TODOs above are historical; do not repeat completed work.
