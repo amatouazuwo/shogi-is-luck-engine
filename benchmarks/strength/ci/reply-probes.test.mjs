@@ -10,11 +10,11 @@ const fakeReferee = `#!/usr/bin/env node
 const readline=require('node:readline');
 for(const stream of [readline.createInterface({input:process.stdin})]) stream.on('line',line=>{
   const [cmd, sfen, holes, move]=line.split('\\t');
-  const legal=sfen==='start'?['A','B','C']:sfen.startsWith('after:')?['X','Y']:[];
+  const legal=sfen==='start'?['A','B','C']:sfen.startsWith('after:')?['X','Y']:sfen.startsWith('end:')?['Z']:[];
   if(cmd==='reset') console.log(JSON.stringify({ok:true}));
   else if(cmd==='legal') console.log(JSON.stringify({moves:legal}));
   else if(cmd==='step') console.log(JSON.stringify({sfen:sfen==='start'?'after:'+move:'end:'+move}));
-  else if(cmd==='go') console.log(JSON.stringify({bestmove:'X',depth:2,nodes:10,elapsed_ms:100}));
+  else if(cmd==='go') console.log(JSON.stringify({bestmove:holes.startsWith('end:')?'Z':'X',depth:2,nodes:10,elapsed_ms:100}));
   else console.log(JSON.stringify({error:'unsupported'}));
 });
 `;
@@ -40,6 +40,8 @@ test('compares the played move and two legal alternatives without ranking them',
   assert.deepEqual(branches.map(x=>x.move),['B','A','C']);
   assert.deepEqual(branches.map(x=>x.referenceReply),['X','X','X']);
   assert.deepEqual(branches.map(x=>x.afterReplySfen),['end:X','end:X','end:X']);
+  assert.deepEqual(branches.map(x=>x.referenceContinuation.move),['Z','Z','Z']);
+  assert.deepEqual(branches.map(x=>x.referenceContinuation.afterSfen),['end:Z','end:Z','end:Z']);
   assert.equal(branches.filter(x=>x.played).length,1);
   assert.equal(output.records[0].assessment,'UNRANKED_REPLIES_ONLY');
 });
