@@ -8,6 +8,7 @@ on:
       - 'benchmarks/strength/experiments/hole-eval/summarize-native-eval.test.mjs'
 permissions:
   contents: read
+  actions: read
 jobs:
   verify-report:
     runs-on: ubuntu-24.04
@@ -22,3 +23,34 @@ jobs:
           set -euo pipefail
           node --check benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs
           node --test benchmarks/strength/experiments/hole-eval/summarize-native-eval.test.mjs
+      - name: Download previous finished native A/B games
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download 45013783788 --repo "$GITHUB_REPOSITORY" \
+            --pattern "native-rsshogi-eval-45013783788" --dir incoming
+          find incoming -type f -print
+      - name: Validate analysis against archived real native games
+        run: |
+          set -euo pipefail
+          mapfile -t games < <(find incoming -name 'native-eval-direct-*.jsonl' -type f | sort)
+          test "${#games[@]}" -eq 2
+          node benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs \
+            results/native-eval-checked.json "${games[@]}"
+          python3 - <<'PY'
+          import json
+          r=json.load(open('results/native-eval-checked.json'))
+          assert r['total']['games']==24, r['total']
+          assert r['total']['candidateWins']==3, r['total']
+          assert r['total']['candidateLosses']==2, r['total']
+          assert r['total']['undecided']==19, r['total']
+          assert r['total']['firstMoveComparisons']==12, r['total']
+          assert r['total']['firstMoveDifferences']==3, r['total']
+          print('Cross-checked actual completed benchmark and first-move diagnostics.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-rsshogi-reviewed-summary
+          path: results/native-eval-checked.json
+          retention-days: 14
