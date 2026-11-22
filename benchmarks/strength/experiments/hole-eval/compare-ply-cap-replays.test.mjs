@@ -42,12 +42,14 @@ test('observes new games without pretending they continue earlier capped games',
  assert.equal(status,0,stderr);
  assert.deepEqual(report.totals,{oldDecided:1,oldUndecided:3,newDecided:1,newUndecided:3,
   oldUndecidedToNewDecided:1,oldDecidedToNewUndecided:1,
-  exactFullOldTrace:2,strictContinuations:1,strictContinuationAndNewDecided:1,
-  divergedBeforeOldEnd:2});
+  exactFullOldTrace:3,strictContinuations:1,strictContinuationAndNewDecided:1,
+  divergedBeforeOldEnd:1});
  assert.equal(report.byBoard.pit.oldUndecided,1);
  assert.equal(report.byBoard.blackhole.newUndecided,2);
  assert.equal(report.equalBinaryHashes,false);
  assert.equal(report.cases.find(x=>x.key==='30/pit/0').strictContinuation,true);
+ assert.equal(report.cases.find(x=>x.key==='30/pit/1').strictContinuation,false,
+  'A previously finished game cannot be counted as an extended continuation');
  assert.equal(report.cases.find(x=>x.key==='30/blackhole/0').strictContinuation,false);
 });
 test('rejects a missing color-swapped game',()=>{
