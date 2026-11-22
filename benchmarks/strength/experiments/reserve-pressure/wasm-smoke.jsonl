@@ -1,0 +1,2 @@
+OBSTACLE_WASM_SEARCH {"holes":["5e"],"bestmove":"5g2g","depth":6,"elapsed_ms":52,"hashfull":4,"nodes":1793,"ponder":"5a6b","pv":["5g2g","5a6b","2g2a+","6b7b","1i2h","7b8b","2a2b","8b7c","2b9b","7c6c"],"score":1495}
+OBSTACLE_WASM_SEARCH {"holes":["4d","5d","6d","4e","5e","6e","4f","5f","6f"],"bestmove":"5g2g","depth":8,"elapsed_ms":100,"hashfull":7,"nodes":5121,"ponder":"5a6b","pv":["5g2g","5a6b","2g2a+","6b6c","2a6a","6c5c","1i2h","5c4b","6a6c","4b3b","6c5c","3b2b","5c4c","2b3a","4c5b","3a2a","5b4c","2a3a"],"score":1605}

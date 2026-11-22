@@ -1,0 +1,142 @@
+--- a/src/eval.rs
++++ b/src/eval.rs
+@@ -1,4 +1,5 @@
+ mod nnue;
++mod reserve_pressure;
+ 
+ use std::sync::Arc;
+ 
+@@ -50,7 +51,16 @@
+     /// 探索中の局面を評価する。NNUEでは`initialize`後の`advance`/`undo`と対応していること。
+     pub(crate) fn evaluate(&mut self, position: &Position) -> i32 {
+         match &mut self.nnue {
+-            Some(nnue) => nnue.stack.evaluate(&nnue.network, position),
++            Some(nnue) => {
++                let score = nnue.stack.evaluate(&nnue.network, position);
++                let holes = position.obstacle_mask();
++                if holes.is_empty() {
++                    score
++                } else {
++                    (score + reserve_pressure::adjustment(position, holes))
++                        .clamp(-MAX_NNUE_EVAL, MAX_NNUE_EVAL)
++                }
++            }
+             None => evaluate_material(position, self.params),
+         }
+     }
+--- /dev/null
++++ b/src/eval/reserve_pressure.rs
+@@ -0,0 +1,113 @@
++use rsshogi::board::Position;
++use rsshogi::board::attack_tables::{
++    GOLD_ATTACKS, KNIGHT_ATTACKS, SILVER_ATTACKS, bishop_attacks, lance_attacks, rook_attacks,
++};
++use rsshogi::types::{Bitboard, Color, HandPiece};
++
++const MAX_ADJUSTMENT: i32 = 80;
++const CAPACITY: [i32; 5] = [0, 3, 5, 6, 7];
++
++/// Account for the loss of checking-drop options in an otherwise unchanged position.
++/// The same mask is fixed throughout search; a side with no reserves has no exposure.
++pub(super) fn adjustment(position: &Position, holes: Bitboard) -> i32 {
++    if holes.is_empty() {
++        return 0;
++    }
++    let turn = position.turn();
++    let occupied = position.pieces();
++    let lost = |side| lost_channels(position, side, occupied, holes);
++    (lost(turn.flip()) - lost(turn)).clamp(-MAX_ADJUSTMENT, MAX_ADJUSTMENT)
++}
++
++fn lost_channels(position: &Position, attacker: Color, occupied: Bitboard, holes: Bitboard) -> i32 {
++    let hand = position.hand(attacker);
++    let defender = attacker.flip();
++    let king = position.king_square(defender);
++    if hand.bits() == 0 || king.is_none() {
++        return 0;
++    }
++
++    let king_index = king.to_index();
++    let backwards = defender.to_index();
++    let empty = !occupied;
++    let blocked = occupied | holes;
++    let available = !blocked;
++    let mut lost = 0;
++
++    // Reverse the movement of a dropped piece from the king square. Any
++    // resulting lance or knight target necessarily has space to move forward.
++    if hand.count(HandPiece::KNIGHT) > 0 {
++        let targets = KNIGHT_ATTACKS[king_index][backwards];
++        lost += 5 * lost_utility(targets & empty, targets & available);
++    }
++    if hand.count(HandPiece::SILVER) > 0 {
++        let targets = SILVER_ATTACKS[king_index][backwards];
++        lost += 4 * lost_utility(targets & empty, targets & available);
++    }
++    if hand.count(HandPiece::GOLD) > 0 {
++        let targets = GOLD_ATTACKS[king_index][backwards];
++        lost += 5 * lost_utility(targets & empty, targets & available);
++    }
++    if hand.count(HandPiece::LANCE) > 0 {
++        let open = lance_attacks(king, occupied, defender) & empty;
++        if open.intersects(holes) {
++            lost += 3 * lost_utility(open, lance_attacks(king, blocked, defender) & available);
++        }
++    }
++    if hand.count(HandPiece::BISHOP) > 0 {
++        let open = bishop_attacks(king, occupied) & empty;
++        if open.intersects(holes) {
++            lost += 4 * lost_utility(open, bishop_attacks(king, blocked) & available);
++        }
++    }
++    if hand.count(HandPiece::ROOK) > 0 {
++        let open = rook_attacks(king, occupied) & empty;
++        if open.intersects(holes) {
++            lost += 4 * lost_utility(open, rook_attacks(king, blocked) & available);
++        }
++    }
++    lost
++}
++
++fn lost_utility(open: Bitboard, available: Bitboard) -> i32 {
++    CAPACITY[open.count().min(4) as usize] - CAPACITY[available.count().min(4) as usize]
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use rsshogi::{board, types::Square};
++
++    fn score(sfen: &str, squares: &[&str]) -> i32 {
++        board::init();
++        let mut position = board::position_from_sfen(sfen).expect("valid SFEN");
++        let mut holes = Bitboard::EMPTY;
++        for square in squares {
++            holes.set(Square::from_usi(square).expect("valid square"));
++        }
++        assert!(position.set_obstacle_mask(holes));
++        adjustment(&position, holes)
++    }
++
++    #[test]
++    fn closed_rook_drop_rays_help_the_defender() {
++        let holes = ["5b", "4a", "6a"];
++        assert_eq!(score("4k4/9/9/9/9/9/9/9/4K4 b R 1", &holes), -28);
++        assert_eq!(score("4k4/9/9/9/9/9/9/9/4K4 w R 1", &holes), 28);
++        assert_eq!(score("4k4/9/9/9/9/9/9/9/4K4 w r 1", &["5h", "6i", "4i"]), -28);
++    }
++
++    #[test]
++    fn knight_drop_direction_and_saturation_agree_under_color_rotation() {
++        assert_eq!(score("4k4/9/9/9/9/9/9/9/4K4 b N 1", &["4c"]), -10);
++        assert_eq!(score("4k4/9/9/9/9/9/9/9/4K4 w n 1", &["6g"]), -10);
++        assert_eq!(score("4k4/9/9/9/9/9/9/9/4K4 b 2N 1", &["4c", "6c"]), -25);
++    }
++
++    #[test]
++    fn holes_behind_piece_obstructions_and_empty_hands_are_neutral() {
++        assert_eq!(score("4k4/9/4P4/9/9/9/9/9/4K4 b R 1", &["5d"]), 0);
++        assert_eq!(score("4k4/9/9/9/9/9/9/9/4K4 w - 1", &["5b", "4a"]), 0);
++        assert_eq!(score("4k4/9/9/9/9/9/9/9/4K4 b RBGSNL 1", &[]), 0);
++    }
++}

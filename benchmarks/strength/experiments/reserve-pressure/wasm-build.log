@@ -1,0 +1,28 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling version_check v0.9.5
+   Compiling generic-array v0.14.7
+   Compiling syn v3.0.3
+   Compiling serde_core v1.0.229
+   Compiling typenum v1.20.1
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling serde v1.0.229
+   Compiling thiserror v2.0.20
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.20
+   Compiling memchr v2.8.3
+   Compiling rsshogi v1.7.2 (/workspace/work/strength/special-evaluation/rules/crates/rsshogi)
+   Compiling itoa v1.0.18
+   Compiling digest v0.10.7
+   Compiling cfg-if v1.0.5
+   Compiling ryu-js v1.0.3
+   Compiling log v0.4.33
+   Compiling serde_json_canonicalizer v0.3.2
+   Compiling sha2 v0.10.9
+   Compiling rsshogi-usi v0.2.0
+   Compiling rsshogi-nnue-mini v0.4.0 (/workspace/work/strength/special-evaluation/engine)
+    Finished `release` profile [optimized] target(s) in 48.28s
