@@ -27,6 +27,18 @@ test('replay entries retain both colors and divergent move without pretending a 
   assert.equal(x.reviewCandidates[0].lastCandidatePly,4);
   assert.match(x.caveat,/not proven blunders/);
 });
+test('replay queue preserves exact pre-move positions and prior moves',()=>{
+  const sente=mk(0,0,['a','b','c']);
+  const gote=mk(1,0,['a','d','e','f']);
+  sente.turns.forEach((t,i)=>{t.sfenBefore='sente-'+i;});
+  gote.turns.forEach((t,i)=>{t.sfenBefore='gote-'+i;});
+  const {proc,output}=run([sente,gote]);
+  assert.equal(proc.status,0,proc.stderr);
+  const x=output.entries[0];
+  assert.deepEqual(x.divergentPositions,{candidateSente:'sente-1',candidateGote:'gote-1'});
+  assert.equal(x.reviewCandidates[0].lastCandidateSfen,'gote-3');
+  assert.deepEqual(x.reviewCandidates[0].precedingMoves,['a','d','e']);
+});
 test('identical completed sequences have no divergence',()=>{
   const {proc,output}=run([mk(0,0,['a','b']),mk(1,0,['a','b'])]);
   assert.equal(proc.status,0,proc.stderr);
