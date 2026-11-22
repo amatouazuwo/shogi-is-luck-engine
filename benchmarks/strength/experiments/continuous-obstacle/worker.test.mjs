@@ -80,5 +80,8 @@ test('rejects malformed obstacle fields and replay while keeping normal position
   assert.equal(normal.result.position,'normal');
   assert.equal((await f.send('go',{depth:0,movetime_ms:100})).ok,false);
   assert.equal((await f.send('go',{depth:64})).ok,false);
+  const stop=await f.send('stop');
+  assert.equal(stop.ok,false);
+  assert.match(stop.error,/not cooperatively cancellable/);
  }finally{await f.close();}
 });
