@@ -50,6 +50,7 @@ jobs:
           node --test benchmarks/strength/ci/holdout-admit.test.mjs
           node --test benchmarks/strength/ci/tactical-delta.test.mjs
           node --test benchmarks/strength/ci/split-tactical-pair.test.mjs
+          node --check benchmarks/strength/ci/tactical-counterfactual.mjs
       - run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
       - name: Build obstacle SDK
         run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/obstacle-sdk"

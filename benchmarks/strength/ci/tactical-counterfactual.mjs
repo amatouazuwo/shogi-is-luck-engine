@@ -16,8 +16,9 @@ assert.ok(referee&&sdk&&trialFile&&corpusFile,
 const trials=readFileSync(trialFile,'utf8').trim().split('\n').map(JSON.parse);
 const config=trials.find(x=>x.event==='config');
 assert.ok(config);
-const missed=trials.filter(x=>x.event==='trial'&&x.budget===100&&x.category==='ray-blocking'&&!x.success);
-assert.ok(missed.length>0,'Expected some ray-blocking misses');
+const rayTrials=trials.filter(x=>x.event==='trial'&&x.budget===100&&x.category==='ray-blocking');
+assert.ok(rayTrials.length>0,'Missing ray-blocking trial results');
+const missed=rayTrials.filter(x=>!x.success);
 const fixtures=new Map(readFileSync(corpusFile,'utf8').trim().split('\n').map(JSON.parse).map(x=>[x.id,x]));
 const wasm=readFileSync(resolve(sdk,'rsshogi_nnue_mini.wasm'));
 const workerJs=resolve(sdk,'worker.js');
