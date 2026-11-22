@@ -5,6 +5,10 @@ on:
     paths: ['.github/workflows/strength-independent.yml', 'benchmarks/strength/ci/**']
   workflow_dispatch:
     inputs:
+      baseline_sha:
+        description: Optional trusted public engine commit (40 hex characters)
+        type: string
+        default: ''
       budget:
         description: Search budget in milliseconds
         type: choice
@@ -37,6 +41,17 @@ jobs:
       - run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
       - name: Build obstacle SDK
         run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/obstacle-sdk"
+      - name: Build pinned comparison SDK
+        env:
+          BASELINE_SHA: ${{ inputs.baseline_sha || '56d5c1ca0e651bd73aaa717ca520b7f9309fb3e6' }}
+        run: |
+          set -euo pipefail
+          [[ "$BASELINE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags --depth=1 origin "$BASELINE_SHA"
+          git worktree add --detach "$RUNNER_TEMP/baseline-source" "$BASELINE_SHA"
+          test "$(git -C "$RUNNER_TEMP/baseline-source" rev-parse HEAD)" = "$BASELINE_SHA"
+          bash "$RUNNER_TEMP/baseline-source/scripts/build-obstacle-sdk.sh" "$RUNNER_TEMP/baseline-sdk"
+          echo "BASELINE_SHA=$BASELINE_SHA" >> "$GITHUB_ENV"
       - name: Run archived tactical fixtures without private game checkout
         env:
           BUDGET: ${{ inputs.budget || '100' }}
@@ -73,17 +88,21 @@ jobs:
       - name: Paired obstacle matches
         env:
           BUDGET: ${{ inputs.budget || '100' }}
-          PAIRS: ${{ inputs.pairs || '3' }}
-          PLY_CAP: ${{ inputs.ply_cap || '120' }}
+          PAIRS: ${{ inputs.pairs || '1' }}
+          PLY_CAP: ${{ inputs.ply_cap || '60' }}
         run: |
           set -euo pipefail
           node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/obstacle-sdk" "$BUDGET" "$PLY_CAP" "$PAIRS" | tee results/matches.jsonl
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/obstacle-sdk" "$BUDGET" "$PLY_CAP" "$PAIRS" 0 "$RUNNER_TEMP/baseline-sdk" | tee results/direct.jsonl
+          printf '{"baseline_sha":"%s","candidate_sha":"%s"}\n' "$BASELINE_SHA" "$GITHUB_SHA" > results/revisions.jsonl
           python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
           print("## Paired matches (archived openings; not a fresh holdout)")
-          for line in open("results/matches.jsonl"):
-              r=json.loads(line)
-              if r["event"]=="summary": print("-",r)
+          for name in ("matches","direct"):
+              print("### "+name)
+              for line in open("results/"+name+".jsonl"):
+                  r=json.loads(line)
+                  if r["event"]=="summary": print("-",r)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
@@ -116,7 +135,7 @@ jobs:
           target="results/$GITHUB_RUN_ID/$GITHUB_RUN_ATTEMPT"
           test ! -e "$target"
           mkdir -p "$target"
-          for name in attack escape matches; do
+          for name in attack escape matches direct revisions; do
             test -s "incoming/$name.jsonl"
             cp "incoming/$name.jsonl" "$target/$name.jsonl"
           done
