@@ -103,6 +103,12 @@ export class ContinuousSearchController {
    if(!result||!legal.includes(result.bestmove))
     throw Error('Engine returned an illegal or missing move');
    const elapsedWallMs=performance.now()-started;
+   // The game's 3-minute clock includes Worker startup, message handling,
+   // position setup and JS/WASM search. Never publish a legal move *after*
+   // that remaining wall clock has expired, even if native search stayed
+   // within its per-move budget. The outer game clock remains authoritative.
+   if(clockRemainingMs!==undefined&&elapsedWallMs>=clockRemainingMs)
+    throw Error('Clock exhausted during search; no move may be applied');
    return {...result,requestedSearchMs:budget,elapsedWallMs,
     remainingClockMs:clockRemainingMs===undefined?null:clockRemainingMs-elapsedWallMs};
   }catch(err){if(this.active===op)this._discard(err);throw err;}
