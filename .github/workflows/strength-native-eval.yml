@@ -1,0 +1,109 @@
+name: Native rsshogi strength on obstacle boards (evaluation experiment)
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-native-eval.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: strength-native-eval-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  candidate-vs-current:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare pinned Rust toolchain and historical candidate base
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          git fetch --no-tags --depth=1 origin ae8d8effdb04b6b0e9f1a73a03cfafbd41843e67
+          node --check benchmarks/strength/ci/match.mjs
+          node --check benchmarks/strength/ci/verified-special-delta.mjs
+      - name: Build unchanged current obstacle rsshogi SDK
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/current-sdk"
+      - name: Build already-studied obstacle-aware NNUE candidate in isolation
+        env:
+          RUN_ENGINE_TESTS: '1'
+        run: |
+          bash benchmarks/strength/experiments/hole-eval/build-hole-aware-sdk.sh \
+            "$GITHUB_WORKSPACE" "$RUNNER_TEMP/hole-eval-sdk"
+      - name: Confirm compatible model, rules and worker interfaces
+        run: |
+          set -euo pipefail
+          (cd "$RUNNER_TEMP/current-sdk" && sha256sum -c SHA256SUMS)
+          (cd "$RUNNER_TEMP/hole-eval-sdk" && sha256sum -c SHA256SUMS)
+          cmp "$RUNNER_TEMP/current-sdk/worker.js" "$RUNNER_TEMP/hole-eval-sdk/worker.js"
+          python3 - <<'PY'
+          import json,os
+          root=os.environ['RUNNER_TEMP']
+          base=json.load(open(f'{root}/current-sdk/manifest.json'))
+          cand=json.load(open(f'{root}/hole-eval-sdk/manifest.json'))
+          # SDK formats are not identical; inspect their published roots and hashes
+          for label,obj in [('current',base),('candidate',cand)]:
+              print(label,obj.get('embedded_rsnn_sha256'),obj.get('upstream_rules',{}).get('revision'),obj.get('upstream_engine',{}).get('revision'))
+          for field in ('embedded_rsnn_sha256','cargo_lock_sha256'):
+              assert base.get(field)==cand.get(field),f'Incompatible {field}'
+          assert base['upstream_rules']['revision']==cand['upstream_rules']['revision']
+          assert base['upstream_engine']['revision']==cand['upstream_engine']['revision']
+          PY
+      - name: Compile independent referee for legal move checks
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Direct current-rsshogi versus obstacle-aware rsshogi games at 100ms
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/hole-eval-sdk" \
+            100 80 4 0 "$RUNNER_TEMP/current-sdk" obstacle \
+            benchmarks/strength/experiments/reserve-pressure/direct-openings.jsonl \
+            | tee results/native-eval-direct-100.jsonl
+      - name: Direct current-rsshogi versus obstacle-aware rsshogi games at 500ms
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/hole-eval-sdk" \
+            500 60 2 0 "$RUNNER_TEMP/current-sdk" obstacle \
+            benchmarks/strength/experiments/reserve-pressure/direct-openings.jsonl \
+            | tee results/native-eval-direct-500.jsonl
+      - name: Independent tactical safety regression for both engines
+        run: |
+          set -euo pipefail
+          (
+            cd benchmarks/strength
+            node forensics/heldout/run-heldout.mjs --corpus special-unseen/unseen-special.jsonl \
+              --sdk "candidate=$RUNNER_TEMP/hole-eval-sdk" \
+              --sdk "baseline=$RUNNER_TEMP/current-sdk" --budget 100,500 --rounds 1
+          ) | tee results/native-eval-tactics.jsonl
+          node benchmarks/strength/ci/verified-special-delta.mjs \
+            results/native-eval-tactics.jsonl \
+            benchmarks/strength/special-unseen/unseen-special.jsonl \
+            results/native-eval-tactical-delta.json
+      - name: Summarize paired results without automatic promotion
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,pathlib
+          print('## Native rsshogi obstacle-aware NNUE experiment (archive-only)')
+          for budget in (100,500):
+              path=pathlib.Path(f'results/native-eval-direct-{budget}.jsonl')
+              if not path.exists():
+                  print(f'- {budget}ms: run incomplete');continue
+              records=[json.loads(x) for x in path.read_text().splitlines() if x.strip()]
+              for row in records:
+                  if row.get('event')=='summary':
+                      print(f"- {budget}ms {row['kind']}: {row['wins']} wins, {row['losses']} losses, {row['undecided']} undecided")
+          print('These are previously prepared opening families, not fresh holdouts.')
+          print('A different short mate or a label mismatch is not automatically a blunder.')
+          print('**Never promote based on this run without broader independent paired games.**')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-rsshogi-eval-${{ github.run_id }}
+          path: results/native-eval-*
+          retention-days: 14
+          if-no-files-found: warn
