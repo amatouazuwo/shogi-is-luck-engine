@@ -10,7 +10,9 @@ assert.ok(outputPath&&filePaths.length, 'Usage: node summarize-native-eval.mjs O
 const asAverage=xs=>xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:null;
 const asNumber=v=>Number.isFinite(v)?v:null;
 const result={schema:1,generatedFrom:filePaths,experiments:[],total:{games:0,candidateWins:0,candidateLosses:0,undecided:0,
-  openingPairs:0,firstMoveDifferences:0,firstMoveComparisons:0},
+  openingPairs:0,firstMoveDifferences:0,firstMoveComparisons:0,
+  identicalPositionComparisons:0,identicalPositionMoveAgreements:0,
+  firstDivergenceCount:0},
  warning:'Native-playing-strength A/B only. Undecided ply-capped games are neither wins nor draws. First root move similarity is a diagnostic, not playing strength. Starts reused across budgets and previous experiments are correlated; do not auto-promote.'};
 for(const path of filePaths) {
  const entries=readFileSync(path,'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
@@ -22,7 +24,8 @@ for(const path of filePaths) {
  assert.equal(games.length,config.pairs*4,'Missing native direct games: '+path);
  assert.ok(Number.isInteger(config.cap)&&config.cap>0);
  const byId=new Map(),stats={games:games.length,wins:0,losses:0,undecided:0,reasonCounts:{},
-  byBoard:[],pairs:[],firstMoveDifferences:0,firstMoveComparisons:0};
+  byBoard:[],pairs:[],firstMoveDifferences:0,firstMoveComparisons:0,
+  identicalPositionComparisons:0,identicalPositionMoveAgreements:0,firstDivergenceCount:0};
  for(const game of games) {
   assert.ok(['pit','blackhole'].includes(game.kind));
   assert.ok([0,1].includes(game.candidateSide));
@@ -69,8 +72,30 @@ for(const path of filePaths) {
   const firstMoveDiff=firstA.move!==firstB.move;
   if(firstMoveDiff)stats.firstMoveDifferences++;
   stats.firstMoveComparisons++;
+  // Pairing by identical positions is valid only while the two runs have
+  // played exactly the same preceding moves. Stop at their first divergence;
+  // subsequent evaluations concern different board states.
+  let comparable=0,identical=0,firstDivergencePly=null;
+  const minimum=Math.min(start.turns.length,switchSides.turns.length);
+  for(let ply=0;ply<minimum;ply++) {
+   const first=start.turns[ply],other=switchSides.turns[ply];
+   if(first.sfenBefore!==other.sfenBefore)break;
+   assert.equal(first.side,other.side,'Identical position but inconsistent mover: '+key);
+   assert.notEqual(first.engine,other.engine,'Paired position should compare different engines: '+key);
+   comparable++;
+   if(first.move!==other.move) {
+    firstDivergencePly=ply;
+    break;
+   }
+   identical++;
+  }
+  stats.identicalPositionComparisons+=comparable;
+  stats.identicalPositionMoveAgreements+=identical;
+  if(firstDivergencePly!==null)stats.firstDivergenceCount++;
   stats.pairs.push({key,kind:start.kind,pair:start.pair,
    candidateRootMove:firstA.move,baselineRootMove:firstB.move,firstMoveDiff,
+   identicalPositionComparisons:comparable,identicalPositionMoveAgreements:identical,
+   firstDivergencePly,
    sides:[start,switchSides].map(x=>({candidateSide:x.candidateSide,
     winner:x.winner,reason:x.reason,plies:x.turns.length,
     result:x.winner===null?'UNDECIDED':x.winner===x.candidateSide?'WIN':'LOSS'}))});
@@ -91,16 +116,20 @@ for(const path of filePaths) {
  result.total.openingPairs+=stats.pairs.length;
  result.total.firstMoveComparisons+=stats.firstMoveComparisons;
  result.total.firstMoveDifferences+=stats.firstMoveDifferences;
+ result.total.identicalPositionComparisons+=stats.identicalPositionComparisons;
+ result.total.identicalPositionMoveAgreements+=stats.identicalPositionMoveAgreements;
+ result.total.firstDivergenceCount+=stats.firstDivergenceCount;
 }
 assert.equal(result.total.candidateWins+result.total.candidateLosses+result.total.undecided,result.total.games);
 mkdirSync(dirname(outputPath),{recursive:true});
 writeFileSync(outputPath,JSON.stringify(result,null,2)+'\n');
 const summary=[
  '## Paired obstacle rsshogi playing strength, capped games are UNDECIDED',
- '| Sample / budget | Candidate wins | Losses | Undecided | Different first moves |',
- '|---|---:|---:|---:|---:|',
+ '| Sample / budget | Candidate wins | Losses | Undecided | Different first moves | Same-position move agreement (before divergence) |',
+ '|---|---:|---:|---:|---:|---:|',
  ...result.experiments.map(x=>'| '+x.path+' / '+x.budgetMs+'ms | '+x.wins+' | '+x.losses+' | '+x.undecided+
- ' | '+x.firstMoveDifferences+'/'+x.firstMoveComparisons+' |'),
+ ' | '+x.firstMoveDifferences+'/'+x.firstMoveComparisons+' | '+
+  x.identicalPositionMoveAgreements+'/'+x.identicalPositionComparisons+' |'),
  '**Only finalized results establish a game win/loss. This is a correlated, historical-opening experiment, not a new strength certificate.**'
 ].join('\n')+'\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
