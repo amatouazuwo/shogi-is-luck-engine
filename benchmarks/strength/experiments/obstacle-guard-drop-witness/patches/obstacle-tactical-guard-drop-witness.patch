@@ -1,0 +1,238 @@
+--- a/src/search/obstacle_guard.rs
++++ b/src/search/obstacle_guard.rs
+@@ -2,7 +2,7 @@
+
+ use rsshogi::board::{self, Captures, Move32List, Position};
+ use rsshogi::mate::solve_mate_in_one;
+-use rsshogi::types::{Color, Move32, PieceType};
++use rsshogi::types::{Bitboard, Color, Move32, PieceType, Rank};
+ use serde::Serialize;
+ use std::time::Duration;
+
+@@ -28,12 +28,15 @@
+     pub(crate) elapsed_ms: u64,
+     pub(crate) replacement_score: Option<i32>,
+     pub(crate) exact_safety_nodes: u32,
++    pub(crate) drop_witness_leaves: u32,
+ }
+
+ struct Probe {
+     start: Instant,
+     budget: Duration,
+     nodes: u32,
++    use_drop_witness: bool,
++    drop_witness_leaves: u32,
+ }
+
+ impl Probe {
+@@ -105,8 +108,20 @@
+             return Some(true);
+         }
+         let mut moves = Move32List::new();
+-        board::generate_legal_all_move32(position, &mut moves);
++        let quiet_cannot_win = self.use_drop_witness
++            && attacking
++            && remaining == 1
++            && guaranteed_drop_after_quiet(position, attacker.flip());
++        if quiet_cannot_win {
++            self.drop_witness_leaves += 1;
++            board::movegen::generate_checks_all_move32(position, &mut moves);
++        } else {
++            board::generate_legal_all_move32(position, &mut moves);
++        }
+         for &mv in moves.as_slice() {
++            if quiet_cannot_win && !position.is_legal_move32(mv) {
++                continue;
++            }
+             position.apply_move32(mv);
+             let won = self.exact_forced(position, attacker, remaining - 1);
+             position.undo_move32(mv).expect("exact safety move was legal");
+@@ -118,6 +133,35 @@
+     }
+ }
+
++/// A quiet opponent move cannot both occupy two distinct empty drop squares and
++/// take a piece from our hand. A non-pawn drop outside check is legal on any empty
++/// square in its allowed ranks. Thus a quiet last ply cannot end the game here.
++fn guaranteed_drop_after_quiet(position: &Position, defender: Color) -> bool {
++    let hand = position.hand(defender);
++    if hand == rsshogi::types::Hand::ZERO {
++        return false;
++    }
++    let open = position.empties().and_not(position.obstacle_mask());
++    if !open.more_than_one() {
++        return false;
++    }
++    if [PieceType::GOLD, PieceType::SILVER, PieceType::BISHOP, PieceType::ROOK]
++        .into_iter()
++        .any(|piece| hand.has(piece))
++    {
++        return true;
++    }
++    let (last, second_last) = if defender == Color::BLACK {
++        (Rank::RANK_1, Rank::RANK_2)
++    } else {
++        (Rank::RANK_9, Rank::RANK_8)
++    };
++    let lance_squares = open.and_not(Bitboard::rank_mask(last));
++    (hand.has(PieceType::LANCE) && lance_squares.more_than_one())
++        || (hand.has(PieceType::KNIGHT)
++            && lance_squares.and_not(Bitboard::rank_mask(second_last)).more_than_one())
++}
++
+ /// Only checked moves and near-king captures can be proving attacker steps.
+ fn forcing_moves(position: &Position) -> Vec<(i32, Move32)> {
+     let owner = position.turn();
+@@ -184,8 +228,13 @@
+     movetime_ms: u64,
+     allow_replacement: bool,
+ ) -> ObstacleGuardOutput {
+-    let mut probe =
+-        Probe { start: Instant::now(), budget: Duration::from_millis(movetime_ms), nodes: 0 };
++    let mut probe = Probe {
++        start: Instant::now(),
++        budget: Duration::from_millis(movetime_ms),
++        nodes: 0,
++        use_drop_witness: true,
++        drop_witness_leaves: 0,
++    };
+     let mut position = source.clone_for_search();
+     let attacker = position.turn().flip();
+     let outcome = compare_after(&mut probe, &mut position, attacker, incumbent);
+@@ -212,20 +261,20 @@
+                 break;
+             }
+             position.apply_move32(candidate);
+-            let score = table
+-                .probe(tt_key(&position, 0))
+-                .map(|entry| -score_from_tt(entry.score, 1))
+-                .unwrap_or_else(|| {
++            let table_entry = table.probe(tt_key(&position, 0));
++            let score =
++                table_entry.map(|entry| -score_from_tt(entry.score, 1)).unwrap_or_else(|| {
+                     evaluator.advance(&position, candidate);
+                     let score = -evaluator.evaluate(&position);
+                     evaluator.undo();
+                     score
+                 });
+             position.undo_move32(candidate).expect("guard candidate was legal");
+-            alternatives.push((score, candidate));
++            let searched_depth = table_entry.map_or(0, |entry| entry.depth);
++            alternatives.push((score, searched_depth, candidate));
+         }
+-        alternatives.sort_by_key(|&(score, _)| std::cmp::Reverse(score));
+-        for (score, candidate) in alternatives {
++        alternatives.sort_by_key(|&(score, depth, _)| std::cmp::Reverse((score, depth)));
++        for (score, _, candidate) in alternatives {
+             // A known mate loss is an unsuitable substitute even if a selective
+             // proof fails to reconstruct the tactic within the remaining budget.
+             if score <= -MATE_TT_THRESHOLD {
+@@ -256,6 +305,7 @@
+         elapsed_ms: probe.start.elapsed().as_millis().min(u128::from(u64::MAX)) as u64,
+         replacement_score,
+         exact_safety_nodes,
++        drop_witness_leaves: probe.drop_witness_leaves,
+     }
+ }
+
+@@ -291,7 +341,13 @@
+             let attacker = position.turn().flip();
+             let losing = position.move32_from_usi(losing).unwrap();
+             let alternative = position.move32_from_usi(alternative).unwrap();
+-            let mut probe = Probe { start: Instant::now(), budget: Duration::MAX, nodes: 0 };
++            let mut probe = Probe {
++                start: Instant::now(),
++                budget: Duration::MAX,
++                nodes: 0,
++                use_drop_witness: true,
++                drop_witness_leaves: 0,
++            };
+             assert_eq!(compare_after(&mut probe, &mut position, attacker, losing), Some(true));
+             assert_eq!(
+                 compare_after(&mut probe, &mut position, attacker, alternative),
+@@ -314,7 +370,13 @@
+         let attacker = position.turn().flip();
+         let incumbent = position.move32_from_usi("6g5h").unwrap();
+         let unsafe_alternative = position.move32_from_usi("6g6f").unwrap();
+-        let mut probe = Probe { start: Instant::now(), budget: Duration::MAX, nodes: 0 };
++        let mut probe = Probe {
++            start: Instant::now(),
++            budget: Duration::MAX,
++            nodes: 0,
++            use_drop_witness: true,
++            drop_witness_leaves: 0,
++        };
+         assert_eq!(compare_after(&mut probe, &mut position, attacker, incumbent), Some(true));
+         assert_eq!(
+             compare_after(&mut probe, &mut position, attacker, unsafe_alternative),
+@@ -331,4 +393,70 @@
+         probe.nodes = MAX_NODES;
+         assert_eq!(exact_replacement_safety(&mut probe, &mut position, attacker, incumbent), None);
+     }
++
++    #[test]
++    fn dynamic_drop_proof_matches_full_leaves_in_both_hazards() {
++        board::init();
++        let arrays: &[&[&str]] =
++            &[&["5e"], &["4d", "5d", "6d", "4e", "5e", "6e", "4f", "5f", "6f"]];
++        let mut state = 696320u64;
++        let mut witnessed = 0;
++        for holes in arrays {
++            let mut mask = Bitboard::EMPTY;
++            for square in *holes {
++                mask.set(Square::from_usi(square).unwrap());
++            }
++            for _ in 0..8 {
++                let sfen = "lnsgk1snl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGK1SNL b Gg 1";
++                let mut position = board::position_from_sfen(sfen).unwrap();
++                assert!(position.set_obstacle_mask(mask));
++                for _ in 0..12 {
++                    let attacker = position.turn();
++                    if guaranteed_drop_after_quiet(&position, attacker.flip()) {
++                        let mut fast = Probe {
++                            start: Instant::now(),
++                            budget: Duration::MAX,
++                            nodes: 0,
++                            use_drop_witness: true,
++                            drop_witness_leaves: 0,
++                        };
++                        let mut exhaustive = Probe { use_drop_witness: false, ..fast };
++                        let first = fast.exact_forced(&mut position, attacker, 1);
++                        let second = exhaustive.exact_forced(&mut position, attacker, 1);
++                        assert_eq!(first, second, "{}", position.to_sfen(None));
++                        witnessed += fast.drop_witness_leaves;
++                    }
++                    let mut moves = Move32List::new();
++                    board::generate_legal_all_move32(&position, &mut moves);
++                    if moves.as_slice().is_empty() {
++                        break;
++                    }
++                    state ^= state << 13;
++                    state ^= state >> 7;
++                    state ^= state << 17;
++                    let index = (state % moves.as_slice().len() as u64) as usize;
++                    position.apply_move32(moves.as_slice()[index]);
++                }
++            }
++        }
++        assert!(witnessed >= 32, "only {witnessed} accelerated control nodes");
++    }
++
++    #[test]
++    fn no_drop_witness_without_two_unblocked_live_squares() {
++        board::init();
++        let position = board::position_from_sfen("k8/9/9/9/9/9/9/9/8K b p 1").unwrap();
++        assert!(!guaranteed_drop_after_quiet(&position, Color::WHITE));
++        let mut position = board::position_from_sfen("k8/9/9/9/9/9/9/9/8K b n 1").unwrap();
++        let abundant = guaranteed_drop_after_quiet(&position, Color::WHITE);
++        let usable = Square::from_usi("6f").unwrap();
++        let mut allowed = position.pieces();
++        allowed.set(usable);
++        for file in 1..=8 {
++            allowed.set(Square::from_usi(&format!("{file}i")).unwrap());
++        }
++        assert!(position.set_obstacle_mask(Bitboard::ALL.and_not(allowed)));
++        assert!(abundant);
++        assert!(!guaranteed_drop_after_quiet(&position, Color::WHITE));
++    }
+ }
