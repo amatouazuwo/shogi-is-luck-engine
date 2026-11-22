@@ -89,7 +89,7 @@ try{
         catch(error){throw Error('Search failed: '+error.message);}
         const elapsed=performance.now()-started;
         clocks[side]-=elapsed;
-        turns.push({side,engine:side===candidateSide?'candidate':'opponent',move:result.bestmove,depth:result.depth,nodes:result.nodes,elapsed,requestMs:ms});
+        turns.push({side,engine:side===candidateSide?'candidate':'opponent',sfenBefore:sfen,move:result.bestmove,depth:result.depth,nodes:result.nodes,elapsed,requestMs:ms});
         if(clocks[side]<=0){winner=1-side;reason='clock';break;}
         if(result.bestmove==='resign'){winner=1-side;reason='resign';break;}
         assert.ok(legal.includes(result.bestmove),'Illegal move '+result.bestmove+' in '+sfen);
