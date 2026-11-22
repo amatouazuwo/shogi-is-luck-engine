@@ -49,8 +49,38 @@ jobs:
           assert r['total']['firstMoveDifferences']==3, r['total']
           print('Cross-checked actual completed benchmark and first-move diagnostics.')
           PY
+      - name: Download completed longer 48-game experiment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download 45015813757 --repo "$GITHUB_REPOSITORY" \
+            --pattern "native-rsshogi-eval-45015813757" --dir incoming48
+          find incoming48 -type f -print
+      - name: Validate finished color-swapped 48-game report
+        run: |
+          set -euo pipefail
+          mapfile -t games < <(find incoming48 -name 'native-eval-*-*.jsonl' -type f ! -name '*tactics*' | sort)
+          test "${#games[@]}" -eq 3
+          node benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs \
+            results/native-eval-48-checked.json "${games[@]}"
+          python3 - <<'PY'
+          import json
+          r=json.load(open('results/native-eval-48-checked.json'))
+          t=r['total']
+          assert t['games']==48,t
+          assert (t['candidateWins'],t['candidateLosses'],t['undecided'])==(18,18,12),t
+          assert t['openingPairs']==24,t
+          assert t['firstMoveComparisons']==24,t
+          assert t['firstMoveDifferences']==3,t
+          assert t['completedPairedOpenings']==16,t
+          assert t['incompletePairedOpenings']==8,t
+          print('Validated all 48 matches, all 24 color-swaps and 16 completed paired openings.')
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: native-rsshogi-reviewed-summary
-          path: results/native-eval-checked.json
+          path: |
+            results/native-eval-checked.json
+            results/native-eval-48-checked.json
           retention-days: 14
