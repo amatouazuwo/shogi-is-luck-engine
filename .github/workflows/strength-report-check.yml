@@ -81,10 +81,59 @@ jobs:
           assert t['incompletePairedOpenings']==8,t
           print('Validated all 48 matches, all 24 color-swaps and 16 completed paired openings.')
           PY
+      - name: Download completed 300-ply experiment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download 45022210336 --repo "$GITHUB_REPOSITORY" \
+            --pattern "native-rsshogi-eval-45022210336" --dir incoming300
+          find incoming300 -type f -print
+      - name: Validate 300-ply results and neutral unfinished status
+        run: |
+          set -euo pipefail
+          mapfile -t games < <(find incoming300 -name 'native-eval-*-*.jsonl' -type f ! -name '*tactics*' | sort)
+          test "${#games[@]}" -eq 3
+          node benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs \
+            results/native-eval-300-checked.json "${games[@]}"
+          python3 - <<'PY'
+          import json
+          r=json.load(open('results/native-eval-300-checked.json'))
+          t=r['total']
+          assert t['games']==48,t
+          assert (t['candidateWins'],t['candidateLosses'],t['undecided'])==(19,22,7),t
+          x=next(x for x in r['experiments'] if x['plyCap']==300)
+          assert (x['wins'],x['losses'],x['undecided'])==(8,7,1),x
+          assert x['reasonCounts']['ply-cap']==1
+          assert x['byBoard'][1]['undecided']==1
+          print('Verified 300-ply 8-7-1, all 48 games 19-22-7, capped result remains neutral.')
+          PY
+      - name: Audit 160-to-300 fresh replays without pretending they continue
+        run: |
+          set -euo pipefail
+          old=$(find incoming48 -name 'native-eval-direct-100.jsonl' -type f)
+          new=$(find incoming300 -name 'native-eval-direct-100.jsonl' -type f)
+          test -f "$old"
+          test -f "$new"
+          node benchmarks/strength/experiments/hole-eval/compare-ply-cap-replays.mjs \
+            "$old" "$new" results/160-versus-300-replay-audit.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('results/160-versus-300-replay-audit.json'))
+          t=r['totals']
+          assert (r['oldCap'],r['newCap'],len(r['cases']))==(160,300,16)
+          assert (t['oldUndecided'],t['newUndecided'])==(3,1),t
+          assert t['strictContinuations']==0,t
+          assert t['divergedBeforeOldEnd']==16,t
+          print('All sixteen were fresh divergent games; no actual 160-ply continuation was observed.')
+          print('The change from three to one unfinished games is NOT causal proof about the cap.')
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: native-rsshogi-reviewed-summary
           path: |
             results/native-eval-checked.json
             results/native-eval-48-checked.json
+            results/native-eval-300-checked.json
+            results/160-versus-300-replay-audit.json
           retention-days: 14
