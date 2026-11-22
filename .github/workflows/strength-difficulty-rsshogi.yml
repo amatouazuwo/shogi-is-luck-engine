@@ -1,0 +1,97 @@
+name: Native rsshogi difficulty contrast - strongest vs strong
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-difficulty-rsshogi.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: native-rsshogi-difficulty-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  paired-strongest-vs-strong:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare exact pinned native rsshogi WASM
+        run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build unchanged obstacle-aware rsshogi with stock sliced Worker
+        run: |
+          set -euo pipefail
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/native-sdk"
+          (cd "$RUNNER_TEMP/native-sdk" && sha256sum --check SHA256SUMS)
+      - name: Build independent obstacle legal move verifier
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Sample reproducible legal obstacle masks on distinct normal formations
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/difficulty-obstacle-openings.jsonl 20261123 \
+            | tee results/difficulty-openings-manifest.json
+      - name: Actual native 1500ms versus 500ms obstacle games, reverse colors, 120-ply neutral cap
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs \
+            "$RUNNER_TEMP/referee" "$RUNNER_TEMP/native-sdk" \
+            1500 120 3 0 "$RUNNER_TEMP/native-sdk" obstacle \
+            results/difficulty-obstacle-openings.jsonl 500 \
+            | tee results/difficulty-native-1500-vs-500.jsonl
+      - name: Summarize native same-model gameplay and retain neutral outcomes
+        if: always()
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee results/difficulty-summary.json
+          import json,pathlib
+          path=pathlib.Path('results/difficulty-native-1500-vs-500.jsonl')
+          if not path.exists():
+              print(json.dumps({'status':'incomplete','note':'Native match did not finish. Do not infer strength.'}))
+          else:
+              events=[json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+              configs=[x for x in events if x['event']=='config']
+              assert len(configs)==1
+              cfg=configs[0]
+              assert (cfg['budget'],cfg['opponentBudget'])==(1500,500)
+              assert cfg['candidateSha']==cfg['baselineSha']
+              assert cfg['candidateWorkerSha']==cfg['baselineWorkerSha']
+              games=[x for x in events if x['event']=='game']
+              assert len(games)==12
+              wins=sum(x['winner'] is not None and x['winner']==x['candidateSide'] for x in games)
+              losses=sum(x['winner'] is not None and x['winner']!=x['candidateSide'] for x in games)
+              undecided=sum(x['winner'] is None for x in games)
+              assert wins+losses+undecided==12
+              assert all(x['reason'] in ('no-legal','ply-cap','repetition-unadjudicated') for x in games)
+              for kind in ['pit','blackhole']:
+                  assert len([g for g in games if g['kind']==kind])==6
+              pairs={}
+              for g in games:pairs.setdefault((g['pair'],g['kind']),[]).append(g)
+              assert len(pairs)==6
+              assert all(sorted(x['candidateSide'] for x in v)==[0,1] for v in pairs.values())
+              performance={}
+              for side in ['candidate','opponent']:
+                  moves=[t for g in games for t in g['turns'] if t['engine']==side]
+                  assert moves
+                  avg=lambda key:sum(t[key] for t in moves)/len(moves)
+                  performance[side]={'moves':len(moves),'mean_depth':round(avg('depth'),3),
+                   'mean_elapsed_ms':round(avg('elapsed'),2),
+                   'budget_overrun_50ms':sum(t['elapsed']>(1500 if side=='candidate' else 500)+50 for t in moves)}
+              summary={'status':'sample-only','games':len(games),
+                'strongest_1500_wins':wins,'strong_500_wins':losses,
+                'neutral_undecided':undecided,'paired_color_cases':len(pairs),
+                'performance':performance,'same_wasm_nnue_and_worker':True,
+                'warning':'This small correlated sample is not Elo. Capped games are neutral; a deeper search is not itself a strength proof.'}
+              print(json.dumps(summary,ensure_ascii=False))
+          PY
+          cat results/difficulty-summary.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Result log handoff
+        if: always()
+        run: |
+          echo 'Full JSONL results printed in this Actions job log (artifact quota is currently exhausted).' >> "$GITHUB_STEP_SUMMARY"
+          test -f results/difficulty-native-1500-vs-500.jsonl && tail -n 4 results/difficulty-native-1500-vs-500.jsonl || true
