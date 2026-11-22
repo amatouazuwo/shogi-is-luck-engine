@@ -1,3 +1,27 @@
+
+## TOP PRIORITY — preserve the original rsshogi playing strength on special boards (user confirmation, 2026-11-22)
+**This section supersedes any previous instruction to optimize for 1-ply/3-ply tactical test scores or referee move matching.**
+
+### Objective
+Make rsshogi-nnue-mini v0.4.0 retain as much of its normal-shogi strategic and tactical ability as practicable when the *currently realized* game position contains impassable holes or a 3×3 black hole. Do NOT predict future random events. Do NOT add a separate forced-attacking / forced-defending policy or artificially replace the engine's selected move to satisfy archived label lists. One-ply mate, three-ply mate and avoidable forced loss are useful **safety indicators**, not the primary objective.
+
+### Technical hypothesis: obstacle-awareness while preserving the engine
+- Obstacle-aware move generation, rays, legal replies, mate search and terminal detection have already been implemented and independently checked; keep these.
+- The inherited NNUE static evaluation accepts piece and hand features and currently gives the same static value for identical pieces/hands/turn with and without obstacles. Its search tree *does* incorporate obstacles, but the static leaf evaluator cannot yet directly value the restriction. This is a concrete mismatch worth testing, **not proof that it causes the observed losses**.
+- Prefer an experimentally measured, minimal *obstacle-only* evaluation supplement over replacing original NNUE weights, search algorithm, move ordering or output moves. The supplement should have an exactly zero effect when the obstacle mask is empty, preserve original legality and keep CPU-time overhead bounded.
+- The repo already contains a built/tested candidate, `benchmarks/strength/experiments/hole-eval/patches/hole-aware-eval.patch`: an obstacle-only capped correction for lost rook/bishop/lance reach and king escape. It previously scored 7 wins, 4 losses, 9 ply-cap undecided in 20 paired obstacle games over just six distinct starts; it was NOT accepted because those data cannot demonstrate a meaningful strength improvement. Also examine `experiments/reserve-pressure` only as a **separate** candidate, not an untested combined heuristic.
+- First meaningful experiment is reproducibly rerun the existing hole-aware candidate against the current, pinned **actual deployed obstacle SDK**, not an arbitrary old baseline or an engine with a different search interface. Confirm both SDKs use the same NNUE model and rules; log binary SHA and full source commit.
+
+### Decision hierarchy (in priority order)
+1. Preserve move legality and the known special-event *current-position* rules; normal boards must remain behaviorally unchanged when holes are absent.
+2. Measure overall **playing-strength difference**: candidate vs baseline, same time limits, varied obstacle layouts, multiple independent opening families, swap colors for each start. Record wins, losses, draws and unfinished games separately. Include depth, node throughput, wall-time, illegal responses and initial-load effects. Use only comparable completed paired games to support strength claims; increase sample size when evidence is inconclusive.
+3. Diagnose evaluation accuracy by comparing unchanged board/hands with different hole masks. Confirm the correction responds sensibly to lost rays, king escape and blocked drops, rather than rewarding a random coordinate. Validate blocked lines against the independent rules. Avoid tuning to known tactical labels.
+4. Use mate-in-1/3, forced-loss avoidance and 36 independently solved positions **only as supplementary safety regression tests**. A slower win or a move different from the referee is not automatically a blunder. UNKNOWN stays UNKNOWN. Do not optimize "shortest mate" as an independent goal.
+5. Accept a candidate only if stronger overall play is supported, no serious new rule/safety defects appear, and ordinary-board behavior is preserved; otherwise revert or retain as experiment. Never merge/deploy without explicit user authorization.
+
+### Concrete next implementation handoff
+Reproduce the existing `hole-aware-eval.patch` build and compare it to the same current baseline across reserved/unseen obstacle openings with 100ms and 500ms per move. Do not begin by adjusting piece weights to match oracle move choices. Investigate whether the observed NNUE obstacle sensitivity actually improves game outcomes before introducing additional correction terms.
+
 # Codex resume brief — 2026-11-27 (draft, verify before using)
 
 ## First action: read actual GitHub state
