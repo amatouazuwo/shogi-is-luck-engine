@@ -113,11 +113,18 @@ jobs:
           unzip -q "$RUNNER_TEMP/official.zip" -d "$RUNNER_TEMP/official"
           sdk="$RUNNER_TEMP/official/wasm-sdk"
           node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$sdk" 100 60 1 0 "$sdk" normal | tee results/normal.jsonl
+      - name: Generate conservative paired scorecard
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/report.mjs
+          node benchmarks/strength/ci/report.mjs results/matches.jsonl results/direct.jsonl results/normal.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: strength-tactics-${{ github.run_id }}
-          path: results/*.jsonl
+          path: |
+            results/*.jsonl
+            results/scorecard.json
           retention-days: 3
           if-no-files-found: warn
 
@@ -148,6 +155,8 @@ jobs:
             test -s "incoming/$name.jsonl"
             cp "incoming/$name.jsonl" "$target/$name.jsonl"
           done
+          test -s incoming/scorecard.json
+          cp incoming/scorecard.json "$target/scorecard.json"
           printf '%s\n' "$SOURCE_SHA" > "$target/source-commit.txt"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
