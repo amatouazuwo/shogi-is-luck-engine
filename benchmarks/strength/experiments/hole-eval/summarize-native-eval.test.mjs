@@ -9,7 +9,7 @@ function testRun(overrides={}) {
  const tmp=mkdtempSync(join(tmpdir(),'native-strength-'));
  try {
   const sf='4k4/9/9/9/9/9/9/9/4K4 b - 1';
-  const c={event:'config',opponent:'baseline',budget:100,cap:20,pairs:1,fixtureSha:'fixture',
+  const c={event:'config',opponent:'baseline',budget:100,cap:1,pairs:1,fixtureSha:'fixture',
    candidateSha:'candidate-wasm',baselineSha:'baseline-wasm'};
   const trial=(kind,side,move,winner)=>({event:'game',pair:21,kind,candidateSide:side,
    start:sf,holes:kind==='pit'?['5e']:['4e','5e','6e','4f','5f','6f','4g','5g','6g'],
@@ -57,5 +57,23 @@ test('refuses to report capped games as decisive',()=>{
   winner:0,reason:'ply-cap',turns:[{side:0,engine:side===0?'candidate':'opponent',move:'5i6h'}]});
  const {status,stderr}=testRun({games:[g('pit',0),g('pit',1),g('blackhole',0),g('blackhole',1)]});
  assert.notEqual(status,0);
- assert.match(stderr,/Ply cap incorrectly adjudicated/);
+ assert.match(stderr,/Unadjudicated game incorrectly assigned a winner/);
+});
+
+test('unadjudicated repetition is an acceptable neutral game end, not a fault',()=>{
+ const sf='4k4/9/9/9/9/9/9/9/4K4 b - 1';
+ const g=(kind,side,reason)=>({event:'game',pair:21,kind,candidateSide:side,start:sf,
+  holes:kind==='pit'?['5e']:['4e','5e','6e','4f','5f','6f','4g','5g','6g'],
+  winner:null,reason,turns:[{side:0,engine:side===0?'candidate':'opponent',move:'5i6h',
+    sfenBefore:sf,depth:1,nodes:25,elapsed:10}]});
+ // The fixture cap is one ply, so a normal cap and a repetition exit are both valid.
+ const games=[g('pit',0,'repetition-unadjudicated'),g('pit',1,'repetition-unadjudicated'),
+  g('blackhole',0,'ply-cap'),g('blackhole',1,'ply-cap')];
+ const {status,stderr,summary}=testRun({games});
+ assert.equal(status,0,stderr);
+ assert.equal(summary.total.undecided,4);
+ assert.equal(summary.experiments[0].reasonCounts['repetition-unadjudicated'],2);
+ assert.equal(summary.experiments[0].reasonCounts['ply-cap'],2);
+ assert.equal(summary.total.candidateWins,0);
+ assert.equal(summary.total.candidateLosses,0);
 });
