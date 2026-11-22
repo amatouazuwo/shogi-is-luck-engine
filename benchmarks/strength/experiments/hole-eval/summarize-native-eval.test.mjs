@@ -42,7 +42,8 @@ test('refuses a missing swapped-side game',()=>{
  const sf='4k4/9/9/9/9/9/9/9/4K4 b - 1';
  const g={event:'game',pair:21,kind:'pit',candidateSide:0,start:sf,holes:['5e'],winner:0,reason:'no-legal',
   turns:[{side:0,engine:'candidate',move:'5i6h'}]};
- const {status,stderr}=testRun({games:[g,g,g,g]});
+ const b={...g,kind:'blackhole',holes:['4e','5e','6e','4f','5f','6f','4g','5g','6g']};
+ const {status,stderr}=testRun({games:[g,g,b,b]});
  assert.notEqual(status,0);
  assert.match(stderr,/Missing one candidate side|Each opening must be played/);
 });
