@@ -11,6 +11,8 @@ on:
       - 'benchmarks/strength/experiments/continuous-obstacle/report.test.mjs'
       - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.mjs'
       - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.test.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/game-turn-adapter.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/game-turn-adapter.test.mjs'
 permissions:
   contents: read
 jobs:
@@ -32,3 +34,5 @@ jobs:
           node --test benchmarks/strength/experiments/continuous-obstacle/report.test.mjs
           node --check benchmarks/strength/experiments/continuous-obstacle/continuous-controller.mjs
           node --test benchmarks/strength/experiments/continuous-obstacle/continuous-controller.test.mjs
+          node --check benchmarks/strength/experiments/continuous-obstacle/game-turn-adapter.mjs
+          node --test benchmarks/strength/experiments/continuous-obstacle/game-turn-adapter.test.mjs
