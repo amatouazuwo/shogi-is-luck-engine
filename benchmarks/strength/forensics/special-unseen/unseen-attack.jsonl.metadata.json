@@ -1,0 +1,28 @@
+{
+  "event": "frozen",
+  "seed": 763029779,
+  "attempts": 30000,
+  "quota": 4,
+  "output": "/workspace/work/strength/special-unseen/unseen-attack.jsonl",
+  "positions": 24,
+  "tallies": {
+    "pit/3": 4,
+    "pit/5": 4,
+    "pit/7": 4,
+    "blackhole/3": 4,
+    "blackhole/5": 4,
+    "blackhole/7": 4
+  },
+  "stats": {
+    "submitted": 738,
+    "checkingProofs": 104,
+    "screenCaps": 0,
+    "fullCaps": 1
+  },
+  "oldCount": 614,
+  "corpusSha256": "ed5eb075d7be87191f86304d48b0d24625bece2c5c4e9436ac9ef43006a2ad0c",
+  "solverSha256": "f27c69be37082fbb31bf6c8c6e6de483f802a448c405b886cbd81d32f616dd1e",
+  "priorSha256": "186f2111d1d81ed25e4e573bc95a088ddd76c7a725a7bd2c3fb8a11a6e13d8a7",
+  "objective": "Shortest bounded forced win by exhausting the opponent’s legal moves. Checking-only search selects candidates; exact full-width proof supplies every answer and rejects smaller winning horizons.",
+  "generation": "Seeded constructed positions with 9–16 occupied cells and asymmetric local/remote material; no timed NNUE, no outcome tuning."
+}

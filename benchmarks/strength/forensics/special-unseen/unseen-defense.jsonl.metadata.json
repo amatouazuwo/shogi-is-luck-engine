@@ -1,0 +1,38 @@
+{
+  "source": "Independent direct tactical defense roots. No predecessor attack positions, engine results, or app changes.",
+  "objective": "After one defensive move, survive the specified opponent forcing horizon. Each root includes an unsafe move with exactly that many plies to a no-legal-move loss.",
+  "seed": 1047032007,
+  "limit": 16000,
+  "minPieces": 8,
+  "maxPieces": 11,
+  "priorRoots": 164,
+  "rows": 12,
+  "missing": [],
+  "totals": {
+    "sampled": 1005,
+    "representable": 658,
+    "near": 0,
+    "legal": 527,
+    "fastProbes": 2424,
+    "fullProbes": 22,
+    "rejectedCap": 4,
+    "fastCap": 0
+  },
+  "sha256": "5cb549448866c515bef89ec855637c52373953c9f8fc78f114463b6405cb2d52",
+  "generatorSha256": "aaa35b9e709bc1dcee2316a31113e44aa875dcbfa6ff0aa5dee337e8d4848f2b",
+  "solverSha256": "f27c69be37082fbb31bf6c8c6e6de483f802a448c405b886cbd81d32f616dd1e",
+  "sideAndHorizon": {
+    "blackhole/3/0": 1,
+    "blackhole/3/1": 1,
+    "blackhole/5/0": 1,
+    "blackhole/5/1": 1,
+    "blackhole/7/0": 1,
+    "blackhole/7/1": 1,
+    "pit/3/0": 1,
+    "pit/3/1": 1,
+    "pit/5/0": 1,
+    "pit/5/1": 1,
+    "pit/7/0": 1,
+    "pit/7/1": 1
+  }
+}
