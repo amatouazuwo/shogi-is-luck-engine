@@ -67,6 +67,8 @@ try {
     records.push({file:point.file,kind:point.kind,pair:point.pair,candidateSide:point.candidateSide,
       candidatePly:point.candidatePly,sfen:point.sfen,holes:point.holes,
       sourceFixtureSha256:point.sourceFixtureSha256,budgetMs:point.budgetMs,
+      rootLegalMoveCount:actual.length,exploredCandidateMoveCount:branches.length,
+      allCandidateMovesCovered:branches.length===actual.length,
       branches,assessment:'UNRANKED_REPLIES_ONLY'});
   }
 } finally {child.stdin.end();child.kill();}
