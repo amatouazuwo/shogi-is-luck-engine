@@ -102,12 +102,12 @@ const output={schema:1,corpusSha256:config.corpusSha256,
   'Do not change the engine or promote it based on this diagnostic alone.'
  ]};
 writeFileSync('results/tactical-counterfactual.json',JSON.stringify(output,null,2)+'\n');
-const lines=['## Opponent-side counterfactual tactical diagnostics',
+const summaryLines=['## Opponent-side counterfactual tactical diagnostics',
   '| Problem | Actual move | Label move | Opponent score after actual | Opponent score after label |',
   '|---|---|---|---:|---:|',
   ...records.map(x=>'| '+x.id+' | '+x.actualMove+' | '+x.labelledGoodMove+' | '+
    (x.branches[0].opponentScore??'N/A')+' | '+(x.branches[1].opponentScore??'N/A')+' |'),
   'Scores are from the opponent side after each fixed move. NOT a move-quality ranking or a proof.'];
-const summary=lines.join('\n')+'\n';
+const summary=summaryLines.join('\n')+'\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
 console.log(summary);
