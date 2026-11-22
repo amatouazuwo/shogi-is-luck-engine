@@ -1,0 +1,82 @@
+name: Continuous rsshogi on newly sampled special-board positions
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-continuous-fresh.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: strength-continuous-fresh-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  independent-obstacle-layouts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned native rsshogi build toolchain
+        run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build unmodified baseline patched rsshogi SDK
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/base-sdk"
+      - name: Build same-WASM continuous-search experimental SDK
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs \
+            "$RUNNER_TEMP/base-sdk" "$RUNNER_TEMP/continuous-sdk"
+          cmp "$RUNNER_TEMP/base-sdk/rsshogi_nnue_mini.wasm" "$RUNNER_TEMP/continuous-sdk/rsshogi_nnue_mini.wasm"
+          cmp "$RUNNER_TEMP/base-sdk/mini.js" "$RUNNER_TEMP/continuous-sdk/mini.js"
+          (cd "$RUNNER_TEMP/continuous-sdk" && sha256sum -c SHA256SUMS)
+      - name: Compile referee that independently enforces legal obstacle moves
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Generate SIX reproducible new obstacle placements from distinct normal positions
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/continuous-fresh-openings.jsonl 20261122 \
+            | tee results/continuous-fresh-manifest.json
+      - name: Direct continuous vs sliced rsshogi, fresh six openings, 100ms, 300 plies
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/continuous-sdk" \
+            100 300 6 0 "$RUNNER_TEMP/base-sdk" obstacle \
+            results/continuous-fresh-openings.jsonl \
+            | tee results/continuous-fresh-100.jsonl
+      - name: Different think budget: first three fresh openings, 500ms, 120 plies
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/continuous-sdk" \
+            500 120 3 0 "$RUNNER_TEMP/base-sdk" obstacle \
+            results/continuous-fresh-openings.jsonl \
+            | tee results/continuous-fresh-500.jsonl
+      - name: Strict report of playing strength, timing and neutral unfinished outcomes
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -f results/continuous-fresh-100.jsonl && test -f results/continuous-fresh-500.jsonl; then
+            node benchmarks/strength/experiments/continuous-obstacle/report.mjs \
+              results/continuous-fresh-reviewed.json \
+              results/continuous-fresh-100.jsonl results/continuous-fresh-500.jsonl
+            python3 - <<'PY'
+          import json
+          x=json.load(open('results/continuous-fresh-reviewed.json'))
+          assert x['total']['games']==36
+          assert sum(g['openingPairs'] for g in x['groups'])==9
+          assert all(g['wasmSha']==x['groups'][0]['wasmSha'] for g in x['groups'])
+          print('New placement sample: 36 paired-color games, two budgets, exact same WASM.')
+          print('Never grade unfinished games as losses or force a shorter win.')
+          PY
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-fresh-obstacle-${{ github.run_id }}
+          path: results/continuous-fresh-*
+          retention-days: 14
+          if-no-files-found: warn
