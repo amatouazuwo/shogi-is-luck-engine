@@ -78,6 +78,8 @@ try{
         const ms=Math.max(1,Math.min(budget,Math.floor(clocks[side]/20),clocks[side]-150));
         if(e){
           await e.send('position',{sfen,holes:f.holes,moves:[]});
+          const sdkLegal=await e.send('legalMoves');
+          assert.deepEqual((Array.isArray(sdkLegal)?sdkLegal:sdkLegal.result).slice().sort(),legal,'Legal move set mismatch: '+sfen);
         }
         const started=performance.now();
         let result;
