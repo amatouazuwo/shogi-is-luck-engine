@@ -1,0 +1,26 @@
+name: Isolated continuous Worker protocol checks
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/strength-continuous-worker-test.yml'
+      - 'benchmarks/strength/experiments/continuous-obstacle/worker.js'
+      - 'benchmarks/strength/experiments/continuous-obstacle/worker.test.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs'
+permissions:
+  contents: read
+jobs:
+  verify-worker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run mocked native-continuous Worker protocol tests
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/experiments/continuous-obstacle/worker.js
+          node --check benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs
+          node --test benchmarks/strength/experiments/continuous-obstacle/worker.test.mjs
