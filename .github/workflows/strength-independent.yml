@@ -51,6 +51,7 @@ jobs:
           node --test benchmarks/strength/ci/tactical-delta.test.mjs
           node --test benchmarks/strength/ci/split-tactical-pair.test.mjs
           node --check benchmarks/strength/ci/tactical-counterfactual.mjs
+          node --test benchmarks/strength/ci/verified-special-delta.test.mjs
       - run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
       - name: Build obstacle SDK
         run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/obstacle-sdk"
@@ -76,6 +77,22 @@ jobs:
           ) | tee results/tactical-paired.jsonl
           node benchmarks/strength/ci/split-tactical-pair.mjs results/tactical-paired.jsonl
           node benchmarks/strength/ci/tactical-delta.mjs results/tactical-candidate.jsonl results/tactical-baseline.jsonl 100
+      - name: Archived independently proved obstacle attack and defense A/B
+        run: |
+          set -euo pipefail
+          (
+            cd benchmarks/strength
+            node forensics/heldout/run-heldout.mjs --corpus special-unseen/unseen-special.jsonl --sdk "candidate=$RUNNER_TEMP/obstacle-sdk" --sdk "baseline=$RUNNER_TEMP/baseline-sdk" --budget 100,500 --rounds 1
+          ) | tee results/verified-special-paired.jsonl
+          node benchmarks/strength/ci/verified-special-delta.mjs results/verified-special-paired.jsonl benchmarks/strength/special-unseen/unseen-special.jsonl results/verified-special-delta.json
+      - name: Known forced-loss escape regressions (archived two cases)
+        run: |
+          set -euo pipefail
+          (
+            cd benchmarks/strength
+            node forensics/heldout/run-heldout.mjs --corpus experiments/obstacle-tactical-guard/positions.jsonl --sdk "candidate=$RUNNER_TEMP/obstacle-sdk" --sdk "baseline=$RUNNER_TEMP/baseline-sdk" --budget 100,500 --rounds 1
+          ) | tee results/known-loss-paired.jsonl
+          node benchmarks/strength/ci/verified-special-delta.mjs results/known-loss-paired.jsonl benchmarks/strength/experiments/obstacle-tactical-guard/positions.jsonl results/known-loss-delta.json
       - name: Run archived tactical fixtures without private game checkout
         env:
           BUDGET: ${{ inputs.budget || '100' }}
@@ -167,6 +184,8 @@ jobs:
             results/terminal-proofs.json
             results/tactical-delta.json
             results/tactical-counterfactual.json
+            results/verified-special-delta.json
+            results/known-loss-delta.json
           retention-days: 3
           if-no-files-found: warn
 
@@ -193,7 +212,7 @@ jobs:
           target="results/$GITHUB_RUN_ID/$GITHUB_RUN_ATTEMPT"
           test ! -e "$target"
           mkdir -p "$target"
-          for name in attack escape matches direct revisions normal tactical-candidate tactical-baseline; do
+          for name in attack escape matches direct revisions normal tactical-candidate tactical-baseline verified-special-paired known-loss-paired; do
             test -s "incoming/$name.jsonl"
             cp "incoming/$name.jsonl" "$target/$name.jsonl"
           done
@@ -213,6 +232,10 @@ jobs:
           cp incoming/tactical-delta.json "$target/tactical-delta.json"
           test -s incoming/tactical-counterfactual.json
           cp incoming/tactical-counterfactual.json "$target/tactical-counterfactual.json"
+          for name in verified-special-delta known-loss-delta; do
+            test -s "incoming/$name.json"
+            cp "incoming/$name.json" "$target/$name.json"
+          done
           printf '%s\n' "$SOURCE_SHA" > "$target/source-commit.txt"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
