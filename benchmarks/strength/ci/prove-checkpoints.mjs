@@ -3,6 +3,7 @@ import {readFileSync,writeFileSync,mkdirSync,appendFileSync} from 'node:fs';
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import {proveTerminal,candidateOutcome} from './terminal-proof.mjs';
+import {prioritizeProofPositions} from './proof-priority.mjs';
 
 // Prove finite terminal outcomes for at most two archived diagnostic positions.
 // Every non-proven outcome is UNKNOWN. This is NOT a global claim of move quality.
@@ -28,7 +29,8 @@ const legal=async(sfen,holes)=>(await query('legal',sfen,holes)).moves;
 const step=async(sfen,holes,move)=>(await query('step',sfen,holes,move)).sfen;
 const records=[];
 try {
-  for(const point of payload.records.slice(0,2)) {
+  for(const selected of prioritizeProofPositions(payload.records,2)) {
+    const point=selected.record;
     assert.ok(Array.isArray(point.branches) && point.branches.some(x=>x.played));
     const holes=point.holes.join(',');
     const rootLegal=await legal(point.sfen,holes);
@@ -52,11 +54,12 @@ try {
     records.push({boardKind:point.kind,pair:point.pair,candidateSide:point.candidateSide,
       candidatePly:point.candidatePly,sfen:point.sfen,holes:point.holes,
       sourceFixtureSha256:point.sourceFixtureSha256??null,
+      selectionCost:{maxLegalOpponentReplies:selected.maxReplies,totalLegalOpponentReplies:selected.totalReplies},
       branches,localContrast,proofScope:'Independent referee terminal/no-legal outcomes within 3 further plies after each candidate move; repetition and special live events not adjudicated.'});
   }
 }finally{child.stdin.end();child.kill();}
 mkdirSync('results',{recursive:true});
-const result={schema:1,maxPositions:2,depthAfterCandidateMove:3,maxNodesPerBranch:300,
+const result={schema:2,maxPositions:2,selectionRule:'fewest maximum legal opponent replies then total replies',depthAfterCandidateMove:3,maxNodesPerBranch:300,
   analyzed:records.length,records,warning:'Finite-horizon exhaustive terminal checks only. UNKNOWN is not a draw. Short-horizon contrasts must be checked against full game rules, new holdout cases, and stronger search before declaring a general blunder.'};
 writeFileSync('results/terminal-proofs.json',JSON.stringify(result,null,2)+'\n');
 const proved=records.filter(r=>r.localContrast!=='NOT_PROVEN').length;
