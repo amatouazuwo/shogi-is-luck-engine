@@ -43,9 +43,10 @@ jobs:
         run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/obstacle-sdk"
       - name: Build pinned comparison SDK
         env:
-          BASELINE_SHA: ${{ inputs.baseline_sha || '56d5c1ca0e651bd73aaa717ca520b7f9309fb3e6' }}
+          BASELINE_SHA: ${{ inputs.baseline_sha }}
         run: |
           set -euo pipefail
+          BASELINE_SHA="${BASELINE_SHA:-$(node -p 'require("./benchmarks/strength/ci/baselines.json").obstacle.commit')}"
           [[ "$BASELINE_SHA" =~ ^[0-9a-f]{40}$ ]]
           git fetch --no-tags --depth=1 origin "$BASELINE_SHA"
           git worktree add --detach "$RUNNER_TEMP/baseline-source" "$BASELINE_SHA"
@@ -104,6 +105,14 @@ jobs:
                   r=json.loads(line)
                   if r["event"]=="summary": print("-",r)
           PY
+      - name: Normal-board continuous search comparison
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/official.zip" https://github.com/nyoki-mtl/rsshogi-nnue-mini/releases/download/v0.4.0/rsshogi-nnue-mini-v0.4.0-wasm-sdk.zip
+          echo "3d05b85949f5ae3bce3cef1f0678a3aeb31d9e8f935565bcc09da63bb19dd1d1  $RUNNER_TEMP/official.zip" | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/official.zip" -d "$RUNNER_TEMP/official"
+          sdk="$RUNNER_TEMP/official/wasm-sdk"
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$sdk" 100 60 1 0 "$sdk" normal | tee results/normal.jsonl
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -135,7 +144,7 @@ jobs:
           target="results/$GITHUB_RUN_ID/$GITHUB_RUN_ATTEMPT"
           test ! -e "$target"
           mkdir -p "$target"
-          for name in attack escape matches direct revisions; do
+          for name in attack escape matches direct revisions normal; do
             test -s "incoming/$name.jsonl"
             cp "incoming/$name.jsonl" "$target/$name.jsonl"
           done
