@@ -1,3 +1,17 @@
+# FINAL ADDENDUM — identical-rsshogi null control also completed
+
+Independent GitHub Actions [45017142828](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45017142828) **passed** with the **same immutable WASM SHA-256 on both competing engine roles**: `113325872d27db39e152b281bc28b954c06db6e87257a38ef8860a387d665227`. The null control played the same four paired opening families at 100ms/80 plies and first two at 500ms/60 plies as the original 24-game experiment. It records:
+- 100ms, two copies of the *same* rsshogi: nominal candidate **1 win, 5 losses, 10 unfinished** over 16 games. These role labels are arbitrary; the split itself shows that small, incomplete match samples can be misleading even without a change to the underlying engine.
+- 500ms, two copies of the *same* rsshogi: **1 win, 1 loss, 6 unfinished** over 8 games.
+- **0/12 different first-root moves**, but in subsequent *identical root positions* up until trajectories first diverged, **114/121 same moves** at 100ms and **21/25 same moves** at 500ms (135/146 agreement overall). Thus independently timed copies of the same engine can legitimately make **11 different moves across 146 comparable in-game search decisions**, despite identical WASM bytes.
+- The same-source A/B candidate-versus-baseline experiment gave **43/55** equal moves before divergence on the original 24-game sample and **68/92** on the longer 48-game sample. These are correlated trajectories and different search-length samples, NOT valid Bernoulli confidence estimates. They suggest the evaluator supplement could change decisions beyond the baseline's natural timing variability; they do NOT prove those decisions are stronger.
+
+**Adoption decision: DO NOT ADOPT the existing hole-aware leaf supplement on the available evidence.** In 48 extended direct games it scored 18 wins / 18 losses / 12 unfinished, and 16 complete color-swapped pairs consisted of 2 candidate sweeps, 1 baseline sweep and 13 split pairs. The identical-engine control verifies that time-limited move variation alone exists. No stable native-strength gain has been established. Retain the known-correct obstacle-masked rsshogi baseline, no production change. Prefer subsequent experiments that prove an improved obstacle-aware positional evaluation without substantially reducing nodes searched per time budget; calibrate against same-WASM self-play, normal-board fidelity, and independent paired games.
+
+The control is not the **same byte-for-byte WASM** as the previously separately compiled baseline build (source, upstream pins and NNUE are the same; build hash can differ across runs), so avoid claiming exact inter-run determinism. What is guaranteed is that *both contestants within the null test* used the exact same compiled binary. The workflows retain the archived logs for independent reanalysis.
+
+---
+
 # UPDATED: 48 paired obstacle games completed — no demonstrated strength gain
 
 GitHub Actions [45015813757](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45015813757) **succeeded** (all two SDK builds, rule parity, three batches of A/B games, 36 verified tactical positions at two budgets, artifact archiving).
