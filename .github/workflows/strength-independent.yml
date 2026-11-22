@@ -1,4 +1,4 @@
-name: Strength CI - independent tactics
+name: Strength CI - independent tactics and matches
 on:
   push:
     branches: [chatgpt/strength-ci]
@@ -10,6 +10,16 @@ on:
         type: choice
         options: ['100', '500', '1500']
         default: '100'
+      pairs:
+        description: Number of archived opening pairs per variant (1-6)
+        type: choice
+        options: ['1', '2', '3', '4', '5', '6']
+        default: '1'
+      ply_cap:
+        description: Maximum plies (20 is a smoke test, not strength evidence)
+        type: choice
+        options: ['20', '60', '120', '180']
+        default: '20'
 permissions:
   contents: read
 concurrency:
@@ -57,6 +67,23 @@ jobs:
               print(json.dumps({"config": configs[0], "summary": summary[0]}, indent=2))
               print("\x60\x60\x60")
               assert all(r.get("legal") is True and not r.get("error") for r in trials), "Illegal move or search failure"
+          PY
+      - name: Compile independent referee
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Paired obstacle matches
+        env:
+          BUDGET: ${{ inputs.budget || '100' }}
+          PAIRS: ${{ inputs.pairs || '1' }}
+          PLY_CAP: ${{ inputs.ply_cap || '20' }}
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/obstacle-sdk" "$BUDGET" "$PLY_CAP" "$PAIRS" | tee results/matches.jsonl
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          print("## Paired matches (archived openings; not a fresh holdout)")
+          for line in open("results/matches.jsonl"):
+              r=json.loads(line)
+              if r["event"]=="summary": print("-",r)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
