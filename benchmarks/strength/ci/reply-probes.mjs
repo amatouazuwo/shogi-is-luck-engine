@@ -5,7 +5,7 @@ import {createInterface} from 'node:readline';
 
 // Diagnostic only: for each losing choice point, compare the played move with
 // deterministic legal alternatives and independently search ONE opponent reply.
-// No value score or best-move claim is produced.
+// Both following moves are from the reference; no value score or best-move claim is produced.
 const [referee,input] = process.argv.slice(2);
 assert.ok(referee && input,'Usage: node reply-probes.mjs REFEREE replay-checkpoints.json');
 const archive=JSON.parse(readFileSync(input,'utf8'));
@@ -46,9 +46,23 @@ try {
         referenceSearch={depth:r.depth??null,nodes:r.nodes??null,elapsedMs:r.elapsed_ms??null};
         replyPosition=(await query('step',after,holes,reply)).sfen;
       }
+      // A second reference move shows one possible continuation, not a candidate-engine response.
+      let referenceContinuation=null;
+      if(replyPosition!==null) {
+        const continuationMoves=(await query('legal',replyPosition,holes)).moves.slice().sort();
+        if(continuationMoves.length) {
+          await query('reset');
+          const next=await query('go','100',replyPosition,holes);
+          assert.ok(continuationMoves.includes(next.bestmove),'Illegal reference continuation');
+          const nextPosition=(await query('step',replyPosition,holes,next.bestmove)).sfen;
+          referenceContinuation={move:next.bestmove,afterSfen:nextPosition,
+            legalCount:continuationMoves.length,depth:next.depth??null,
+            nodes:next.nodes??null,elapsedMs:next.elapsed_ms??null};
+        }
+      }
       branches.push({move,played:move===point.playedMove,afterCandidateSfen:after,
         legalOpponentReplies:replies.length,referenceReply:reply,afterReplySfen:replyPosition,
-        referenceSearch});
+        referenceSearch,referenceContinuation});
     }
     records.push({file:point.file,kind:point.kind,pair:point.pair,candidateSide:point.candidateSide,
       candidatePly:point.candidatePly,sfen:point.sfen,holes:point.holes,
@@ -58,9 +72,9 @@ try {
 } finally {child.stdin.end();child.kill();}
 mkdirSync('results',{recursive:true});
 const payload={schema:1,referenceReplyBudgetMs:100,maxPositions:4,maxAlternativesPerPosition:2,
-  records,warning:'One reference reply is not minimax, a move score, tactical proof or evidence of improvement. Archived losing lines are not fresh holdout data.'};
+  records,warning:'Two reference continuation moves are not minimax, a candidate-engine search, a move score, tactical proof or evidence of improvement. Archived losing lines are not fresh holdout data.'};
 writeFileSync('results/reply-probes.json',JSON.stringify(payload,null,2)+'\n');
 const md='## Diagnostic reply probes\nExamined '+records.length+' losing choice points and '+records.reduce((n,x)=>n+x.branches.length,0)+
-  ' played/alternative branches at 100ms reference reply search. No moves are ranked.\n';
+  ' played/alternative branches at 100ms per reference search for up to two continuation plies. No moves are ranked.\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,md);
 console.log(md);
