@@ -173,6 +173,7 @@ class StockWorker {
   async search(sfen, ms) {
     const position = await this.request('position',{sfen,moves:[]});
     const r = await this.request('go',{depth:64,movetime_ms:ms,nodes:sharedNodes},ms+1750);
+    assert.ok(Number.isFinite(position?.cpuMs) && Number.isFinite(r?.cpuMs), 'Worker CPU accounting did not return');
     return {move:r.bestmove, nodes:r.nodes, depth:r.depth, time:r.elapsed_ms,
       cpuMs:position.cpuMs+r.cpuMs,searchCpuMs:r.cpuMs};
   }

@@ -1,0 +1,213 @@
+{
+  "scope": "Normal-shogi SFEN, ignoring move number for novelty. Canonical form includes mirrored files and 180-degree color exchange.",
+  "previewFiles": [
+    {
+      "file": "openings.jsonl",
+      "sha256": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11"
+    }
+  ],
+  "priorFiles": [
+    {
+      "file": "match-stock-100-extension.jsonl",
+      "sha256": "e4ee5a74fb0fbec4527153f8cc2469dd08a288aee566687ebb1b66b2bb9f3b4e"
+    },
+    {
+      "file": "match-stock-100-second-holdout.jsonl",
+      "sha256": "23c8a4ba6136e8f9b348b1bc2bd9d83a2e940d007f8af6c9f5feee5ccc42ec90"
+    },
+    {
+      "file": "match-stock-100.jsonl",
+      "sha256": "29bae4132f6afc381fea45685ba49742726ba4bd12e24d98b813702539d3b69a"
+    },
+    {
+      "file": "match-stock-hirate-high.jsonl",
+      "sha256": "cbb6102d8de47a2e01b6e083464623a3e7bedf0de8654e7d42e7cdc655e47b3f"
+    },
+    {
+      "file": "match-stock-nodes-15000.jsonl",
+      "sha256": "d7dcd36bd717089d125a64901c2b78946a4c9e98cb2d2f353b4e73be4ea77f0c"
+    },
+    {
+      "file": "match-suisho5-20000-100.jsonl",
+      "sha256": "d407d8f6a9ccbb6f098114363bc9cd6c9e2b6a1155ee2467a237cebe2b2a08cb"
+    },
+    {
+      "file": "match-suisho5-5000-100.jsonl",
+      "sha256": "395cb08c6b28eae1b791636536ddf35054ddfedcdbf188c1fcc9f8f2b837b763"
+    },
+    {
+      "file": "match-suisho5-80000-100.jsonl",
+      "sha256": "81779ba29106c68764bd9eb9ae10be559d19dd58b435081ca1857819d76dd856"
+    },
+    {
+      "file": "normal-calibration.jsonl",
+      "sha256": "f596fe8ac68c8f0315aca01e2472e5457bea01bbec031ad6097c4e031a4421e8"
+    },
+    {
+      "file": "normal-game-primary.jsonl",
+      "sha256": "e34ace1efeaf06df4e6701fb0b39316cfa141dd21f25813605adec0b4351a323"
+    },
+    {
+      "file": "normal-hirate-primary.jsonl",
+      "sha256": "9a8b776a0475500a77ab6388c4ff52568cf0ea8150d88f9b33f9ce69c569c1de"
+    },
+    {
+      "file": "normal-smoke.jsonl",
+      "sha256": "4970de5fc1054ddc293f7840393cf1c8919f7faf54e662decef2fae8c9f6a814"
+    },
+    {
+      "file": "fixed.jsonl",
+      "sha256": "a4af9c2ee30cfe7c2b0c4fcd4aecabe394cd1d8a255321af058ca31b950a82f9"
+    }
+  ],
+  "matchFiles": [],
+  "previewCount": 16,
+  "novelty": {
+    "exact": {
+      "priorDistinct": 27,
+      "previewDistinct": 16,
+      "duplicatePreview": [],
+      "previousOverlap": []
+    },
+    "canonical": {
+      "priorDistinct": 27,
+      "previewDistinct": 16,
+      "duplicatePreview": [],
+      "previousOverlap": []
+    }
+  },
+  "profiles": [
+    {
+      "level": 100,
+      "family": "game",
+      "positions": 4,
+      "turns": {
+        "b": 4
+      },
+      "startPlies": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "boardPieces": [
+        40,
+        40,
+        40,
+        40
+      ],
+      "heldPieces": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "level": 100,
+      "family": "hirate",
+      "positions": 4,
+      "turns": {
+        "b": 4
+      },
+      "startPlies": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "boardPieces": [
+        40,
+        40,
+        40,
+        40
+      ],
+      "heldPieces": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "level": 500,
+      "family": "game",
+      "positions": 2,
+      "turns": {
+        "b": 2
+      },
+      "startPlies": [
+        0,
+        0
+      ],
+      "boardPieces": [
+        40,
+        40
+      ],
+      "heldPieces": [
+        0,
+        0
+      ]
+    },
+    {
+      "level": 500,
+      "family": "hirate",
+      "positions": 2,
+      "turns": {
+        "b": 2
+      },
+      "startPlies": [
+        8,
+        8
+      ],
+      "boardPieces": [
+        38,
+        40
+      ],
+      "heldPieces": [
+        0,
+        2
+      ]
+    },
+    {
+      "level": 1500,
+      "family": "game",
+      "positions": 2,
+      "turns": {
+        "b": 2
+      },
+      "startPlies": [
+        0,
+        0
+      ],
+      "boardPieces": [
+        40,
+        40
+      ],
+      "heldPieces": [
+        0,
+        0
+      ]
+    },
+    {
+      "level": 1500,
+      "family": "hirate",
+      "positions": 2,
+      "turns": {
+        "b": 2
+      },
+      "startPlies": [
+        10,
+        10
+      ],
+      "boardPieces": [
+        40,
+        40
+      ],
+      "heldPieces": [
+        0,
+        0
+      ]
+    }
+  ]
+}

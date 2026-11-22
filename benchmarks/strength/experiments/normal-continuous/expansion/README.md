@@ -1,15 +1,30 @@
-# 通常盤面の追加対局
+# 通常盤面の連続探索追加対局
 
-100msの前回32局で使った番号0〜7を除外した。追加は各番号で平手系とゲーム固有ランダム陣形を各1局面生成し、各局面で先後を入れ替える。100msは番号8〜11、500msは12〜13、1500msは14〜15を使用する。`openings.jsonl` は対局前に凍結した局面、手順、SDK識別子、ゲームルールのSHA-256を記録する。条件ごとに局面集合が異なるため、時間設定間の結果は同一局面での比較とは扱わない。手数上限は100msが200手、500・1500msが100手で、上限に達した棋譜を未決着とする。
+公式 `rsshogi-nnue-mini v0.4.0` の同一WASM・同一内蔵評価モデルを使用し、連続C API探索のWorkerと、公式の35ms固定スライスWorkerを比較する。ゲーム本体のルールはコミット `17b41aa8959877be81dc86ecd3477a67a3139262` に固定した。過去の通常盤面比較と同じ探索方式、合法手判定、SFEN変換を使用する。
 
-公式rsshogi-nnue-mini v0.4.0の公式WASMとモデルを両方式で共用する。前回と同じ連続探索のWorkerと公式Workerを比較する。ゲーム側の修正は探索結果を計測するコードには含めず、ゲームの合法手を固定コミットから参照する。Node.js 22.23.5、計時側はゲームの3分切れ負け、1スレッド、ハッシュ16 MiB。Worker内の `position` と `go` に使ったCPU時間を、経過時間と別に記録する。サンプル採取時のCPUアフィニティは1論理CPU。
+| 設定 | 開始局面 | 先後ペア | 局数 | 開始局面からの手数上限 |
+|---|---|---:|---:|---:|
+| 100ms | 平手由来とランダム、オフセット8〜11 | 8 | 16 | 200 |
+| 500ms | 平手由来とランダム、オフセット12〜13 | 4 | 8 | 100 |
+| 1500ms | 平手由来とランダム、オフセット14〜15 | 4 | 8 | 100 |
+
+`openings.jsonl` に固定したSFEN、ゲーム側合法手数、平手由来の手順、ランダム陣形のシードを保存した。平手は8〜10手を進めた局面、ランダム陣形は初期局面を使う。いずれも穴なし。16局面は盤面・持ち駒・手番の完全一致と180度回転・手番交換で照合し、既存の通常盤面の記録との重複は0件だった。
+
+同一開始局面で連続探索側の先後を入れ替える。1スレッド、置換表16 MiB、持ち時間は両者3分。探索要求は設定時間、残り時間の20分の1、残り時間から150msを引いた値のうち最小を使い、最低1ms。運イベントと演出の待ち時間は加えない。手数上限に達した対局は未決着として集計し、4回反復の引き分けと区別する。両側の記録が揃ったペアを棋力集計に使い、処理中の対局は別途記録する。
+
+Linuxの単一CPUに固定したNode 22で、指し手の探索を直列に実行する。`wallMs` は局面設定から探索応答までにかかった壁時計時間。`cpuMs` は局面設定と探索について計測した各WorkerスレッドのCPU時間で、ユーザー時間とシステム時間の合計。キュー待ちや他スレッドでの初期化は含まない。`searchCpuMs` は探索コマンドのみ。`summary.json` のP95は昇順95%順位。手数上限を全敗から全勝まで動かした観測得点率の範囲と、先後ペア単位の参考95%区間を保存する。各時間条件は異なる開始局面群を使う。
+
+## 再現
+
+ゲーム本体のGitチェックアウトを `GAME_REPO`、公式 v0.4.0 WASM SDKを `NORMAL_SDK` に指定する。以下のファイルを作業ディレクトリに置く。`taskset` で指定できるCPU番号を第3引数に渡す。元ログがあるディレクトリでは、別の空の作業ディレクトリを使用する。
 
 ```bash
-GAME_COMMIT=17b41aa8959877be81dc86ecd3477a67a3139262
-# GAME_REPO は当該コミットのゲームチェックアウト、SDK は公式WASM SDKの場所。
-node normal-match.mjs --repo "$GAME_REPO" --game-commit "$GAME_COMMIT" --sdk "$SDK" --level 100 --family hirate,game --pair-offset 8 --pairs 4 --ply-cap 200 > match-stock-100.jsonl
-node normal-match.mjs --repo "$GAME_REPO" --game-commit "$GAME_COMMIT" --sdk "$SDK" --level 500 --family hirate,game --pair-offset 12 --pairs 2 --ply-cap 100 > match-stock-500.jsonl
-node normal-match.mjs --repo "$GAME_REPO" --game-commit "$GAME_COMMIT" --sdk "$SDK" --level 1500 --family hirate,game --pair-offset 14 --pairs 2 --ply-cap 100 > match-stock-1500.jsonl
+mkdir -p frozen-game
+git -C "$GAME_REPO" archive 17b41aa8959877be81dc86ecd3477a67a3139262 -- \
+  index.html ai/rsshogi-position.mjs | tar -x -C frozen-game
+bash run-expansion.sh "$NORMAL_SDK" frozen-game 2
 ```
 
-同じ条件に `--validate-openings` を加えると、対局を行わずに局面を検証できる。記録より優劣を判断する場合は、先後の組を単位とし、未決着が結論に与える範囲を評価する。
+再現スクリプトはゲーム本体ファイルのSHA-256を確認し、WorkerのCPU計測を短い探索で検証してから上表の対局を順に実行する。既存ログの集計は `node summarize.mjs`。`match-stock-*-expansion.jsonl` の進捗行は長時間実行時の状況確認に使える。時間制約つきの着手と実測時間は実行機・負荷によって変動する。
+
+[公式WASM SDK](https://github.com/nyoki-mtl/rsshogi-nnue-mini/releases/tag/v0.4.0) · [固定したゲーム本体](https://github.com/amatouazuwo/shogi-is-luck/tree/17b41aa8959877be81dc86ecd3477a67a3139262)
