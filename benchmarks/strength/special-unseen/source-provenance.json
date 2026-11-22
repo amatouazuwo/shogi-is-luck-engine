@@ -1,0 +1,17 @@
+{
+  "original": {
+    "generate-attack.mjs": "b05643232945c3b707018f61fc2deff5b3eb50b17a8602c728f632a67e3f28c3",
+    "generate-defense.mjs": "aaa35b9e709bc1dcee2316a31113e44aa875dcbfa6ff0aa5dee337e8d4848f2b",
+    "position-audit.mjs": "49d5203847025e20116de7a7134f2c4272ee699a2a3dafabd296cf5d868409d5",
+    "audit-freeze.mjs": "87bcf98ee3de58be52a8a3b06f2dc8e5360671bc73d6396f6a9ec3e270cae21d"
+  },
+  "portable": {
+    "generate-attack.mjs": "a17b41e1a2b06111c20257f3cf1f6ffd60d5a8b9bba2c08f866fe07296521da3",
+    "generate-defense.mjs": "851b4e1442af7ed453ddb65bb38caf7cb7af9684b762e00de40b9af83dc835a3",
+    "position-audit.mjs": "096754df9329bcf61974936e45281fa2d8120e77fe6c1b898cb889a4e9b3d3b4",
+    "audit-freeze.mjs": "9c41e5ef4d95bc3c4701e74f8cf44b2178b005468f8d30997089fc533a324a78",
+    "game-context.mjs": "b3abac45e4dc874479ab1938171f0019f6b616f493f707a6131ccaeb5670c6c3",
+    "verify-defense-archive.mjs": "2296bf0c755edf77e338b6845a336d6c6911fbc96de6d4c252104bee375f690e"
+  },
+  "change": "The portable scripts resolve GAME_REPO and archive paths explicitly and can audit a frozen file in place. Frozen corpus bytes, the prior snapshot, and oracle labeling remain the same."
+}

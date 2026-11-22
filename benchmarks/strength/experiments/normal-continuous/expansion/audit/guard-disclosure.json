@@ -1,0 +1,139 @@
+{
+  "heldout": 36,
+  "initialTrials": 228,
+  "initialScores": {
+    "100/baseline": {
+      "attack": [
+        21,
+        24
+      ],
+      "escape": [
+        10,
+        12
+      ],
+      "known": [
+        1,
+        2
+      ]
+    },
+    "500/baseline": {
+      "attack": [
+        22,
+        24
+      ],
+      "escape": [
+        10,
+        12
+      ],
+      "known": [
+        2,
+        2
+      ]
+    },
+    "1500/baseline": {
+      "attack": [
+        22,
+        24
+      ],
+      "escape": [
+        11,
+        12
+      ],
+      "known": [
+        1,
+        2
+      ]
+    },
+    "100/guard": {
+      "attack": [
+        21,
+        24
+      ],
+      "escape": [
+        11,
+        12
+      ],
+      "known": [
+        1,
+        2
+      ]
+    },
+    "500/guard": {
+      "attack": [
+        22,
+        24
+      ],
+      "escape": [
+        9,
+        12
+      ],
+      "known": [
+        2,
+        2
+      ]
+    },
+    "1500/guard": {
+      "attack": [
+        23,
+        24
+      ],
+      "escape": [
+        9,
+        12
+      ],
+      "known": [
+        2,
+        2
+      ]
+    }
+  },
+  "initialWrongReplacements": [
+    {
+      "id": "heldout/blackhole/escape3/2",
+      "budget": 500,
+      "move": "6g6f",
+      "guard": {
+        "bestmove": "6g6f",
+        "elapsed_ms": 0,
+        "nodes": 496,
+        "proof_ms": 0,
+        "proof_nodes": 286,
+        "replacement_score": -31996,
+        "status": "replaced-proved-loss",
+        "searchedMove": "6g5h",
+        "searchedScore": -31994,
+        "searchedDepth": 18
+      }
+    },
+    {
+      "id": "heldout/blackhole/escape3/2",
+      "budget": 1500,
+      "move": "6g6f",
+      "guard": {
+        "bestmove": "6g6f",
+        "elapsed_ms": 1,
+        "nodes": 496,
+        "proof_ms": 0,
+        "proof_nodes": 286,
+        "replacement_score": -31996,
+        "status": "replaced-proved-loss",
+        "searchedMove": "6g5h",
+        "searchedScore": -31994,
+        "searchedDepth": 19
+      }
+    }
+  ],
+  "repairTrials": 56,
+  "repairWorkerTrials": 28,
+  "repairWorkerReplacements": 0,
+  "repairProofNodes": [
+    32,
+    114
+  ],
+  "repairManualTargetsRestored": 0,
+  "repairManualTargets": 8,
+  "gameObstacleSdk": {
+    "wasmSha256": "0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108",
+    "workerSha256": "fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2"
+  }
+}
