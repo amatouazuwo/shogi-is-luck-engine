@@ -2,7 +2,7 @@ name: Strength CI - independent tactics and matches
 on:
   push:
     branches: [chatgpt/strength-ci]
-    paths: ['.github/workflows/strength-independent.yml', 'benchmarks/strength/ci/**']
+    paths: ['.github/workflows/strength-independent.yml', 'benchmarks/strength/ci/**', 'patches/**', 'scripts/**']
   workflow_dispatch:
     inputs:
       baseline_sha:
@@ -52,6 +52,8 @@ jobs:
           node --test benchmarks/strength/ci/split-tactical-pair.test.mjs
       - run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
       - name: Build obstacle SDK
+        env:
+          RUN_ENGINE_ROOT_TESTS: "1"
         run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/obstacle-sdk"
       - name: Build pinned comparison SDK
         env:
