@@ -10,7 +10,7 @@ const fakeReferee = `#!/usr/bin/env node
 const readline=require('node:readline');
 for(const stream of [readline.createInterface({input:process.stdin})]) stream.on('line',line=>{
   const [cmd, sfen, holes, move]=line.split('\\t');
-  const legal=sfen==='start'?['A','B','C']:sfen.startsWith('after:')?['X','Y']:sfen.startsWith('end:')?['Z']:[];
+  const legal=sfen==='start'?['A','B','C']:(sfen??'').startsWith('after:')?['X','Y']:(sfen??'').startsWith('end:')?['Z']:[];
   if(cmd==='reset') console.log(JSON.stringify({ok:true}));
   else if(cmd==='legal') console.log(JSON.stringify({moves:legal}));
   else if(cmd==='step') console.log(JSON.stringify({sfen:sfen==='start'?'after:'+move:'end:'+move}));
