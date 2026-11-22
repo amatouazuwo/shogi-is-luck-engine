@@ -43,6 +43,10 @@ test('keeps verified attack gains separate from defense regressions',()=>{
  assert.deepEqual([attack.improved,attack.regressed],[1,0]);
  assert.deepEqual([defense.improved,defense.regressed],[0,1]);
  assert.equal(output.cases.filter(x=>x.changedMove).length,2);
+ assert.equal(output.cases.find(x=>x.part==='attack').candidateEvidence,'VERIFIED_LABEL_MATCH');
+ assert.equal(output.cases.find(x=>x.part==='attack').baselineEvidence,'UNRESOLVED_LABEL_MISMATCH');
+ assert.equal(output.cases.find(x=>x.part==='defense').candidateEvidence,'PROVEN_SHORT_HORIZON_LOSS');
+ assert.equal(output.cases.find(x=>x.part==='defense').baselineEvidence,'VERIFIED_LABEL_MATCH');
 });
 test('refuses a missing opponent observation',()=>{
  const trials=[
