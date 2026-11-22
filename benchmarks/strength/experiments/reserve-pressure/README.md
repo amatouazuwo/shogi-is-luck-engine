@@ -27,3 +27,13 @@ node fixed-control.mjs /path/to/baseline-sdk /tmp/reserve-sdk \
 ```
 
 未使用局面による評価は `forensics/heldout/run-heldout.mjs` で同じモデル・現行穴対応SDKと比較する。勝敗を測る場合は、使っていない開始局面の組ごとに先後を入れ替え、手数上限で止まった局を分けて記録する。
+
+### 実戦形式の対照用開始局面
+
+候補の採点と別に先後入替用の開始8局面を固定した。穴の種類ごとに序盤・中盤・駒数の少ない局面を含み、左右反転・先後反転を含め既存の特殊局面台帳と重複していない。生成シード4個を穴の種類間で共有するため、8局面を完全に独立な標本とは扱わない。 [固定した開始局面](direct-openings.jsonl)
+
+```bash
+node ../../obstacle-matches.mjs --game-root "$GAME_REPO" --candidate-sdk /tmp/reserve-pressure-sdk \
+  --reference /path/to/obstacle-reference --opponent baseline --holdout --offset 30 --pairs 4 \
+  --kind both --budgets 100 --ply-cap 100 > /tmp/reserve-pressure-direct-100.jsonl
+```
