@@ -34,14 +34,14 @@ try {
       assert.ok(Array.isArray(game.turns) && typeof game.start==='string' && Array.isArray(game.holes));
       const holes = game.holes.join(',');
       let sfen = game.start;
-      let lastCandidate = null;
+      const candidatePositions = [];
       for(let i=0;i<game.turns.length;i++) {
         const turn=game.turns[i];
         assert.equal(turn.sfenBefore, sfen, 'SFEN mismatch: '+file+' / '+game.kind+' / '+game.pair+' ply '+(i+1));
         const side=sfen.split(' ')[1]==='b'?0:1;
         assert.equal(turn.side,side,'Turn mismatch at ply '+(i+1));
         const legal=(await query('legal',sfen,holes)).moves;
-        if(turn.engine==='candidate') lastCandidate={ply:i+1,sfen,move:turn.move,legal};
+        if(turn.engine==='candidate') candidatePositions.push({ply:i+1,sfen,move:turn.move,legal});
         if(turn.move==='resign') {
           assert.equal(game.reason,'resign','Unexpected resignation');
           assert.equal(i,game.turns.length-1,'Moves after resignation');
@@ -58,19 +58,24 @@ try {
         sfen=(await query('step',sfen,holes,turn.move)).sfen;
       }
       verifiedGames++;
-      if(game.winner!==null && game.winner!==game.candidateSide && lastCandidate) {
-        checkpoints.push({
-          file, kind:game.kind, pair:game.pair, candidateSide:game.candidateSide,
-          reason:game.reason, start:game.start, holes:game.holes,
-          sourceFixtureSha256:config.fixtureSha??null,
-          sourceCandidateWasmSha256:config.candidateSha??null,
-          sourceBaselineWasmSha256:config.baselineSha??null,
-          budgetMs:config.budget, lastCandidatePly:lastCandidate.ply,
-          sfen:lastCandidate.sfen, playedMove:lastCandidate.move,
-          legalMoveCount:lastCandidate.legal.length,
-          legalMoves:lastCandidate.legal.slice().sort(),
-          notice:'Legal alternatives only, not recommended moves. No best-move or causal assessment.'
-        });
+      if(game.winner!==null && game.winner!==game.candidateSide) {
+        // Last forced move (only one legal option) is rarely an actionable improvement.
+        // Keep the most recent three genuine choice points as independent replay probes.
+        const options = candidatePositions.filter(x=>x.legal.length>=2).slice(-3).reverse();
+        for(const position of options) {
+          checkpoints.push({
+            file, kind:game.kind, pair:game.pair, candidateSide:game.candidateSide,
+            reason:game.reason, start:game.start, holes:game.holes,
+            sourceFixtureSha256:config.fixtureSha??null,
+            sourceCandidateWasmSha256:config.candidateSha??null,
+            sourceBaselineWasmSha256:config.baselineSha??null,
+            budgetMs:config.budget, candidatePly:position.ply,
+            sfen:position.sfen, playedMove:position.move,
+            legalMoveCount:position.legal.length,
+            legalMoves:position.legal.slice().sort(),
+            notice:'Choice point in a loss, not a proven blunder. Legal alternatives are not ranked.'
+          });
+        }
       }
     }
   }
@@ -81,7 +86,7 @@ try {
 checkpoints.sort((a,b)=>a.file.localeCompare(b.file)||a.kind.localeCompare(b.kind)||a.pair-b.pair||a.candidateSide-b.candidateSide);
 mkdirSync('results',{recursive:true});
 const payload={schema:1, verifiedGames, verifiedMoves, skippedTerminalMoves,
-  checkpointCount:checkpoints.length, checkpoints,
+  checkpointCount:checkpoints.length, perLossLimit:3, checkpoints,
   warning:'Reference-rules replay only. Does not prove parity with private game, strength improvement, or blunder causality.'};
 writeFileSync('results/replay-checkpoints.json',JSON.stringify(payload,null,2)+'\n');
 const summary='## Independent replay integrity\nVerified games: '+verifiedGames+
