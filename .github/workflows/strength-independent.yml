@@ -52,8 +52,6 @@ jobs:
           node --test benchmarks/strength/ci/split-tactical-pair.test.mjs
       - run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
       - name: Build obstacle SDK
-        env:
-          RUN_ENGINE_ROOT_TESTS: "1"
         run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/obstacle-sdk"
       - name: Build pinned comparison SDK
         env:

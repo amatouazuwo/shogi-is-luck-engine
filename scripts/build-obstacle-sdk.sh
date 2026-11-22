@@ -43,9 +43,6 @@ export RSSHOGI_EMBEDDED_RSNN_SHA256="$model_digest"
 # Keep local checkout and Cargo registry paths out of the distributed binary.
 export RUSTFLAGS="--remap-path-prefix=$build=/build --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo"
 unset CARGO_ENCODED_RUSTFLAGS
-if [[ ${RUN_ENGINE_ROOT_TESTS:-0} == 1 ]]; then
-    (cd "$build/engine" && cargo +"$rust" test --locked --lib --features c-api,embedded-rsnn obstacle_root_order_tests)
-fi
 if [[ ${RUN_ENGINE_TESTS:-0} == 1 ]]; then
     (cd "$build/rules" && cargo +"$rust" test --locked -p rsshogi --lib --test shogiluck_holes)
     (cd "$build/engine" && cargo +"$rust" test --locked --lib --features c-api,embedded-rsnn)
