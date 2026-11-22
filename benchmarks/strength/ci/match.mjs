@@ -6,13 +6,15 @@ import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {Worker} from 'node:worker_threads';
-const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline]=process.argv.slice(2);
+const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline, mode='obstacle']=process.argv.slice(2);
 const budget=Number(budgetStr), cap=Number(capStr), pairs=Number(pairsStr), offset=Number(offsetStr);
 assert.ok([100,500,1500].includes(budget));
 assert.ok(Number.isInteger(cap)&&cap>=1&&cap<=180);
 assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&&offset>=0&&offset+pairs<=6);
-const raw=readFileSync(new URL('../experiments/holdout-openings.jsonl',import.meta.url),'utf8');
-const fixtures=raw.trim().split('\n').map(JSON.parse);
+assert.ok(['normal','obstacle'].includes(mode));
+const normal=mode==='normal';
+const raw=readFileSync(new URL(normal?'../experiments/normal-continuous/expansion/openings.jsonl':'../experiments/holdout-openings.jsonl',import.meta.url),'utf8');
+const fixtures=raw.trim().split('\n').map(JSON.parse).filter(f=>!normal||f.event==='opening').map(f=>normal?{...f,kind:f.family,sfen:f.opening,holes:[]}:f);
 const ids=[...new Set(fixtures.map(f=>f.pair))].slice(offset,offset+pairs);
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const log=(event,data)=>console.log(JSON.stringify({event,...data}));
@@ -26,9 +28,9 @@ async function request(...fields){
     assert.ok(!r.done);const x=JSON.parse(r.value);assert.ok(!x.error,x.error);return x;
   }finally{clearTimeout(timer);}
 }
-function engine(dir){
+function engine(dir,continuous=false){
   const wasm=readFileSync(resolve(dir,'rsshogi_nnue_mini.wasm'));
-  const js=resolve(dir,'worker.js');
+  const js=continuous?resolve(new URL('../experiments/normal-continuous/expansion/continuous-worker.mjs',import.meta.url).pathname):resolve(dir,'worker.js');
   const thread=new Worker(`
     const {parentPort,workerData}=require('node:worker_threads');
     globalThis.self=globalThis;
@@ -50,12 +52,12 @@ function engine(dir){
       thread.postMessage({id,command,...fields});
     });
   }
-  return {send,thread,wasm,sha:hash(wasm),workerSha:hash(readFileSync(js))};
+  return {send,thread,wasm,moduleUrl:pathToFileURL(resolve(dir,'mini.js')).href,sha:hash(wasm),workerSha:hash(readFileSync(js))};
 }
-const a=engine(sdk), b=baseline?engine(baseline):null;
+const a=engine(sdk,normal), b=baseline?engine(baseline):null;
 const scores=[];
 try{
-  for(const e of [a,b].filter(Boolean))await e.send('init',{wasm:e.wasm,hash_mb:16});
+  for(const e of [a,b].filter(Boolean))await e.send('init',{wasm:e.wasm,hash_mb:16,moduleUrl:e.moduleUrl});
   log('config',{budget,cap,pairs,offset,fixtureSha:hash(raw),candidateSha:a.sha,candidateWorkerSha:a.workerSha,baselineSha:b?.sha,baselineWorkerSha:b?.workerSha,referenceSha:hash(readFileSync(binary)),node:process.version,opponent:b?'baseline':'reference',clockMs:180000});
   for(const f of fixtures.filter(f=>ids.includes(f.pair))){
     const holes=f.holes.join(',');
@@ -78,8 +80,8 @@ try{
         const ms=Math.max(1,Math.min(budget,Math.floor(clocks[side]/20),clocks[side]-150));
         if(e){
           await e.send('position',{sfen,holes:f.holes,moves:[]});
-          const sdkLegal=await e.send('legalMoves');
-          assert.deepEqual((Array.isArray(sdkLegal)?sdkLegal:sdkLegal.result).slice().sort(),legal,'Legal move set mismatch: '+sfen);
+          if(!normal){const sdkLegal=await e.send('legalMoves');
+          assert.deepEqual((Array.isArray(sdkLegal)?sdkLegal:sdkLegal.result).slice().sort(),legal,'Legal move set mismatch: '+sfen);}
         }
         const started=performance.now();
         let result;
@@ -97,7 +99,7 @@ try{
       scores.push(row);log('game',row);
     }
   }
-  for(const kind of ['pit','blackhole']){
+  for(const kind of (normal?['hirate','game']:['pit','blackhole'])){
     const rows=scores.filter(r=>r.kind===kind);
     assert.equal(rows.length,pairs*2);
     log('summary',{kind,games:rows.length,wins:rows.filter(r=>r.winner===r.candidateSide).length,losses:rows.filter(r=>r.winner!==null&&r.winner!==r.candidateSide).length,undecided:rows.filter(r=>r.winner===null).length});
