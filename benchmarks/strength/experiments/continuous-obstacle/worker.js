@@ -85,9 +85,10 @@ self.onmessage=async ({data:message})=>{
     break;
    }
    case 'stop':
-    // Stop requests cannot run while synchronous WASM search is on the stack.
-    // This only acknowledges that no search is currently running.
-    reply(message,{ok:true});
+    // Synchronous WASM search blocks this Worker, so stop cannot execute
+    // while go is running. Never acknowledge it as a successful cancellation.
+    // The controller must terminate this Worker and discard its old results.
+    reply(message,{ok:false,error:'Continuous search is not cooperatively cancellable; terminate this Worker from the controller'});
     break;
    case 'dispose':
     nextGeneration();initialization++;
