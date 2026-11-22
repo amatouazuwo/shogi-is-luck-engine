@@ -44,6 +44,9 @@ test('compares the played move and two legal alternatives without ranking them',
   assert.deepEqual(branches.map(x=>x.referenceContinuation.afterSfen),['end:Z','end:Z','end:Z']);
   assert.equal(branches.filter(x=>x.played).length,1);
   assert.equal(output.records[0].assessment,'UNRANKED_REPLIES_ONLY');
+  assert.equal(output.records[0].rootLegalMoveCount,3);
+  assert.equal(output.records[0].exploredCandidateMoveCount,3);
+  assert.equal(output.records[0].allCandidateMovesCovered,true);
 });
 test('rejects stale or incorrect legal move sets before searching',()=>{
   const {proc}=run({...point,legalMoves:['B','C']});
