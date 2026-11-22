@@ -33,10 +33,18 @@ for (const file of inputs) {
       candidateSente: sente.turns[divergencePly - 1]?.move ?? null,
       candidateGote: gote.turns[divergencePly - 1]?.move ?? null
     };
+    // SFEN is recorded before each selected move by the independent referee.
+    // Old archives may not include it; null means replay requires advancing from start.
+    const divergentPositions = divergencePly === null ? null : {
+      candidateSente: sente.turns[divergencePly - 1]?.sfenBefore ?? null,
+      candidateGote: gote.turns[divergencePly - 1]?.sfenBefore ?? null
+    };
     const cases = gamesOfPair.filter(g => outcome(g) === 'loss').map(g => {
       const index = g.turns.findLastIndex(t => t.engine === 'candidate');
       return {candidateSide: g.candidateSide, lastCandidatePly: index < 0 ? null : index + 1,
         lastCandidateMove: index < 0 ? null : g.turns[index].move,
+        lastCandidateSfen: index < 0 ? null : (g.turns[index].sfenBefore ?? null),
+        precedingMoves: index < 0 ? [] : g.turns.slice(0,index).map(t => t.move),
         reason: g.reason, plies: g.turns.length};
     });
     const priority = cases.length === 2 ? 'review-both-colors'
@@ -47,7 +55,7 @@ for (const file of inputs) {
       baselineWasmSha256: config.baselineSha ?? null,
       opponent: config.opponent, budgetMs: config.budget, fixtureSha256: config.fixtureSha,
       results: {candidateSente: outcome(sente), candidateGote: outcome(gote)},
-      divergencePly, divergentMoves, reviewCandidates: cases, priority,
+      divergencePly, divergentMoves, divergentPositions, reviewCandidates: cases, priority,
       caveat: 'These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied.'});
   }
 }
