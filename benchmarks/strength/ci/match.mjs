@@ -6,16 +6,21 @@ import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {Worker} from 'node:worker_threads';
-const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline, mode='obstacle']=process.argv.slice(2);
+const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline, mode='obstacle', customFixture]=process.argv.slice(2);
 const budget=Number(budgetStr), cap=Number(capStr), pairs=Number(pairsStr), offset=Number(offsetStr);
 assert.ok([100,500,1500].includes(budget));
 assert.ok(Number.isInteger(cap)&&cap>=1&&cap<=180);
-assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&&offset>=0&&offset+pairs<=6);
+assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&&offset>=0);
 assert.ok(['normal','obstacle'].includes(mode));
 const normal=mode==='normal';
-const raw=readFileSync(new URL(normal?'../experiments/normal-continuous/expansion/openings.jsonl':'../experiments/holdout-openings.jsonl',import.meta.url),'utf8');
+const raw=readFileSync(customFixture ? resolve(customFixture) :
+ new URL(normal?'../experiments/normal-continuous/expansion/openings.jsonl':'../experiments/holdout-openings.jsonl',import.meta.url),'utf8');
 const fixtures=raw.trim().split('\n').map(JSON.parse).filter(f=>!normal||f.event==='opening').map(f=>normal?{...f,kind:f.family,sfen:f.opening,holes:[]}:f);
 const ids=[...new Set(fixtures.map(f=>f.pair))].slice(offset,offset+pairs);
+assert.equal(ids.length,pairs,'Missing requested opening families');
+if(!normal)for(const id of ids)assert.deepEqual(
+ fixtures.filter(f=>f.pair===id).map(f=>f.kind).sort(),['blackhole','pit'],
+ 'Each paired opening family must contain pit and blackhole boards');
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const log=(event,data)=>console.log(JSON.stringify({event,...data}));
 const ref=spawn(binary,[],{stdio:['pipe','pipe','inherit']});
