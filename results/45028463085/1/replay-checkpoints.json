@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "verifiedGames": 8,
+  "verifiedMoves": 461,
+  "skippedTerminalMoves": 0,
+  "checkpointCount": 3,
+  "perLossLimit": 3,
+  "checkpoints": [
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateSide": 1,
+      "reason": "no-legal",
+      "start": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6r/9/6L2/G2BP+RNS1/1SlK1PGPL/PP1P+N1P2 b 2p 9",
+      "holes": [
+        "3e"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "sourceCandidateWasmSha256": "726ee67c5e422d1282155a7a44a1e5dbf79a0b192bcf5dc47e7a29b64717b162",
+      "sourceBaselineWasmSha256": "fe48e88097bdb35a63210b55185fae019686a13448024b526b0172693fed477a",
+      "budgetMs": 100,
+      "candidatePly": 40,
+      "sfen": "sppk1n2+L/p1b2Slp1/n1G1p+Bpg1/2Pp5/9/6L2/G3P+RNP1/1SKP1PG2/PP4P2 w L2Prsnp 48",
+      "playedMove": "S*5b",
+      "legalMoveCount": 3,
+      "legalMoves": [
+        "N*5b",
+        "R*5b",
+        "S*5b"
+      ],
+      "notice": "Choice point in a loss, not a proven blunder. Legal alternatives are not ranked."
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateSide": 1,
+      "reason": "no-legal",
+      "start": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6r/9/6L2/G2BP+RNS1/1SlK1PGPL/PP1P+N1P2 b 2p 9",
+      "holes": [
+        "3e"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "sourceCandidateWasmSha256": "726ee67c5e422d1282155a7a44a1e5dbf79a0b192bcf5dc47e7a29b64717b162",
+      "sourceBaselineWasmSha256": "fe48e88097bdb35a63210b55185fae019686a13448024b526b0172693fed477a",
+      "budgetMs": 100,
+      "candidatePly": 38,
+      "sfen": "spp2n2+L/p1bk1Slp1/n1G1p1pg1/2Pp1+B3/9/6L2/G3P+RNP1/1SKP1PG2/PP4P2 w L2Prsnp 46",
+      "playedMove": "6b6a",
+      "legalMoveCount": 2,
+      "legalMoves": [
+        "6b5b",
+        "6b6a"
+      ],
+      "notice": "Choice point in a loss, not a proven blunder. Legal alternatives are not ranked."
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateSide": 1,
+      "reason": "no-legal",
+      "start": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6r/9/6L2/G2BP+RNS1/1SlK1PGPL/PP1P+N1P2 b 2p 9",
+      "holes": [
+        "3e"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "sourceCandidateWasmSha256": "726ee67c5e422d1282155a7a44a1e5dbf79a0b192bcf5dc47e7a29b64717b162",
+      "sourceBaselineWasmSha256": "fe48e88097bdb35a63210b55185fae019686a13448024b526b0172693fed477a",
+      "budgetMs": 100,
+      "candidatePly": 36,
+      "sfen": "spp1kn2+L/p1b2Slp1/n3p1pg1/2Pp1+B3/9/6L2/G3P+RNP1/1SKP1PG2/PP4P2 w GL2Prsnp 44",
+      "playedMove": "5a6b",
+      "legalMoveCount": 4,
+      "legalMoves": [
+        "5a4b",
+        "5a5b",
+        "5a6a",
+        "5a6b"
+      ],
+      "notice": "Choice point in a loss, not a proven blunder. Legal alternatives are not ranked."
+    }
+  ],
+  "warning": "Reference-rules replay only. Does not prove parity with private game, strength improvement, or blunder causality."
+}
