@@ -10,7 +10,7 @@ assert.ok(outPath&&files.length,'Usage: node report.mjs OUTPUT.json GAME1.jsonl 
 const avg=x=>x.length?x.reduce((a,b)=>a+b,0)/x.length:null;
 const percentile=(x,p)=>x.length?[...x].sort((a,b)=>a-b)[Math.ceil(p*x.length)-1]:null;
 const result={schema:1,files,groups:[],total:{games:0,wins:0,losses:0,undecided:0,
- completeColorPairs:0,incompleteColorPairs:0,illegalMoves:0,changedRootMoves:0},
+ completeColorPairs:0,incompleteColorPairs:0,changedRootMoves:0},
  warning:'UNDECIDED is neutral, not a loss or inferior play. Search-depth improvements and archived opening results alone never justify deployment. Continuous synchronous WASM cannot accept stop until search returns.'};
 const collate=(rows,role,budget)=> {
  const plies=rows.flatMap(x=>x.turns.filter(t=>t.engine===role));
