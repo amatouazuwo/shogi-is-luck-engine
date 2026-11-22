@@ -1,3 +1,32 @@
+# FOLLOW-UP RESULTS — novel obstacle combinations and normal-board fidelity verified
+
+The newer tests **COMPLETED successfully** in GitHub Actions and use the exact same engine and embedded NNUE (only the Worker differs):
+
+| Sample | Budget / cap | Continuous wins | Losses | Neutral undecided | Complete reversed-side pairs |
+|---|---:|---:|---:|---:|---:|
+| New hole/black-hole placements on six distinct archived normal SFEN formations | 100ms / 300 ply | **11** | **13** | **0** | 12/12 |
+| Same new placement corpus, subset of three formations | 500ms / 120 ply | **7** | **4** | **1** | 5/6 |
+| **New obstacle-layout direct games** | | **18** | **17** | **1** | **17/18** |
+| No obstacles, eight normal-board openings (hirate-derived and random) | 100ms / 200 ply | **13** | **3** | **0** | 8/8 |
+| No obstacles, subset of two new formations (four board families) | 500ms / 120 ply | **1** | **3** | **4** | 1/4 |
+| **Normal-board direct games** | | **14** | **6** | **4** | **9/12** |
+
+- [Fresh obstacle layout test 45027863125](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45027863125) PASSED; all **36** logged games were legally checked at every move, no move exceeding the requested budget by 50ms. At 100ms, continuous search mean depth **7.40** vs sliced **6.73**; at 500ms, **9.21** vs **7.78**. New special-board placements gave **no demonstrated, consistent advantage** at 100ms (11-13); the 500ms subgroup was smaller (7-4-1).
+- [Normal-board fidelity test 45028524249](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45028524249) PASSED; all **24** games were legally checked with identical WASM/NNUE. At 100ms, continuous 13W/3L, average depth **6.89** vs **6.39**; at 500ms, only 4/8 games decided and continuous scored 1W/3L/4 undecided, average depth **9.41** vs **7.65**. Do NOT claim a definitive 500ms weakness or strength from the tiny, heavily capped sample.
+- Only newly sampled *obstacle masks* were fresh in the newer special-board test; base SFEN formations were from an older archived normal corpus. The 500ms subset overlaps with the 100ms sample. All match data is correlated and time-limited searches are not deterministic. Do not compute a misleading overall Elo or claim a general winning rate from these observations.
+- The 36 previously archived tactical labels are only supplementary; overall **native playing strength** remains the primary objective. **UNDECIDED is not a negative score.**
+- **Decision:** continuous search remains an experiment with promising normal-board results, but a generalized special-board strength gain is **not yet demonstrated**. Keep original rsshogi binary/evaluation unchanged, no production deployment.
+
+## Browser-style cancellation controller, experimental only
+
+`continuous-controller.mjs` provides an isolated, injection-based controller **not wired into the live game**. It maintains a reusable native Worker across successful searches and explicitly discards the Worker on cancel, worker error or search timeout. Every queued request has a unique ID and a session association; on cancellation, all pending requests reject with `AbortError`, stale replies are ignored, and a fresh Worker is initialized on the next turn. The returned `elapsedWallMs` measures initialization/communication/search wall time, not just native search time; the game must deduct actual wall time from its own three-minute clock. It checks the candidate's returned move against the current legal move list and never fabricates a move on cancellation.
+
+`continuous-controller.test.mjs` covers consecutive Worker reuse, cancellation during active `go`, stale replies from a terminated Worker, AbortSignal cancellation, Worker timeout recovery and the expired-clock case. The test workflow [45030875601](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45030875601) PASSED. The **real-WASM Node Worker integration test** `controller-real-smoke.mjs` and [run 45031007389](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45031007389) were added to validate the same flow against an actual compiled rsshogi binary. Its outcome must be inspected before claiming actual controller integration works.
+
+**Deployment is still blocked** pending real browser Worker, real UI cancellation and scene navigation, special-event board transitions, 3-minute clock accounting, terminal-state adjudication, and varied mobile hardware performance checks. Node success alone is not a claim of browser integration. PR #3 remains draft and unmerged.
+
+---
+
 # VERIFIED RESULT — existing rsshogi's uninterrupted search is promising but NOT yet production-ready
 
 GitHub Actions [45026414339](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45026414339) passed all builds, same-WASM equivalence, independent full legal-move cross-checks, 40 color-swapped direct games, 100/500ms tactical safety checks and archived complete logs. An independent [archive replay / timing check 45027566626](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45027566626) also passed.
