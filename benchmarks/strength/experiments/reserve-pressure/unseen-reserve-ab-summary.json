@@ -1,0 +1,291 @@
+{
+  "corpusSha256": "ec1fa261bb12d1d836ecb9f56890802f35ca330d5e13d1c57b8632d8558d1a20",
+  "trials": 216,
+  "results": [
+    {
+      "budgetMs": 100,
+      "group": "attack",
+      "baseline": {
+        "positions": 24,
+        "correct": 23,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 9.875,
+        "meanNodes": 7176.375,
+        "meanWallMs": 112.55820533333326,
+        "meanWorkerMs": 102.83333333333333
+      },
+      "reserve": {
+        "positions": 24,
+        "correct": 24,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 9.791666666666666,
+        "meanNodes": 7119.375,
+        "meanWallMs": 111.43706833333323,
+        "meanWorkerMs": 102.83333333333333
+      },
+      "pairedImprovements": 1,
+      "pairedRegressions": 0
+    },
+    {
+      "budgetMs": 100,
+      "group": "defense",
+      "baseline": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 5.583333333333333,
+        "meanNodes": 5243.916666666667,
+        "meanWallMs": 118.67854974999989,
+        "meanWorkerMs": 109
+      },
+      "reserve": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 5.583333333333333,
+        "meanNodes": 5052.416666666667,
+        "meanWallMs": 113.44331683333333,
+        "meanWorkerMs": 104.25
+      },
+      "pairedImprovements": 0,
+      "pairedRegressions": 0
+    },
+    {
+      "budgetMs": 100,
+      "group": "all",
+      "baseline": {
+        "positions": 36,
+        "correct": 35,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 8.444444444444445,
+        "meanNodes": 6532.222222222223,
+        "meanWallMs": 114.59832013888881,
+        "meanWorkerMs": 104.88888888888889
+      },
+      "reserve": {
+        "positions": 36,
+        "correct": 36,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 8.38888888888889,
+        "meanNodes": 6430.388888888889,
+        "meanWallMs": 112.10581783333326,
+        "meanWorkerMs": 103.30555555555556
+      },
+      "pairedImprovements": 1,
+      "pairedRegressions": 0
+    },
+    {
+      "budgetMs": 500,
+      "group": "attack",
+      "baseline": {
+        "positions": 24,
+        "correct": 24,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 14.291666666666666,
+        "meanNodes": 41350.541666666664,
+        "meanWallMs": 513.031653791667,
+        "meanWorkerMs": 503.4583333333333
+      },
+      "reserve": {
+        "positions": 24,
+        "correct": 24,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 14.333333333333334,
+        "meanNodes": 41418.333333333336,
+        "meanWallMs": 514.2598514583334,
+        "meanWorkerMs": 503.625
+      },
+      "pairedImprovements": 0,
+      "pairedRegressions": 0
+    },
+    {
+      "budgetMs": 500,
+      "group": "defense",
+      "baseline": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 7.333333333333333,
+        "meanNodes": 35170.916666666664,
+        "meanWallMs": 514.0584214166661,
+        "meanWorkerMs": 504.5833333333333
+      },
+      "reserve": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 7.25,
+        "meanNodes": 34767.666666666664,
+        "meanWallMs": 513.6464523333335,
+        "meanWorkerMs": 503.9166666666667
+      },
+      "pairedImprovements": 0,
+      "pairedRegressions": 0
+    },
+    {
+      "budgetMs": 500,
+      "group": "all",
+      "baseline": {
+        "positions": 36,
+        "correct": 36,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 11.972222222222221,
+        "meanNodes": 39290.666666666664,
+        "meanWallMs": 513.3739096666668,
+        "meanWorkerMs": 503.8333333333333
+      },
+      "reserve": {
+        "positions": 36,
+        "correct": 36,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 11.972222222222221,
+        "meanNodes": 39201.444444444445,
+        "meanWallMs": 514.0553850833335,
+        "meanWorkerMs": 503.72222222222223
+      },
+      "pairedImprovements": 0,
+      "pairedRegressions": 0
+    },
+    {
+      "budgetMs": 1500,
+      "group": "attack",
+      "baseline": {
+        "positions": 24,
+        "correct": 23,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 16,
+        "meanNodes": 130994.95833333333,
+        "meanWallMs": 1512.7495067499997,
+        "meanWorkerMs": 1502.9166666666667
+      },
+      "reserve": {
+        "positions": 24,
+        "correct": 23,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 15.958333333333334,
+        "meanNodes": 131172.08333333334,
+        "meanWallMs": 1513.6259268333333,
+        "meanWorkerMs": 1503.9583333333333
+      },
+      "pairedImprovements": 0,
+      "pairedRegressions": 0
+    },
+    {
+      "budgetMs": 1500,
+      "group": "defense",
+      "baseline": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 8,
+        "meanNodes": 121997.08333333333,
+        "meanWallMs": 1514.77631641667,
+        "meanWorkerMs": 1503.25
+      },
+      "reserve": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 8.416666666666666,
+        "meanNodes": 126108,
+        "meanWallMs": 1514.2013836666677,
+        "meanWorkerMs": 1503.25
+      },
+      "pairedImprovements": 0,
+      "pairedRegressions": 0
+    },
+    {
+      "budgetMs": 1500,
+      "group": "all",
+      "baseline": {
+        "positions": 36,
+        "correct": 35,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 13.333333333333334,
+        "meanNodes": 127995.66666666667,
+        "meanWallMs": 1513.4251099722233,
+        "meanWorkerMs": 1503.0277777777778
+      },
+      "reserve": {
+        "positions": 36,
+        "correct": 35,
+        "illegal": 0,
+        "responseTimeouts": 0,
+        "otherErrors": 0,
+        "overBudget50ms": 0,
+        "meanDepth": 13.444444444444445,
+        "meanNodes": 129484.05555555556,
+        "meanWallMs": 1513.817745777778,
+        "meanWorkerMs": 1503.7222222222222
+      },
+      "pairedImprovements": 0,
+      "pairedRegressions": 0
+    }
+  ],
+  "decisions": [
+    {
+      "id": "unseen/pit/win7/02",
+      "budgetMs": 100,
+      "group": "attack",
+      "baseline": {
+        "move": "7f6e",
+        "correct": false
+      },
+      "reserve": {
+        "move": "2c2g+",
+        "correct": true
+      }
+    }
+  ]
+}
