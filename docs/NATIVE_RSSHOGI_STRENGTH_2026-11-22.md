@@ -56,3 +56,16 @@ Measured directly from `benchmarks/strength/experiments/hole-eval/compare.jsonl`
 Interpretation: the obstacle-only correction is indeed reaching the static evaluator, but this does not establish that it changes practical strategic decisions often enough to improve strength. It may merely adjust numerical scores without materially altering search choices; alternatively, it may matter in longer, less artificial games. The direct games, including games that end undecided at the ply cap, are necessary to distinguish those possibilities.
 
 Do not misinterpret the 78/100 changed static numbers as 78% better decisions. Do not treat the one differing tactical choice as a regression or benefit absent further evidence. Evaluate search throughput and first-move differences on the *same* root position, especially with blocked rays and actual king threats, rather than tuning to the archive.
+
+## Secondary diagnostic from run 45013783788: same-root choices and throughput
+
+All 24 direct games preserve their full per-move search traces. Comparing the **same first-move root position** between the color-swapped candidate/baseline games (which are independent time-limited searches) yields **3 different initial moves across 12 matching opening/budget comparisons**:
+
+- 100ms, pair 31, blackhole: candidate `5c6a+`, baseline `5c4a+`.
+- 100ms, pair 33, pit: candidate `6f7e`, baseline `7f6d`.
+- 100ms, pair 33, blackhole: candidate `3f4e`, baseline `6i6h`.
+- The other 9 first-move comparisons agreed. Differences may include ordinary time/CPU scheduling variation; a move difference alone is not a proof of improvement.
+
+Across all **1,707 recorded plies**: candidate 854 searches, mean depth **5.690**, mean nodes **22,397**, mean nodes/sec **100,298**; baseline 853 searches, mean depth **5.771**, mean nodes **22,547**, mean nodes/sec **100,762**. The aggregate includes both 100ms and 500ms budgets and correlated repeated openings. There is no evidence of a **large** slowdown from this small sample, but the numbers do not establish a statistically reliable throughput difference.
+
+A new strict, tested analyzer at `benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs` reports only **decided** games as wins/losses, requires both colors for each opening, measures same-root first move discrepancies and search throughput, and retains the distinction between capped games and genuine draws. CI run [45016821717](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45016821717) passed all analyzer unit tests.
