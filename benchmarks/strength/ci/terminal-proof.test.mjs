@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {proveTerminal,candidateOutcome} from './terminal-proof.mjs';
+import {proveTerminal,candidateOutcome,verifyTerminalCertificate} from './terminal-proof.mjs';
 const graph={
   mate:['forced'], forced:[],
   lose:['replyA','replyB'], replyA:['mateA'],replyB:['mateB'],
@@ -34,4 +34,41 @@ test('node cap cannot produce an unsupported loss',async()=>{
 test('repeated state is UNKNOWN without repetition adjudication',async()=>{
  const x=await proveTerminal({sfen:'loop',legal,step,depth:3});
  assert.equal(x.outcome,'UNKNOWN');
+});
+
+test('independent replay accepts an exhaustive WIN certificate',async()=>{
+ const proof=await proveTerminal({sfen:'mate',legal,step,depth:1});
+ assert.equal(proof.certificate.kind,'exists');
+ const audit=await verifyTerminalCertificate({sfen:'mate',certificate:proof.certificate,legal,step});
+ assert.equal(audit.outcome,'WIN');
+ assert.equal(audit.valid,true);
+});
+test('independent replay accepts an all-replies LOSS certificate',async()=>{
+ const proof=await proveTerminal({sfen:'lose',legal,step,depth:2});
+ assert.equal(proof.certificate.kind,'forall');
+ const audit=await verifyTerminalCertificate({sfen:'lose',certificate:proof.certificate,legal,step});
+ assert.equal(audit.outcome,'LOSS');
+});
+test('a missing defender reply invalidates an alleged forced loss',async()=>{
+ const proof=await proveTerminal({sfen:'lose',legal,step,depth:2});
+ const tampered=structuredClone(proof.certificate);
+ tampered.children.pop();
+ await assert.rejects(
+  verifyTerminalCertificate({sfen:'lose',certificate:tampered,legal,step}),
+  /Universal proof must cover ALL legal moves/
+ );
+});
+test('an altered SFEN invalidates a certificate',async()=>{
+ const proof=await proveTerminal({sfen:'mate',legal,step,depth:1});
+ const tampered=structuredClone(proof.certificate);
+ tampered.child.sfen='different';
+ await assert.rejects(
+  verifyTerminalCertificate({sfen:'mate',certificate:tampered,legal,step}),
+  /Certificate position mismatch/
+ );
+});
+test('UNKNOWN never produces a claimed certificate',async()=>{
+ const proof=await proveTerminal({sfen:'lose',legal,step,depth:1});
+ assert.equal(proof.outcome,'UNKNOWN');
+ assert.equal(proof.certificate,null);
 });
