@@ -70,12 +70,9 @@ jobs:
           mkdir -p results
           (
             cd benchmarks/strength
-            OBSTACLE_SDK="$RUNNER_TEMP/obstacle-sdk" node tactics/score-worker.mjs 100
-          ) | tee results/tactical-candidate.jsonl
-          (
-            cd benchmarks/strength
-            OBSTACLE_SDK="$RUNNER_TEMP/baseline-sdk" node tactics/score-worker.mjs 100
-          ) | tee results/tactical-baseline.jsonl
+            node forensics/heldout/run-heldout.mjs --corpus tactics/corpus.jsonl --sdk "candidate=$RUNNER_TEMP/obstacle-sdk" --sdk "baseline=$RUNNER_TEMP/baseline-sdk" --budget 100 --rounds 1
+          ) | tee results/tactical-paired.jsonl
+          node benchmarks/strength/ci/split-tactical-pair.mjs results/tactical-paired.jsonl
           node benchmarks/strength/ci/tactical-delta.mjs results/tactical-candidate.jsonl results/tactical-baseline.jsonl 100
       - name: Run archived tactical fixtures without private game checkout
         env:
