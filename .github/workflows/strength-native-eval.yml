@@ -59,7 +59,7 @@ jobs:
           set -euo pipefail
           mkdir -p results
           node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/hole-eval-sdk" \
-            100 160 4 0 "$RUNNER_TEMP/current-sdk" obstacle \
+            100 300 4 0 "$RUNNER_TEMP/current-sdk" obstacle \
             benchmarks/strength/experiments/reserve-pressure/direct-openings.jsonl \
             | tee results/native-eval-direct-100.jsonl
       - name: Different archived opening families at 100ms (not previously tested in this run)
