@@ -29,3 +29,11 @@
 - Validate standing result attribution and A/B symmetry; inspect all games from paired colors.
 - Provide configurable, low-budget staged evaluation with true disjoint new positions; full self-play and meaningful human-dan calibration not yet complete.
 - Inspect GitHub Actions `workflow_dispatch` visibility on a draft nondefault branch. Do not merge to default solely to enable manual dispatch.
+
+## Diagnostic replay additions (2026-11-22; experimental)
+- `benchmarks/strength/ci/match.mjs` now logs `sfenBefore` for every move so exact pre-move positions can be replayed.
+- `replay-check.mjs` independently checks logged move legality and SFEN transitions, and extracts up to three non-forced candidate decisions per loss.
+- `reply-probes.mjs` investigates up to four such decision points; each checks the played move and at most two unranked legal alternatives, following with bounded 100ms reference responses and one further reference continuation.
+- `codex-review.mjs` converts those into `results/codex-review.json`, sorted by rule-terminal condition and differences in reference replies, not by estimated chess strength. The `chatgpt/strength-results` branch archives the full inputs and intermediate reports by run ID once GitHub Actions completes.
+- Earlier verified run [45004381190](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45004381190) generated 4 positions and 11 branches for one-reference-reply probes. It does NOT demonstrate move superiority. Recent commits may still be awaiting verification: always check the newest workflow run associated with the PR head before using generated archives.
+- **Codex next:** inspect verified `codex-review.json` with `reply-probes.json` and `replay-checkpoints.json`. Identify one real tactical failure, verify against *all* relevant opponent replies, propose a minimal engine candidate change, and test against the pinned baseline on new unseen cases. Do not interpret a different reference reply or forced move as a proven blunder; do not promote an AI based on these diagnostic outputs.
