@@ -35,6 +35,20 @@ int main(){
             auto w=split(line,'\t');
             if(w.size()==1&&w[0]=="reset"){engine.reset();std::cout<<"{\"ok\":true}";}
             else if(w.size()==3&&w[0]=="legal"){std::cout<<"{\"moves\":";printMoves(legalMoves(readPosition(w[1],w[2])));std::cout<<'}';}
+            else if(w.size()==3&&w[0]=="features"){
+                const auto p=readPosition(w[1],w[2]);
+                const auto legal=legalMoves(p);
+                int captures=0, promotions=0;
+                for(const auto m:legal){
+                    if(p.board[m.to]!=Empty && p.board[m.to]!=Wall)++captures;
+                    if(m.promotion)++promotions;
+                }
+                const bool check=attacked(p,p.king[p.turn],1-p.turn);
+                std::cout<<"{\"inCheck\":"<<(check?"true":"false")
+                         <<",\"legalCount\":"<<legal.size()
+                         <<",\"captureMoves\":"<<captures
+                         <<",\"promotionMoves\":"<<promotions<<'}';
+            }
             else if(w.size()==4&&w[0]=="go"){
                 auto r=engine.run(readPosition(w[2],w[3]),parseMilliseconds(w[1]));
                 std::cout<<"{\"bestmove\":\""<<usi(r.move)<<"\",\"depth\":"<<r.depth<<",\"nodes\":"<<r.nodes<<",\"elapsed_ms\":"<<r.elapsed<<'}';
