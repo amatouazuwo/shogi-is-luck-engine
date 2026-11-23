@@ -73,6 +73,6 @@ test('modified fixture, missing color reversal and altered node cap are rejected
   assert.throws(()=>auditProvisionalFourDanSpecial(x.events,x.text,10000),/reference node/);
 });
 test('scoreboard does not promote a neutral result into a win',()=>{
-  const x=fixture();x.events[1].winner=0;
+  const x=fixture();x.events[3].winner=0;
   assert.throws(()=>auditProvisionalFourDanSpecial(x.events,x.text,10000),/neutral/);
 });
