@@ -58,6 +58,16 @@ jobs:
             -ex 'set debuginfod enabled off' \
             -ex "run < $RUNNER_TEMP/depth8-reproducer.usi" \
             -ex 'thread apply all bt 12' \
+            -ex 'thread 1' \
+            -ex 'frame 7' \
+            -ex 'info locals' \
+            -ex 'print iteration' \
+            -ex 'print score' \
+            -ex 'print this->pv_index_' \
+            -ex 'print this->multipv_' \
+            -ex 'print this->shared_.signals.stop' \
+            -ex 'print this->shared_.signals.limit_reached' \
+            -ex 'print this->root_moves_.size()' \
             --args "$RUNNER_TEMP/gikou-debug/bin/development" 2>&1 \
             | tee "$RUNNER_TEMP/depth8-backtrace.log"
           result=$?
