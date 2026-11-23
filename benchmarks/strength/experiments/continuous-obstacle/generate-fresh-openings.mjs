@@ -86,9 +86,10 @@ try{
    single.sort((a,b)=>score(row.opening+'/pit/'+a).localeCompare(score(row.opening+'/pit/'+b)));
    if(!single.length)continue;
    const pit=[single[0]];
-   const [legalPit,legalBH]=await Promise.all([
-    legalCount(row.opening,pit),legalCount(row.opening,bh)
-   ]); // Calls must not share the same referee stdout concurrently!
+   // A referee is a sequential stdin/stdout request-response stream.
+   // Parallel writes could mismatch counts to obstacle placements.
+   const legalPit=await legalCount(row.opening,pit);
+   const legalBH=await legalCount(row.opening,bh);
    if(legalPit<5||legalBH<5)continue;
    seen.add(row.opening);
    selected.push({...row,pit,bh,legalPit,legalBH});
