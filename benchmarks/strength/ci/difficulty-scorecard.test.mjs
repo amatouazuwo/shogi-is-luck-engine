@@ -36,6 +36,15 @@ test('undecided games are neutral and produce conservative score bounds',()=>{
   assert.equal(result.neutralUndecided,2);
   assert.deepEqual(result.scoreBoundsIncludingNeutral,[.25,.75]);
   assert.equal(result.candidateDecidedWinRate,.5);
+  assert.deepEqual(result.byTermination['no-legal'],{
+    games:2,candidateWins:1,opponentWins:1,neutralUndecided:0,
+  });
+  assert.deepEqual(result.byTermination['ply-cap'],{
+    games:2,candidateWins:0,opponentWins:0,neutralUndecided:2,
+  });
+  assert.deepEqual(result.byTermination['clock'],{
+    games:0,candidateWins:0,opponentWins:0,neutralUndecided:0,
+  });
   assert.equal(result.amateurRankValidation,'NOT_PERFORMED');
   assert.equal(result.autoAssignAmateurGrade,false);
   assert.equal(result.performance.candidate.meanElapsedMs,100);
@@ -93,4 +102,24 @@ test('full-force game clock budget is independently audited for every native tur
   assert.equal(score.performance.opponent.meanClockChargeMs,2802);
   events[1].turns[0].requestMs=1500;
   assert.throws(()=>scoreDifficultyGames(events),/Observed Worker budget/);
+});
+
+test('three-minute clock forfeits are separated from on-board victories',()=>{
+  const events=makeSample();
+  // The fixture's first pit game is a win for candidateSide 0.
+  events[1].reason='clock';
+  const result=scoreDifficultyGames(events);
+  assert.equal(result.candidateWins,1);
+  assert.equal(result.opponentWins,1);
+  assert.deepEqual(result.byTermination['clock'],{
+    games:1,candidateWins:1,opponentWins:0,neutralUndecided:0,
+  });
+  assert.deepEqual(result.byTermination['no-legal'],{
+    games:1,candidateWins:0,opponentWins:1,neutralUndecided:0,
+  });
+  assert.equal(
+    Object.values(result.byTermination).reduce((sum,r)=>sum+r.games,0),
+    result.games,
+  );
+  assert.equal(result.autoAssignAmateurGrade,false);
 });
