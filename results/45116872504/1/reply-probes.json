@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "referenceReplyBudgetMs": 100,
+  "maxPositions": 4,
+  "maxAlternativesPerPosition": 2,
+  "records": [
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 44,
+      "sfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/1kN6/9/1+R4L2/1K2P1N2/1S1P1P+pP1/PP1s1BP2 w GLPr2gnp 52",
+      "holes": [
+        "3e"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "budgetMs": 100,
+      "rootLegalMoveCount": 5,
+      "exploredCandidateMoveCount": 3,
+      "allCandidateMovesCovered": false,
+      "branches": [
+        {
+          "move": "G*8e",
+          "played": true,
+          "afterCandidateSfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/1kN6/1g7/1+R4L2/1K2P1N2/1S1P1P+pP1/PP1s1BP2 b GLPrgnp 53",
+          "legalOpponentReplies": 148,
+          "referenceReply": "8f8e",
+          "afterReplySfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/1kN6/1+R7/6L2/1K2P1N2/1S1P1P+pP1/PP1s1BP2 w 2GLPrgnp 54",
+          "referenceSearch": {
+            "depth": 3,
+            "nodes": 4683,
+            "elapsedMs": 7
+          },
+          "referenceContinuation": {
+            "move": "8d9c",
+            "afterSfen": "sppb1n2+L/p2Sp1lp1/k2p1ppg1/2N6/1+R7/6L2/1K2P1N2/1S1P1P+pP1/PP1s1BP2 b 2GLPrgnp 55",
+            "legalCount": 1,
+            "depth": 2,
+            "nodes": 414,
+            "elapsedMs": 0
+          }
+        },
+        {
+          "move": "8d7d",
+          "played": false,
+          "afterCandidateSfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/2k6/9/1+R4L2/1K2P1N2/1S1P1P+pP1/PP1s1BP2 b GLPr2g2np 53",
+          "legalOpponentReplies": 158,
+          "referenceReply": "G*7e",
+          "afterReplySfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/2k6/2G6/1+R4L2/1K2P1N2/1S1P1P+pP1/PP1s1BP2 w LPr2g2np 54",
+          "referenceSearch": {
+            "depth": 1,
+            "nodes": 666,
+            "elapsedMs": 0
+          },
+          "referenceContinuation": null
+        },
+        {
+          "move": "8d9c",
+          "played": false,
+          "afterCandidateSfen": "sppb1n2+L/p2Sp1lp1/k2p1ppg1/2N6/9/1+R4L2/1K2P1N2/1S1P1P+pP1/PP1s1BP2 b GLPr2gnp 53",
+          "legalOpponentReplies": 157,
+          "referenceReply": "G*8d",
+          "afterReplySfen": "sppb1n2+L/p2Sp1lp1/k2p1ppg1/1GN6/9/1+R4L2/1K2P1N2/1S1P1P+pP1/PP1s1BP2 w LPr2gnp 54",
+          "referenceSearch": {
+            "depth": 1,
+            "nodes": 546,
+            "elapsedMs": 0
+          },
+          "referenceContinuation": null
+        }
+      ],
+      "assessment": "UNRANKED_REPLIES_ONLY"
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 40,
+      "sfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/1kN6/GB7/4+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 w GLPrgnp 48",
+      "holes": [
+        "3e"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "budgetMs": 100,
+      "rootLegalMoveCount": 4,
+      "exploredCandidateMoveCount": 3,
+      "allCandidateMovesCovered": false,
+      "branches": [
+        {
+          "move": "8d9e",
+          "played": true,
+          "afterCandidateSfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/2N6/kB7/4+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b GLPr2gnp 49",
+          "legalOpponentReplies": 154,
+          "referenceReply": "5f8f",
+          "afterReplySfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/2N6/kB7/1+R4L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 w GLPr2gnp 50",
+          "referenceSearch": {
+            "depth": 3,
+            "nodes": 69824,
+            "elapsedMs": 100
+          },
+          "referenceContinuation": {
+            "move": "9e8d",
+            "afterSfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/1kN6/1B7/1+R4L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b GLPr2gnp 51",
+            "legalCount": 1,
+            "depth": 5,
+            "nodes": 75712,
+            "elapsedMs": 100
+          }
+        },
+        {
+          "move": "8d7e",
+          "played": false,
+          "afterCandidateSfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/2N6/GBk6/4+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b GLPrgnp 49",
+          "legalOpponentReplies": 154,
+          "referenceReply": "G*6e",
+          "afterReplySfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/2N6/GBkG5/4+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 w LPrgnp 50",
+          "referenceSearch": {
+            "depth": 1,
+            "nodes": 343,
+            "elapsedMs": 0
+          },
+          "referenceContinuation": null
+        },
+        {
+          "move": "8d8c",
+          "played": false,
+          "afterCandidateSfen": "sppb1n2+L/p2Sp1lp1/1k1p1ppg1/2N6/GB7/4+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b GLPrgnp 49",
+          "legalOpponentReplies": 157,
+          "referenceReply": "G*8d",
+          "afterReplySfen": "sppb1n2+L/p2Sp1lp1/1k1p1ppg1/1GN6/GB7/4+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 w LPrgnp 50",
+          "referenceSearch": {
+            "depth": 1,
+            "nodes": 519,
+            "elapsedMs": 0
+          },
+          "referenceContinuation": {
+            "move": "8c7b",
+            "afterSfen": "sppb1n2+L/p1kSp1lp1/3p1ppg1/1GN6/GB7/4+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b LPrgnp 51",
+            "legalCount": 1,
+            "depth": 1,
+            "nodes": 52,
+            "elapsedMs": 0
+          }
+        }
+      ],
+      "assessment": "UNRANKED_REPLIES_ONLY"
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateSide": 1,
+      "candidatePly": 36,
+      "sfen": "sppb1n2+L/p2Sp1lp1/k2p1ppg1/2N6/GB7/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 w LPrgnp 44",
+      "holes": [
+        "3e"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "budgetMs": 100,
+      "rootLegalMoveCount": 162,
+      "exploredCandidateMoveCount": 3,
+      "allCandidateMovesCovered": false,
+      "branches": [
+        {
+          "move": "G*8d",
+          "played": true,
+          "afterCandidateSfen": "sppb1n2+L/p2Sp1lp1/k2p1ppg1/1gN6/GB7/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b LPrnp 45",
+          "legalOpponentReplies": 108,
+          "referenceReply": "9e8d",
+          "afterReplySfen": "sppb1n2+L/p2Sp1lp1/k2p1ppg1/1GN6/1B7/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 w GLPrnp 46",
+          "referenceSearch": {
+            "depth": 4,
+            "nodes": 97920,
+            "elapsedMs": 100
+          },
+          "referenceContinuation": {
+            "move": "9c8d",
+            "afterSfen": "sppb1n2+L/p2Sp1lp1/3p1ppg1/1kN6/1B7/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b GLPrgnp 47",
+            "legalCount": 1,
+            "depth": 5,
+            "nodes": 83328,
+            "elapsedMs": 100
+          }
+        },
+        {
+          "move": "2c1c",
+          "played": false,
+          "afterCandidateSfen": "sppb1n2+L/p2Sp1lp1/k2p1pp1g/2N6/GB7/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b LPrgnp 45",
+          "legalOpponentReplies": 108,
+          "referenceReply": "6b6a+",
+          "afterReplySfen": "spp+S1n2+L/p3p1lp1/k2p1pp1g/2N6/GB7/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 w BLPrgnp 46",
+          "referenceSearch": {
+            "depth": 4,
+            "nodes": 79808,
+            "elapsedMs": 100
+          },
+          "referenceContinuation": {
+            "move": "N*7e",
+            "afterSfen": "spp+S1n2+L/p3p1lp1/k2p1pp1g/2N6/GBn6/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b BLPrgp 47",
+            "legalCount": 162,
+            "depth": 3,
+            "nodes": 73344,
+            "elapsedMs": 100
+          }
+        },
+        {
+          "move": "2c1d",
+          "played": false,
+          "afterCandidateSfen": "sppb1n2+L/p2Sp1lp1/k2p1pp2/2N5g/GB7/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b LPrgnp 45",
+          "legalOpponentReplies": 108,
+          "referenceReply": "6b6a+",
+          "afterReplySfen": "spp+S1n2+L/p3p1lp1/k2p1pp2/2N5g/GB7/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 w BLPrgnp 46",
+          "referenceSearch": {
+            "depth": 4,
+            "nodes": 78336,
+            "elapsedMs": 100
+          },
+          "referenceContinuation": {
+            "move": "N*7e",
+            "afterSfen": "spp+S1n2+L/p3p1lp1/k2p1pp2/2N5g/GBn6/1G2+R1L2/1K2P1N2/1S1P1P+pP1/PP1s2P2 b BLPrgp 47",
+            "legalCount": 162,
+            "depth": 3,
+            "nodes": 73472,
+            "elapsedMs": 100
+          }
+        }
+      ],
+      "assessment": "UNRANKED_REPLIES_ONLY"
+    }
+  ],
+  "warning": "Two reference continuation moves are not minimax, a candidate-engine search, a move score, tactical proof or evidence of improvement. Archived losing lines are not fresh holdout data."
+}
