@@ -1,0 +1,144 @@
+name: Isolate provisional 25k node cap from game 1.5s thinking time
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/provisional-fourdan-factorized.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fourdan-factorized-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  same-nnue-relative-match:
+    name: ${{ matrix.slug }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The first two jobs change ONLY node cap: both have 1500ms.
+          - slug: isolate-node-cap-first-three
+            candidate_ms: 1500
+            opponent_ms: 1500
+            candidate_nodes: "25000"
+            opponent_nodes: "none"
+            offset: 0
+          - slug: isolate-node-cap-other-three
+            candidate_ms: 1500
+            opponent_ms: 1500
+            candidate_nodes: "25000"
+            opponent_nodes: "none"
+            offset: 3
+          # Recheck the previous combined-setting comparison on other families.
+          - slug: recheck-combined-profile-other-three
+            candidate_ms: 1000
+            opponent_ms: 1500
+            candidate_nodes: "25000"
+            opponent_nodes: "none"
+            offset: 3
+          # Change ONLY thinking time with both sides capped at 25k nodes.
+          - slug: isolate-thinking-time-other-three
+            candidate_ms: 1000
+            opponent_ms: 1500
+            candidate_nodes: "25000"
+            opponent_nodes: "25000"
+            offset: 3
+    env:
+      CANDIDATE_MS: ${{ matrix.candidate_ms }}
+      OPPONENT_MS: ${{ matrix.opponent_ms }}
+      CANDIDATE_NODES: ${{ matrix.candidate_nodes }}
+      OPPONENT_NODES: ${{ matrix.opponent_nodes }}
+      OFFSET: ${{ matrix.offset }}
+      LABEL: ${{ matrix.slug }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check independent node, clock and scoring contracts
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/search-axis-match.mjs
+          node --check benchmarks/strength/ci/difficulty-scorecard.mjs
+          node --test benchmarks/strength/ci/clock-budget.test.mjs \
+            benchmarks/strength/ci/search-control-contract.test.mjs \
+            benchmarks/strength/ci/difficulty-scorecard.test.mjs
+      - name: Build identical pinned obstacle NNUE Workers and independent referee
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/fourdan-sdk"
+          (cd "$RUNNER_TEMP/fourdan-sdk" && sha256sum -c SHA256SUMS)
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/fourdan-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs "$RUNNER_TEMP/fourdan-referee"
+      - name: Compare real 3-minute paired native games
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/search-axis-match.mjs \
+            "$RUNNER_TEMP/fourdan-referee" "$RUNNER_TEMP/fourdan-sdk" \
+            "$CANDIDATE_MS" 300 3 "$OFFSET" "$RUNNER_TEMP/fourdan-sdk" obstacle \
+            benchmarks/strength/experiments/holdout-openings.jsonl \
+            "$OPPONENT_MS" 20 20 1300 1300 fixed fixed 64 64 \
+            "$CANDIDATE_NODES" "$OPPONENT_NODES" \
+            | tee "results/$LABEL.jsonl"
+      - name: Audit complete games and isolate only intended controls
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/difficulty-scorecard.mjs \
+            "results/$LABEL.jsonl" "$CANDIDATE_MS" "$OPPONENT_MS" \
+            | tee "results/$LABEL-scorecard.json"
+          python3 - "results/$LABEL.jsonl" "results/$LABEL-scorecard.json" <<'PY'
+          import json,sys,os,collections
+          raw=[json.loads(l) for l in open(sys.argv[1],encoding='utf-8') if l.strip()]
+          score=json.load(open(sys.argv[2],encoding='utf-8'))
+          cfgs=[x for x in raw if x.get('event')=='config']
+          games=[x for x in raw if x.get('event')=='game']
+          assert len(cfgs)==1 and len(games)==12
+          cfg=cfgs[0]
+          expected_ids=range(21+int(os.environ['OFFSET']),24+int(os.environ['OFFSET']))
+          nodes=lambda k: None if os.environ[k]=='none' else int(os.environ[k])
+          assert (cfg['budget'],cfg['opponentBudget'])==(int(os.environ['CANDIDATE_MS']),int(os.environ['OPPONENT_MS']))
+          assert (cfg['candidateNodesCap'],cfg['opponentNodesCap'])==(nodes('CANDIDATE_NODES'),nodes('OPPONENT_NODES'))
+          assert cfg['candidateSha']==cfg['baselineSha']
+          assert cfg['candidateWorkerSha']==cfg['baselineWorkerSha']
+          assert cfg['clockMs']==180000 and cfg['cap']==300
+          assert cfg['pairs']==3 and cfg['offset']==int(os.environ['OFFSET'])
+          assert (cfg['candidateClockDivisor'],cfg['opponentClockDivisor'])==(20,20)
+          assert (cfg['candidatePreMoveDelayMs'],cfg['opponentPreMoveDelayMs'])==(1300,1300)
+          assert cfg['clockDelayMethod']=='virtual-debit-not-wall-wait'
+          assert (cfg['candidateDepthCap'],cfg['opponentDepthCap'])==(64,64)
+          assert score['games']==12 and score['sameModelAndWorker']
+          assert score['amateurRankValidation']=='NOT_PERFORMED' and score['autoAssignAmateurGrade'] is False
+          assert score['candidateWins']+score['opponentWins']+score['neutralUndecided']==12
+          assert collections.Counter(g['kind'] for g in games)=={'pit':6,'blackhole':6}
+          grouped=collections.defaultdict(list)
+          for g in games:
+              assert g['pair'] in expected_ids
+              grouped[(g['pair'],g['kind'])].append(g['candidateSide'])
+              assert len(g['turns'])<=300
+              assert all(x<=180000 for x in g['clocks'])
+              for turn in g['turns']:
+                  candidate=turn['engine']=='candidate'
+                  cap=cfg['candidateNodesCap'] if candidate else cfg['opponentNodesCap']
+                  budget=cfg['budget'] if candidate else cfg['opponentBudget']
+                  assert turn['nodesCap']==cap
+                  assert cap is None or 0<=turn['nodes']<=cap
+                  assert 0<turn['requestMs']<=budget
+          assert len(grouped)==6 and all(sorted(sides)==[0,1] for sides in grouped.values())
+          print('PASS: paired actual NNUE games with exact clock/node/time audit; no human grade inferred')
+          print('RESULT:',json.dumps({'trial':os.environ['LABEL'],
+              'score':{k:score[k] for k in ['candidateWins','opponentWins','neutralUndecided','scoreBoundsIncludingNeutral','performance']}},
+              ensure_ascii=False))
+          PY
+          echo "### $LABEL" >> "$GITHUB_STEP_SUMMARY"
+          cat "results/$LABEL-scorecard.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Record interpretation restrictions
+        if: always()
+        run: |
+          echo 'Only 3 source SFEN families per matrix job: pit + blackhole, swapped colors (12 actual games). Groups overlap with earlier analysis and are not a human Elo sample.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Engine WASM, Worker, referee, game clocks and 1300ms virtual premove delays are identical. Only the matrix-declared think-time and node ceilings may differ.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No 1-percent game events, mobile hardware variation, GUI animations, human-grade certification, game-preset changes, merging or production deployment.' >> "$GITHUB_STEP_SUMMARY"
