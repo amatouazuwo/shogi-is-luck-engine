@@ -1,0 +1,87 @@
+name: Real Chromium Web Worker with pinned obstacle WASM NNUE
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/browser-real-obstacle-wasm-smoke.yml'
+      - 'benchmarks/strength/ci/browser-obstacle-worker-smoke.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: real-chromium-obstacle-wasm-draft
+  cancel-in-progress: true
+jobs:
+  browser-wasm:
+    name: Native obstacle NNUE in actual Chromium Web Worker
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate headless-browser test script syntax
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/browser-obstacle-worker-smoke.mjs
+      - name: Build reproducible pinned obstacle WASM SDK
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/browser-obstacle-sdk"
+          (cd "$RUNNER_TEMP/browser-obstacle-sdk" && sha256sum -c SHA256SUMS)
+      - name: Compare generated SDK hashes against private game's pinned SDK manifest
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/browser-obstacle-sdk"
+          echo '0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108  rsshogi_nnue_mini.wasm' | sha256sum -c -
+          echo 'fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2  worker.js' | sha256sum -c -
+          echo '112294de3bbd5ee315a81da86a6aa85ab8e55725e13bca5f5b8e8268ba7306b1  mini.js' | sha256sum -c -
+      - name: Install headless Chromium for real browser Worker test
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null
+          npm install --no-save --no-package-lock playwright@1.64.1
+          npx --no-install playwright install --with-deps chromium
+      - name: Run real NNUE/WASM in real Chromium Worker and enforce legal moves
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/browser-obstacle-worker-smoke.mjs "$RUNNER_TEMP/browser-obstacle-sdk" \
+            | tee results/browser-obstacle-worker-smoke.jsonl
+      - name: Independently audit the actual Worker evidence
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          rows=[json.loads(x) for x in open('results/browser-obstacle-worker-smoke.jsonl',encoding='utf8') if x.strip()]
+          matched=[x for x in rows if x.get('event')=='rsshogi-real-browser-worker']
+          assert len(matched)==1
+          evidence=matched[0]
+          assert evidence['status']=='PASS'
+          assert evidence['browser']=='Chromium'
+          assert evidence['tests']==5 and len(evidence['sessions'])==4
+          assert evidence['workerCancelledAndRecreated']
+          assert evidence['wasmSha256']=='0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108'
+          assert evidence['workerSha256']=='fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2'
+          names=[x['name'] for x in evidence['sessions']]
+          assert names==['normal-1500ms','pit-25k','blackhole-25k','worker-recreated-after-terminate']
+          assert evidence['sessions'][0]['cap'] is None
+          for x in evidence['sessions']:
+              assert isinstance(x['move'],str) and x['move']
+              assert x['legal']>0 and x['nodes']>=0 and x['depth']>=0
+              if x['cap'] is not None: assert x['nodes']<=x['cap']==25000
+          print('PASS: actual Chromium Web Worker + exact private-game pinned NNUE WASM/Worker, real legal moves, pits/blackhole, forced termination and recovery')
+          PY
+          {
+            echo '### Actual browser/Web Worker validation'
+            echo 'Expected five audited checks: normal search, pit, 3x3 blackhole, forced termination, and post-termination replacement search.'
+            echo 'Uses real Chromium Web Worker, 4.9MB NNUE WASM, and exact game-pinned SDK SHA256 files.'
+            echo 'Does NOT run the private game UI, 3-minute clock controller, rare 1% events, or certify human amateur ranks.'
+            cat results/browser-obstacle-worker-smoke.jsonl
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve explicit production restrictions
+        if: always()
+        run: |
+          echo 'Development-only public engine CI. Private game presets, simple CPU, main/develop, Render production and PR merge remain unchanged.' >> "$GITHUB_STEP_SUMMARY"
