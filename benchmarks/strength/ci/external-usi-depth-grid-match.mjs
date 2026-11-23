@@ -11,6 +11,7 @@ import {parseUsiHandshake,referenceSettings,parseUsiBestmove}
   from './external-usi-calibration-contract.mjs';
 import {planTurn} from './clock-budget.mjs';
 import {searchRequest,auditSearch} from './search-control-contract.mjs';
+import {referenceProxyForDepth} from './gikou-reference-proxies.mjs';
 
 const [, ,gikouExe,gikouCwd,sdkArg,refereeExe,corpusArg,
   depthArg='2',tierCsv='1000,2000,4000,7000',idCsv='8,9,10,11,12,13']=process.argv;
@@ -27,7 +28,7 @@ const parseUniqueIntegers=(raw,min,max,label)=>{
  return numbers;
 };
 const depth=Number(depthArg);
-assert.ok(Number.isInteger(depth)&&[2,3,4,5].includes(depth),'External depth must be 2..5');
+assert.ok(Number.isInteger(depth)&&[2,3,4,5,8].includes(depth),'External depth must be 2,3,4,5 or provisional depth8');
 const gid=parseUniqueIntegers(idCsv,8,15,'fixture');
 const nodesTier=parseUniqueIntegers(tierCsv,500,50000,'node');
 const maxPlies=300;
@@ -102,7 +103,8 @@ try{
    gid.slice().sort((a,b)=>a-b),'Unexpected fixture identities');
  console.log(JSON.stringify({
    event:'gikou-normal-match-config',
-   name:identity.name,tag:'v2.0.2',depthLimit:depth,book:false,threads:1,
+   name:identity.name,tag:'v2.0.2',depthLimit:depth,
+   referenceProxy:referenceProxyForDepth(depth),book:false,threads:1,
    referenceHash:sha(readFileSync(resolve(gikouExe))),
    referenceParamsHash:sha(readFileSync(resolve(gikouCwd,'params.bin'))),
    nnueHash:sha(wasm),workerHash:sha(readFileSync(resolve(sdk,'worker.js'))),
