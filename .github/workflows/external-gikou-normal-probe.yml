@@ -1,0 +1,80 @@
+name: Real Gikou2 normal-board USI reference probe
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/external-gikou-normal-probe.yml'
+      - 'benchmarks/strength/ci/external-usi-calibration-contract.mjs'
+      - 'benchmarks/strength/ci/external-usi-calibration-contract.test.mjs'
+      - 'benchmarks/strength/ci/external-usi-normal-probe.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: external-gikou-normal-probe-draft
+  cancel-in-progress: true
+jobs:
+  external-usi-reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check legal moves, protocol parsing and truthful scoring
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/external-usi-normal-probe.mjs
+          node --test benchmarks/strength/ci/external-usi-calibration-contract.test.mjs
+      - name: Build genuine Gikou2 at pinned source revision
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/gikou-src" "$RUNNER_TEMP/gikou-eval"
+          git -C "$RUNNER_TEMP/gikou-src" init -q
+          git -C "$RUNNER_TEMP/gikou-src" fetch -q --depth 1 \
+            https://github.com/gikou-official/Gikou.git \
+            f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-src" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/gikou-src" rev-parse HEAD)" = \
+            f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          make -C "$RUNNER_TEMP/gikou-src" release -j2
+          test -x "$RUNNER_TEMP/gikou-src/bin/release"
+          sha256sum "$RUNNER_TEMP/gikou-src/bin/release"
+      - name: Fetch original evaluation parameters from official Gikou2 release
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 300 \
+            -o "$RUNNER_TEMP/gikou2_win.zip" \
+            https://github.com/gikou-official/Gikou/releases/download/v2.0.2/gikou2_win.zip
+          sha256sum "$RUNNER_TEMP/gikou2_win.zip"
+          unzip -q "$RUNNER_TEMP/gikou2_win.zip" -d "$RUNNER_TEMP/gikou-eval"
+          PARAM=$(find "$RUNNER_TEMP/gikou-eval" -type f -name params.bin -print -quit)
+          test -n "$PARAM"
+          cp "$PARAM" "$RUNNER_TEMP/gikou-src/params.bin"
+          sha256sum "$RUNNER_TEMP/gikou-src/params.bin"
+          echo 'Genuine published Gikou2 parameter file found (SHA256 in log)' >> "$GITHUB_STEP_SUMMARY"
+      - name: Build unchanged pinned obstacle-aware NNUE WASM and independent legal referee
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/gikou-probe-sdk"
+          (cd "$RUNNER_TEMP/gikou-probe-sdk" && sha256sum -c SHA256SUMS)
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/gikou-referee"
+      - name: Compare four normal SFEN positions at Gikou depth2 with student node tiers
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/external-usi-normal-probe.mjs \
+            "$RUNNER_TEMP/gikou-src/bin/release" "$RUNNER_TEMP/gikou-src" \
+            "$RUNNER_TEMP/gikou-probe-sdk" "$RUNNER_TEMP/gikou-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/real-gikou-reference.jsonl \
+            | tee results/real-gikou-reference-run.jsonl
+          tail -n 1 results/real-gikou-reference-run.jsonl >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve the calibration boundary
+        if: always()
+        run: |
+          echo 'This tests real Gikou2, not fake USI. But bestmove agreement is not head-to-head win rate.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Gikou2 depth2 historical Shogi Club 24 estimate is NOT a certified amateur grade for rsshogi.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No Gikou binary or evaluation parameter redistribution. No main/develop or Render changes.' >> "$GITHUB_STEP_SUMMARY"
