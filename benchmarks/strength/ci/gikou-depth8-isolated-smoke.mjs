@@ -72,8 +72,13 @@ try{
   console.log(JSON.stringify({event:'gikou-depth8-isolated-config',
     engine:identity.name,reference:FOUR_DAN_PROVISIONAL_GIKOU,
     openings:entries.map(x=>x.pair)}));
+  // Captured directly from the failing full-game integration run (paired game 8, ply 118).
+  // This is an ordinary-shogi SFEN with no obstacle data, not a fabricated puzzle.
+  const failingPosition={pair:'8-ply118',opening:
+    '6B1l/l4g+N1k/p4pspn/3P4p/7S1/3SP1P2/P2S1K1PP/5GG2/L7L b 2RB2N8Pg 127'};
   for(const test of [{depth:5,position:entries[0]},{depth:8,position:entries[0]},
-    {depth:8,position:entries[1]}]){
+    {depth:8,position:entries[1]},
+    {depth:5,position:failingPosition},{depth:8,position:failingPosition}]){
     active='depth'+test.depth+'-pair'+test.position.pair;
     send('usinewgame');
     send('position sfen '+test.position.opening);
