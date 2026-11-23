@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "file": "results/direct.jsonl",
+      "kind": "blackhole",
+      "pair": 21,
+      "candidateCommit": "9c8ef323f89590dc891ac23a5dc4080be2ba29b9",
+      "candidateWasmSha256": "398e764f6c0b3e75e74074510474dd898833839d4bb520c59a5231268cba1d7c",
+      "baselineWasmSha256": "aba5eb1753ad61e5113eb0f911886621a7cca616ffb6a3f34318d5e84a709dab",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "results": {
+        "candidateSente": "unresolved",
+        "candidateGote": "loss"
+      },
+      "divergencePly": 13,
+      "divergentMoves": {
+        "candidateSente": "4g5f",
+        "candidateGote": "7h5f"
+      },
+      "divergentPositions": {
+        "candidateSente": "spp5+L/pkbRp1lp1/2gpnppg1/1s7/1n7/1G6S/4P+RN2/1SBK1PGP1/PP1P+N1P2 b L2Pp 21",
+        "candidateGote": "spp5+L/pkbRp1lp1/2gpnppg1/1s7/1n7/1G6S/4P+RN2/1SBK1PGP1/PP1P+N1P2 b L2Pp 21"
+      },
+      "reviewCandidates": [
+        {
+          "candidateSide": 1,
+          "lastCandidatePly": 50,
+          "lastCandidateMove": "5b4a",
+          "lastCandidateSfen": "spp5+L/p2Sk1lp1/1lG1+Rppg1/B1P6/s2p5/1G6S/4P1N1p/3K+NPGP1/PP1P2P2 w B2N2Pr 58",
+          "precedingMoves": [
+            "1h1d",
+            "7b7c",
+            "R*6b",
+            "6a7b",
+            "6g7h",
+            "1b2c",
+            "1d1a+",
+            "P*1f",
+            "2g1f",
+            "9c8e",
+            "9g8f",
+            "4a5c",
+            "7h5f",
+            "6c6d",
+            "L*7h",
+            "5c6e",
+            "6b5b+",
+            "P*1g",
+            "5i5h",
+            "8e7g+",
+            "8h7g",
+            "6e7g",
+            "7h7g",
+            "S*6e",
+            "7g7c+",
+            "8b7c",
+            "5b7b",
+            "7c7b",
+            "B*9d",
+            "L*8c",
+            "P*7c",
+            "7b7c",
+            "P*7d",
+            "7c7b",
+            "N*9e",
+            "8d9e",
+            "5f6e",
+            "6d6e",
+            "G*7c",
+            "7b6a",
+            "S*6b",
+            "6a5b",
+            "4g5f",
+            "P*5e",
+            "5f5e",
+            "N*5d",
+            "5e5d",
+            "B*5c",
+            "5d5c"
+          ],
+          "reason": "no-legal",
+          "plies": 51
+        }
+      ],
+      "priority": "review-single-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateCommit": "9c8ef323f89590dc891ac23a5dc4080be2ba29b9",
+      "candidateWasmSha256": "398e764f6c0b3e75e74074510474dd898833839d4bb520c59a5231268cba1d7c",
+      "baselineWasmSha256": "aba5eb1753ad61e5113eb0f911886621a7cca616ffb6a3f34318d5e84a709dab",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "results": {
+        "candidateSente": "unresolved",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 2,
+      "divergentMoves": {
+        "candidateSente": "9c8e",
+        "candidateGote": "1b2c"
+      },
+      "divergentPositions": {
+        "candidateSente": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6L/9/6L2/G2BP+RNS1/1SlK1PGP1/PP1P+N1P2 w R2p 10",
+        "candidateGote": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6L/9/6L2/G2BP+RNS1/1SlK1PGP1/PP1P+N1P2 w R2p 10"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/normal.jsonl",
+      "kind": "game",
+      "pair": 8,
+      "candidateCommit": "9c8ef323f89590dc891ac23a5dc4080be2ba29b9",
+      "candidateWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "baselineWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11",
+      "results": {
+        "candidateSente": "unresolved",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 1,
+      "divergentMoves": {
+        "candidateSente": "1i1h",
+        "candidateGote": "8g8c+"
+      },
+      "divergentPositions": {
+        "candidateSente": "1+p1ps2nb/+p1lgn+pp+rk/1sp1pglp+p/9/9/9/1LPPG1SL+P/PG2PPRP1/SPK1B1PN+N b - 1",
+        "candidateGote": "1+p1ps2nb/+p1lgn+pp+rk/1sp1pglp+p/9/9/9/1LPPG1SL+P/PG2PPRP1/SPK1B1PN+N b - 1"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/normal.jsonl",
+      "kind": "hirate",
+      "pair": 8,
+      "candidateCommit": "9c8ef323f89590dc891ac23a5dc4080be2ba29b9",
+      "candidateWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "baselineWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11",
+      "results": {
+        "candidateSente": "unresolved",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 4,
+      "divergentMoves": {
+        "candidateSente": "7a6b",
+        "candidateGote": "7a7b"
+      },
+      "divergentPositions": {
+        "candidateSente": "lnsg1g1nl/1r3ksb1/p1pppp1pp/6p2/1p7/2PP3P1/PPB1PPP1P/2SG3R1/LN2KGSNL w - 12",
+        "candidateGote": "lnsg1g1nl/1r3ksb1/p1pppp1pp/6p2/1p7/2PP3P1/PPB1PPP1P/2SG3R1/LN2KGSNL w - 12"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    }
+  ]
+}
