@@ -7,7 +7,8 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {Worker} from 'node:worker_threads';
 import {planTurn} from './clock-budget.mjs';
-const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline, mode='obstacle', customFixture, opponentBudgetStr=budgetStr, candidateDivisorStr='20', opponentDivisorStr='20', candidatePreDelayStr='0', opponentPreDelayStr='0']=process.argv.slice(2);
+import {chooseAdaptiveThink} from './adaptive-think-policy.mjs';
+const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline, mode='obstacle', customFixture, opponentBudgetStr=budgetStr, candidateDivisorStr='20', opponentDivisorStr='20', candidatePreDelayStr='0', opponentPreDelayStr='0',candidatePolicy='fixed']=process.argv.slice(2);
 const budget=Number(budgetStr), opponentBudget=Number(opponentBudgetStr), cap=Number(capStr), pairs=Number(pairsStr), offset=Number(offsetStr);
 const candidateDivisor=Number(candidateDivisorStr), opponentDivisor=Number(opponentDivisorStr);
 const candidatePreDelay=Number(candidatePreDelayStr), opponentPreDelay=Number(opponentPreDelayStr);
@@ -16,6 +17,9 @@ assert.ok([100,500,1000,1500,3000,6000].includes(opponentBudget),'Opponent time 
 assert.ok(Number.isInteger(cap)&&cap>=1&&cap<=300, 'Ply cap must be within 1–300');
 assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&&offset>=0);
 assert.ok(['normal','normal-worker','obstacle'].includes(mode));
+assert.ok(['fixed','adaptive-feature-v1'].includes(candidatePolicy),'Unknown candidate thinking policy');
+assert.ok(candidatePolicy==='fixed'||!normal,'Tactical adaptive benchmark currently validates obstacle boards only');
+assert.ok(candidatePolicy==='fixed'||budget===6000,'Adaptive policy requires max 6000ms');
 for(const divisor of [candidateDivisor,opponentDivisor])assert.ok(Number.isInteger(divisor)&&divisor>=2&&divisor<=100);
 for(const delay of [candidatePreDelay,opponentPreDelay])assert.ok(Number.isFinite(delay)&&delay>=0&&delay<=10000);
 const normal=mode==='normal'||mode==='normal-worker';
@@ -74,7 +78,7 @@ const a=engine(sdk,normal), b=baseline?engine(baseline):null;
 const scores=[];
 try{
   for(const e of [a,b].filter(Boolean))await e.send('init',{wasm:e.wasm,hash_mb:16,moduleUrl:e.moduleUrl});
-  log('config',{budget,opponentBudget,cap,pairs,offset,fixtureSha:hash(raw),candidateSha:a.sha,candidateWorkerSha:a.workerSha,baselineSha:b?.sha,baselineWorkerSha:b?.workerSha,referenceSha:hash(readFileSync(binary)),node:process.version,opponent:b?'baseline':'reference',clockMs:180000,candidateClockDivisor:candidateDivisor,opponentClockDivisor:opponentDivisor,candidatePreMoveDelayMs:candidatePreDelay,opponentPreMoveDelayMs:opponentPreDelay,clockDelayMethod:'virtual-debit-not-wall-wait'});
+  log('config',{budget,opponentBudget,cap,pairs,offset,fixtureSha:hash(raw),candidateSha:a.sha,candidateWorkerSha:a.workerSha,baselineSha:b?.sha,baselineWorkerSha:b?.workerSha,referenceSha:hash(readFileSync(binary)),node:process.version,opponent:b?'baseline':'reference',clockMs:180000,candidateClockDivisor:candidateDivisor,opponentClockDivisor:opponentDivisor,candidatePreMoveDelayMs:candidatePreDelay,opponentPreMoveDelayMs:opponentPreDelay,clockDelayMethod:'virtual-debit-not-wall-wait',candidatePolicy});
   for(const f of fixtures.filter(f=>ids.includes(f.pair))){
     const holes=f.holes.join(',');
     const first=await request('legal',f.sfen,holes);
@@ -94,7 +98,22 @@ try{
         if(ply===cap)break;
         const e=side===candidateSide?a:b;
         const isCandidate=side===candidateSide;
-        const currentBudget=isCandidate?budget:opponentBudget;
+        // Measure independent tactical features at each candidate turn.
+        // Charge feature-detection work to the candidate's own 3-minute clock.
+        // This prototype is NOT wired into the production game.
+        const clockBeforeFeatureMs=clocks[side];
+        let featureDetectionMs=0, adaptiveDecision=null, tacticalFeatures=null;
+        if(isCandidate&&candidatePolicy==='adaptive-feature-v1'){
+          const featureStarted=performance.now();
+          tacticalFeatures=await request('features',sfen,holes);
+          featureDetectionMs=performance.now()-featureStarted;
+          clocks[side]-=featureDetectionMs;
+          assert.equal(tacticalFeatures.legalCount,legal.length,
+            'Independent feature extractor must use same legal move set');
+          if(clocks[side]<=0){winner=1-side;reason='clock';break;}
+          adaptiveDecision=chooseAdaptiveThink(tacticalFeatures,clocks[side]);
+        }
+        const currentBudget=isCandidate?(adaptiveDecision?.maxThinkMs??budget):opponentBudget;
         const clockDivisor=isCandidate?candidateDivisor:opponentDivisor;
         const preDelayMs=isCandidate?candidatePreDelay:opponentPreDelay;
         const plan=planTurn({remainingMs:clocks[side],nominalMs:currentBudget,
@@ -116,7 +135,9 @@ try{
         turns.push({side,engine:side===candidateSide?'candidate':'opponent',sfenBefore:sfen,move:result.bestmove,depth:result.depth,nodes:result.nodes,elapsed,requestMs:ms,
           clockDivisor,preMoveDelayChargedMs:plan.preMoveDelayChargedMs,
           chargedMs:plan.preMoveDelayChargedMs+elapsed,clockBeforeMs:plan.clockBeforeMs,
-          clockAfterDelayMs:plan.clockAfterDelayMs,clockAfterTurnMs:clocks[side]});
+          clockAfterDelayMs:plan.clockAfterDelayMs,clockAfterTurnMs:clocks[side],
+          clockBeforeFeatureMs,featureDetectionMs,policyDecision:adaptiveDecision,
+          tacticalFeatures});
         if(clocks[side]<=0){winner=1-side;reason='clock';break;}
         if(result.bestmove==='resign'){winner=1-side;reason='resign';break;}
         assert.ok(legal.includes(result.bestmove),'Illegal move '+result.bestmove+' in '+sfen);
