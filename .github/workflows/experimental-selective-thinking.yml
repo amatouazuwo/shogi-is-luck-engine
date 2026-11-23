@@ -1,0 +1,85 @@
+name: Experimental selective CPU thinking - 1s base vs fixed 1s and 6s
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/experimental-selective-thinking.yml'
+      - 'benchmarks/strength/ci/adaptive-think-policy.mjs'
+      - 'benchmarks/strength/ci/adaptive-think-policy.test.mjs'
+      - 'benchmarks/strength/ci/adaptive-scorecard.mjs'
+      - 'benchmarks/strength/ci/adaptive-scorecard.test.mjs'
+      - 'benchmarks/strength/ci/referee-feature-smoke.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: selective-thinking-300ply-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  paired-adaptive-versus-fixed:
+    strategy:
+      fail-fast: false
+      matrix:
+        fixed_ms: [1000, 6000]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test selective budget, unadjudicated-game scoring and clock charges
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/match.mjs
+          node --check benchmarks/strength/ci/adaptive-think-policy.mjs
+          node --check benchmarks/strength/ci/adaptive-scorecard.mjs
+          node --test benchmarks/strength/ci/adaptive-think-policy.test.mjs \
+            benchmarks/strength/ci/adaptive-scorecard.test.mjs \
+            benchmarks/strength/ci/clock-budget.test.mjs \
+            benchmarks/strength/ci/difficulty-scorecard.test.mjs
+      - name: Rebuild unchanged pinned rsshogi NNUE and verified obstacle Worker
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/selective-sdk"
+          (cd "$RUNNER_TEMP/selective-sdk" && sha256sum -c SHA256SUMS)
+      - name: Build independent shogi legality and tactical feature referee
+        run: |
+          set -euo pipefail
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/selective-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs "$RUNNER_TEMP/selective-referee"
+      - name: Generate identical sealed-for-this-trial hole and blackhole openings
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/selective-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/selective-openings.jsonl 20261206 \
+            | tee results/selective-openings-manifest.json
+      - name: Real 300-ply maximum matches - selective versus fixed with both colors
+        run: |
+          set -euo pipefail
+          # Candidate: quiet=1000ms, tactical=1500-3000ms, check=6000ms,
+          # further safeguarded at low clocks, capped by 3-minute clock/12.
+          # Opponent: same rsshogi with fixed 1000ms or fixed 6000ms.
+          # 300-ply neutral cap: no fictitious outcomes.
+          node benchmarks/strength/ci/match.mjs \
+            "$RUNNER_TEMP/selective-referee" "$RUNNER_TEMP/selective-sdk" \
+            6000 300 1 0 "$RUNNER_TEMP/selective-sdk" obstacle \
+            results/selective-openings.jsonl ${{ matrix.fixed_ms }} 12 12 1300 1300 adaptive-feature-v1 \
+            | tee results/selective-v-fixed-${{ matrix.fixed_ms }}.jsonl
+      - name: Verify every decision and publish legal, neutral-aware results
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/adaptive-scorecard.mjs \
+            results/selective-v-fixed-${{ matrix.fixed_ms }}.jsonl ${{ matrix.fixed_ms }} \
+            | tee results/selective-v-fixed-${{ matrix.fixed_ms }}-scorecard.json
+          cat results/selective-v-fixed-${{ matrix.fixed_ms }}-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Explain limitations and retain job evidence
+        if: always()
+        run: |
+          echo 'EXPERIMENTAL adaptive candidate vs fixed ${{ matrix.fixed_ms }}ms; same 6s candidate ceiling, same model, 180s clock, /12 divisor and 1300ms pre-move debit. Feature extraction CPU time is charged to the adaptive side.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Hole and blackhole with color reversal, up to 300 ply; legal referee check, king danger and tactical feature audit. At capped ply/repetition outcome is NEUTRAL, never claimed as draw.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Small correlated sample. Not an Elo/rank estimate, not proof of better strength. No automatic changes to game UI, main/develop, Render or releases.' >> "$GITHUB_STEP_SUMMARY"
