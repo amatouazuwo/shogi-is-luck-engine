@@ -1,0 +1,136 @@
+name: Pair Gikou2 depth8 proxy vs 25k and 50k nodes on same normal openings
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/gikou-depth8-25k-50k-paired.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gikou-depth8-25k-50k-paired-draft
+  cancel-in-progress: true
+jobs:
+  real-external-paired-grid:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - label: depth8-identical-opening-25k-50k
+            depths: '8'
+            node_tiers: '25000,50000'
+            opening_ids: '12,13,14,15'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify scorecards prevent false grade, missing pair and clock errors
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/external-usi-depth-grid-match.mjs
+          node --check benchmarks/strength/ci/external-usi-depth-grid-scorecard.mjs
+          node --test benchmarks/strength/ci/gikou-reference-proxies.test.mjs \
+            benchmarks/strength/ci/external-usi-depth-grid-scorecard.test.mjs \
+            benchmarks/strength/ci/external-usi-calibration-contract.test.mjs \
+            benchmarks/strength/ci/clock-budget.test.mjs
+      - name: Build pinned Gikou2 real USI engine
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/gikou-src" "$RUNNER_TEMP/gikou-eval"
+          git -C "$RUNNER_TEMP/gikou-src" init -q
+          git -C "$RUNNER_TEMP/gikou-src" fetch -q --depth 1 \
+            https://github.com/gikou-official/Gikou.git \
+            f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-src" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/gikou-src" rev-parse HEAD)" = \
+            f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-src" apply --check "$GITHUB_WORKSPACE/patches/gikou2-empty-legal-probability.patch"
+          git -C "$RUNNER_TEMP/gikou-src" apply "$GITHUB_WORKSPACE/patches/gikou2-empty-legal-probability.patch"
+          make -C "$RUNNER_TEMP/gikou-src" release -j2
+          test -x "$RUNNER_TEMP/gikou-src/bin/release"
+          sha256sum "$RUNNER_TEMP/gikou-src/bin/release"
+      - name: Pin official Gikou2 parameters with SHA256, never upload evaluation data
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 300 \
+            -o "$RUNNER_TEMP/gikou2_win.zip" \
+            https://github.com/gikou-official/Gikou/releases/download/v2.0.2/gikou2_win.zip
+          echo "3bbb667bfd77e0236b052593b5c61b7fe1827ed72b5b5f437760c60974852757  $RUNNER_TEMP/gikou2_win.zip" | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/gikou2_win.zip" -d "$RUNNER_TEMP/gikou-eval"
+          PARAM=$(find "$RUNNER_TEMP/gikou-eval" -type f -name params.bin -print -quit)
+          test -n "$PARAM"
+          cp "$PARAM" "$RUNNER_TEMP/gikou-src/params.bin"
+          echo "6bbc573306839fe019634dd94b06af7c22834a641e8bc060e23889ae9b3b2195  $RUNNER_TEMP/gikou-src/params.bin" | sha256sum -c -
+          PROGRESS=$(find "$RUNNER_TEMP/gikou-eval" -type f -name progress.bin -print -quit)
+          test -n "$PROGRESS" || { echo "Official progress.bin is missing"; exit 1; }
+          cp "$PROGRESS" "$RUNNER_TEMP/gikou-src/progress.bin"
+          echo "ddf60a3180f768d9756b83cd4fe50a18b9e93855d1ad7281566934fb7c53a042  $RUNNER_TEMP/gikou-src/progress.bin" | sha256sum -c -
+          PROBABILITY=$(find "$RUNNER_TEMP/gikou-eval" -type f -name probability.bin -print -quit)
+          test -n "$PROBABILITY" || { echo "Missing official probability.bin"; exit 1; }
+          cp "$PROBABILITY" "$RUNNER_TEMP/gikou-src/probability.bin"
+          echo "dc2b18f1eaa7551822901eab7b68c6f279cc449ef527462b611b5d9510cb6c1a  $RUNNER_TEMP/gikou-src/probability.bin" | sha256sum -c -
+      - name: Build unchanged real NNUE obstacle WASM and independently coded referee
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/calibration-sdk"
+          (cd "$RUNNER_TEMP/calibration-sdk" && sha256sum -c SHA256SUMS)
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/calibration-referee"
+      - name: Play same eight paired normal games each at 25k and 50k against Gikou2 depth8
+        env:
+          DEPTHS: ${{ matrix.depths }}
+          NODES: ${{ matrix.node_tiers }}
+          OPENINGS: ${{ matrix.opening_ids }}
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          for DEPTH in $DEPTHS; do
+            echo "::group::Gikou2 depth $DEPTH vs NNUE nodes $NODES"
+            node benchmarks/strength/ci/external-usi-depth-grid-match.mjs \
+              "$RUNNER_TEMP/gikou-src/bin/release" "$RUNNER_TEMP/gikou-src" \
+              "$RUNNER_TEMP/calibration-sdk" "$RUNNER_TEMP/calibration-referee" \
+              benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+              "$DEPTH" "$NODES" "$OPENINGS" \
+              | tee "results/gikou-depth$DEPTH-matches.jsonl"
+            node benchmarks/strength/ci/external-usi-depth-grid-scorecard.mjs \
+              "results/gikou-depth$DEPTH-matches.jsonl" \
+              benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+              "$DEPTH" "$NODES" "$OPENINGS" \
+              | tee "results/gikou-depth$DEPTH-audited.json"
+            cat "results/gikou-depth$DEPTH-audited.json" >> "$GITHUB_STEP_SUMMARY"
+            echo "::endgroup::"
+          done
+      - name: Independently verify paired fixtures and both tiers on exactly same openings
+        run: |
+          set -euo pipefail
+          python3 - results/gikou-depth8-matches.jsonl results/gikou-depth8-audited.json <<'PY'
+          import json,sys,collections
+          events=[json.loads(row) for row in open(sys.argv[1],encoding='utf-8') if row.strip()]
+          report=json.load(open(sys.argv[2],encoding='utf-8'))
+          cfg=[e for e in events if e.get('event')=='gikou-normal-match-config']
+          assert len(cfg)==1 and cfg[0]['depthLimit']==8
+          assert cfg[0]['nodeTiers']==[25000,50000]
+          assert cfg[0]['fixtureIds']==[12,13,14,15]
+          games=[e for e in events if e.get('event')=='gikou-normal-match-game']
+          assert len(games)==16
+          assert collections.Counter(g['nodesCap'] for g in games)=={25000:8,50000:8}
+          assert len({(g['nodesCap'],g['pair'],g['candidateSide']) for g in games})==16
+          assert all(g['pair'] in (12,13,14,15) and g['candidateSide'] in (0,1) for g in games)
+          assert all(g['reason'] not in ('ply-cap','repetition-unadjudicated') or g['winner'] is None for g in games)
+          print('PASS: 25k/50k each faced real Gikou2 depth8 on EXACT same 4 normal openings, both colors')
+          print('AUDITED:',json.dumps(report,ensure_ascii=False)[:3000])
+          PY
+      - name: State that external engine comparisons are not human rank certifications
+        if: always()
+        run: |
+          echo 'Gikou2 depth uses no one-second hard cap; rsshogi node tier does use 1000ms max. Both have 180s virtual clocks.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'All matches use normal shogi only. Special-board strength requires separate NNUE evaluation.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Openings 12-15 are archived corpus fixtures, not new sealed holdouts. 25k and 50k are both checked on the same FOUR starting SFENs with color swaps (8 games each), which still cannot certify human rank.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Gikou2 depth8 is labeled provisional amateur fourth-dan in configuration only; no human calibration is required.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Pinned Gikou2 + one terminal node guard; params.bin, progress.bin AND probability.bin are all SHA-verified.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Earlier two-file comparisons lacked progress.bin or probability.bin; do not mix their results with this three-model holdout.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No production CPU profiles, main, develop, Render or game PR modifications.' >> "$GITHUB_STEP_SUMMARY"
