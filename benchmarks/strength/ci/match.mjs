@@ -18,11 +18,12 @@ assert.ok(Number.isInteger(cap)&&cap>=1&&cap<=300, 'Ply cap must be within 1–3
 assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&&offset>=0);
 assert.ok(['normal','normal-worker','obstacle'].includes(mode));
 assert.ok(['fixed','adaptive-feature-v1'].includes(candidatePolicy),'Unknown candidate thinking policy');
+const normal=mode==='normal'||mode==='normal-worker';
 assert.ok(candidatePolicy==='fixed'||!normal,'Tactical adaptive benchmark currently validates obstacle boards only');
 assert.ok(candidatePolicy==='fixed'||budget===6000,'Adaptive policy requires max 6000ms');
 for(const divisor of [candidateDivisor,opponentDivisor])assert.ok(Number.isInteger(divisor)&&divisor>=2&&divisor<=100);
 for(const delay of [candidatePreDelay,opponentPreDelay])assert.ok(Number.isFinite(delay)&&delay>=0&&delay<=10000);
-const normal=mode==='normal'||mode==='normal-worker';
+
 const raw=readFileSync(customFixture ? resolve(customFixture) :
  new URL(normal?'../experiments/normal-continuous/expansion/openings.jsonl':'../experiments/holdout-openings.jsonl',import.meta.url),'utf8');
 const fixtures=raw.trim().split('\n').map(JSON.parse).filter(f=>!normal||f.event==='opening').map(f=>normal?{...f,kind:f.family,sfen:f.opening,holes:[]}:f);
