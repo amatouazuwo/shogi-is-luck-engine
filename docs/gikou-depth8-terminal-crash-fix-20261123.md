@@ -28,3 +28,12 @@
 正式な「アマ四段」の証明ではなく、ユーザー指定の「技巧2深さ8＝アマ四段程度（仮）」という比較ルールを維持する。
 
 **保全条件**：この工程はエンジンDraft PR #3でのみ実施。ゲームPR #12、「ふつう」簡易CPU、ゲーム正式難易度、`main/develop`、Render本番は未変更。
+
+## 修正後の実測結果
+
+- [単独探索CI #45118620237](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45118620237)：**SUCCESS**。深さ5/8と通常局面・問題の詰み局面の全テストが成功。深さ8でも`B*2a`を返した。
+- [rsshogi実対局CI #45118765575](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45118765575)：**SUCCESS**。2元局面・先後交換の4局すべて完走。独立審判による合法着手・時計・勝敗監査が成功。rsshogi10,000ノードが**2勝2敗**。
+- これは安定性を確認した小規模試験であり、四段相当を証明する段級位実験ではない。今後は[公式評価ファイルを両方使用した再測定](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45118969180)に切り替える。
+
+### 重要な再現性の注意
+`progress.bin`の公式ZIP由来SHA256は`ddf60a3180f768d9756b83cd4fe50a18b9e93855d1ad7281566934fb7c53a042`。旧試験と新試験は技巧2内部の評価関数の入力が異なるため、過去の技術的な勝率値の連続性を仮定しない。公式Gikou2ソースには1か所のガードパッチを当てており、原作者配布バイナリとの同一性は主張しない。
