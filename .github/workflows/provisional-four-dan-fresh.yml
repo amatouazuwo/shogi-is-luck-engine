@@ -1,0 +1,124 @@
+name: Recheck provisional 25k on newly generated obstacle masks
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/provisional-four-dan-fresh.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: provisional-four-dan-fresh-draft
+  cancel-in-progress: true
+jobs:
+  new-masks-paired-matches:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        opponent_nodes: [10000, 50000]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check existing clock and relative-scorecard safeguards
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/search-axis-match.mjs
+          node --check benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs
+          node --test benchmarks/strength/ci/difficulty-scorecard.test.mjs benchmarks/strength/ci/clock-budget.test.mjs
+      - name: Build a single pinned obstacle-aware NNUE and independent referee
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/fresh-sdk"
+          (cd "$RUNNER_TEMP/fresh-sdk" && sha256sum -c SHA256SUMS)
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/fresh-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs "$RUNNER_TEMP/fresh-referee"
+      - name: Generate reproducible NEW obstacle masks on archived normal positions
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/fresh-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/fresh-fourdan-openings.jsonl 20261211
+      - name: Play actual native 25k versus alternative with swapped colors
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/search-axis-match.mjs \
+            "$RUNNER_TEMP/fresh-referee" "$RUNNER_TEMP/fresh-sdk" \
+            1000 300 6 0 "$RUNNER_TEMP/fresh-sdk" obstacle \
+            results/fresh-fourdan-openings.jsonl \
+            1000 20 20 1300 1300 \
+            fixed fixed 64 64 25000 ${{ matrix.opponent_nodes }} \
+            | tee results/fresh-25k-vs-${{ matrix.opponent_nodes }}.jsonl
+      - name: Independently audit fresh fixtures, every legal native move and clock
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/difficulty-scorecard.mjs \
+            results/fresh-25k-vs-${{ matrix.opponent_nodes }}.jsonl 1000 1000 \
+            | tee results/fresh-25k-vs-${{ matrix.opponent_nodes }}-scorecard.json
+          python3 - \
+            results/fresh-fourdan-openings.jsonl \
+            results/fresh-25k-vs-${{ matrix.opponent_nodes }}.jsonl \
+            results/fresh-25k-vs-${{ matrix.opponent_nodes }}-scorecard.json \
+            ${{ matrix.opponent_nodes }} <<'PY'
+          import json,sys,hashlib,collections
+          fixtures_path,events_path,score_path,opponent_text=sys.argv[1:]
+          opponent=int(opponent_text)
+          raw=open(fixtures_path,'rb').read()
+          fixtures=[json.loads(row) for row in raw.splitlines() if row]
+          events=[json.loads(row) for row in open(events_path,encoding='utf-8') if row.strip()]
+          score=json.load(open(score_path,encoding='utf-8'))
+          configs=[e for e in events if e.get('event')=='config']
+          games=[e for e in events if e.get('event')=='game']
+          assert len(configs)==1 and len(games)==24
+          cfg=configs[0]
+          assert cfg['fixtureSha']==hashlib.sha256(raw).hexdigest()
+          assert (cfg['candidateSha'],cfg['candidateWorkerSha'])==(cfg['baselineSha'],cfg['baselineWorkerSha'])
+          assert cfg['candidateNodesCap']==25000 and cfg['opponentNodesCap']==opponent
+          assert cfg['budget']==cfg['opponentBudget']==1000 and cfg['cap']==300
+          assert cfg['candidateDepthCap']==cfg['opponentDepthCap']==64
+          assert cfg['candidateClockDivisor']==cfg['opponentClockDivisor']==20
+          assert cfg['candidatePreMoveDelayMs']==cfg['opponentPreMoveDelayMs']==1300
+          assert len(fixtures)==12
+          keyed={(f['pair'],f['kind']):f for f in fixtures}
+          assert len(keyed)==12 and len({f['pair'] for f in fixtures})==6
+          assert len({f['sfen'] for f in fixtures})==6
+          assert collections.Counter(f['sourceFamily'] for f in fixtures)=={'hirate':6,'game':6}
+          assert all(f['legal']>=5 for f in fixtures)
+          assert all(sorted(len(f['holes']) for f in fixtures if f['pair']==pair)==[1,9]
+                     for pair in {f['pair'] for f in fixtures})
+          seen=set()
+          for g in games:
+              key=(g['pair'],g['kind'])
+              assert key in keyed and g['candidateSide'] in (0,1)
+              assert (key,g['candidateSide']) not in seen
+              seen.add((key,g['candidateSide']))
+              fixture=keyed[key]
+              assert g['start']==fixture['sfen'] and g['holes']==fixture['holes']
+              for move in g['turns']:
+                  cap=25000 if move['engine']=='candidate' else opponent
+                  assert move['nodesCap']==cap and move['depthCap']==64
+                  assert isinstance(move['nodes'],int) and 0<=move['nodes']<=cap
+                  assert 0<=move['depth']<=64
+          assert len(seen)==24
+          assert score['games']==24 and score['sameModelAndWorker'] is True
+          assert score['candidateWins']+score['opponentWins']+score['neutralUndecided']==24
+          assert score['source']['fixtureSha256']==cfg['fixtureSha']
+          assert score['autoAssignAmateurGrade'] is False
+          print('PASS: 24 paired legal native games, exact newly generated obstacles, 300-ply neutral treatment and node/clock audit')
+          print('RESULT:',json.dumps({k:score[k] for k in ('candidateWins','opponentWins','neutralUndecided','scoreBoundsIncludingNeutral')},ensure_ascii=False))
+          PY
+          cat results/fresh-25k-vs-${{ matrix.opponent_nodes }}-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve limits of interpretation
+        if: always()
+        run: |
+          echo 'New obstacle masks are deterministic (seed 20261211), but underlying normal SFENs are from an existing public corpus; this is NOT a fully unseen human-strength test.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'These results only compare 25k nodes to ${{ matrix.opponent_nodes }} nodes in special-board rsshogi. Gikou2 cannot play these boards.' >> "$GITHUB_STEP_SUMMARY"
+          echo '300-ply and unadjudicated repetition are neutral; no fictitious wins/losses and no amateur grade certification.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No merge/deploy to the game, no CPU presets changed, no production Render changes.' >> "$GITHUB_STEP_SUMMARY"
