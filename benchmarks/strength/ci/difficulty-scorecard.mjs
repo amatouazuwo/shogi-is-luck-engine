@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {planTurn} from './clock-budget.mjs';
 import {chooseAdaptiveThink} from './adaptive-think-policy.mjs';
+import {chooseAdaptiveThinkV2} from './adaptive-think-policy-v2.mjs';
 
 // Report *relative* engine strengths only. Never treat a capped game as a
 // draw/loss or a move-time budget as proof of an amateur rank.
@@ -57,14 +58,24 @@ export function scoreDifficultyGames(events, {
       if(config.clockDelayMethod==='virtual-debit-not-wall-wait'){
         const candidate=turn.engine==='candidate';
         let nominalMs=candidate?config.budget:config.opponentBudget;
-        if(config.candidatePolicy==='adaptive-feature-v1'&&candidate){
+        const activePolicy=candidate?(config.candidatePolicy??'fixed')
+          :(config.opponentPolicy??'fixed');
+        if(activePolicy!=='fixed'){
+          assert.ok(['adaptive-feature-v1','adaptive-feature-v2'].includes(activePolicy),
+            'Unknown adaptive policy in trial');
           assert.ok(turn.tacticalFeatures,'Adaptive turn must preserve referee tactical features');
-          const decision=chooseAdaptiveThink(turn.tacticalFeatures,turn.clockBeforeMs);
-          assert.deepEqual(turn.policyDecision,decision,'Adaptive search decision must be independently reproducible');
+          const decision=activePolicy==='adaptive-feature-v1'
+            ?chooseAdaptiveThink(turn.tacticalFeatures,turn.clockBeforeMs)
+            :chooseAdaptiveThinkV2(turn.tacticalFeatures,turn.clockBeforeMs);
+          assert.deepEqual(turn.policyDecision,decision,
+            'Adaptive search decision must be independently reproducible');
           assert.ok(Number.isFinite(turn.featureDetectionMs)&&turn.featureDetectionMs>=0);
           assert.ok(Math.abs((turn.clockBeforeFeatureMs-turn.featureDetectionMs)-turn.clockBeforeMs)<1.01,
             'Tactical feature processing must be charged to game clock');
           nominalMs=decision.maxThinkMs;
+        }else{
+          assert.ok(turn.policyDecision===null||turn.policyDecision===undefined,
+            'Fixed-policy side cannot report an adaptive decision');
         }
         const divisor=candidate?config.candidateClockDivisor:config.opponentClockDivisor;
         const preMoveDelayMs=candidate?config.candidatePreMoveDelayMs:config.opponentPreMoveDelayMs;
