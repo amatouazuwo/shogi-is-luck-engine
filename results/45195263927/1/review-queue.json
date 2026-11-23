@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateCommit": "3ff79718c85466d429948ca0175acdde479671e2",
+      "candidateWasmSha256": "370feb09e53325b05178fadc3ad1a42514a5b9f4013d7e6e710b5c6b9502ca56",
+      "baselineWasmSha256": "080f3b060f3319440beb6713eae41a4171f164d18def63ac15858dfd2a27c982",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "results": {
+        "candidateSente": "win",
+        "candidateGote": "loss"
+      },
+      "divergencePly": 5,
+      "divergentMoves": {
+        "candidateSente": "2g1f",
+        "candidateGote": "6h7h"
+      },
+      "divergentPositions": {
+        "candidateSente": "sppb1n2+L/pkg1p1lp1/n2p1ppg1/1s7/9/6L1p/G2BP+RNS1/1SlK1PGP1/PP1P+N1P2 b RPp 13",
+        "candidateGote": "sppb1n2+L/pkg1p1lp1/n2p1ppg1/1s7/9/6L1p/G2BP+RNS1/1SlK1PGP1/PP1P+N1P2 b RPp 13"
+      },
+      "reviewCandidates": [
+        {
+          "candidateSide": 1,
+          "lastCandidatePly": 44,
+          "lastCandidateMove": "8b7a",
+          "lastCandidateSfen": "sp1b4+L/pkp1+R1lp1/n+S1p2pg1/9/g1l6/4B1L2/2P1P1N2/1S1K1PPP1/PP1P5 w 2GN2Prsn2p 52",
+          "precedingMoves": [
+            "1h1d",
+            "1b2c",
+            "1d1a+",
+            "P*1f",
+            "6h7h",
+            "1f1g+",
+            "5i6h",
+            "1g2g",
+            "L*8f",
+            "2g3h",
+            "8f8d",
+            "8b7c",
+            "3i3h",
+            "7c8d",
+            "9g8f",
+            "S*6f",
+            "6g5f",
+            "L*7d",
+            "P*7e",
+            "6f7e",
+            "S*9e",
+            "8d7c",
+            "8f7e",
+            "7d7e",
+            "P*7g",
+            "G*8e",
+            "4g4c",
+            "8e9e",
+            "R*7d",
+            "7c8b",
+            "4c4a",
+            "S*5i",
+            "S*8d",
+            "5i6h+",
+            "7h6h",
+            "G*7c",
+            "7d7c+",
+            "7b7c",
+            "4a5b",
+            "7a7b",
+            "S*8c",
+            "7c8c",
+            "8d8c+"
+          ],
+          "reason": "no-legal",
+          "plies": 45
+        }
+      ],
+      "priority": "review-single-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "blackhole",
+      "pair": 21,
+      "candidateCommit": "3ff79718c85466d429948ca0175acdde479671e2",
+      "candidateWasmSha256": "370feb09e53325b05178fadc3ad1a42514a5b9f4013d7e6e710b5c6b9502ca56",
+      "baselineWasmSha256": "080f3b060f3319440beb6713eae41a4171f164d18def63ac15858dfd2a27c982",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "results": {
+        "candidateSente": "win",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 6,
+      "divergentMoves": {
+        "candidateSente": "9c8e",
+        "candidateGote": "1b2c"
+      },
+      "divergentPositions": {
+        "candidateSente": "spp2n2p/pkbRp1lpg/n1gp1pp2/1s6L/9/9/G3P+RNS1/1SBK1PGP1/PP1P+N1P2 w L2p 14",
+        "candidateGote": "spp2n2p/pkbRp1lpg/n1gp1pp2/1s6L/9/9/G3P+RNS1/1SBK1PGP1/PP1P+N1P2 w L2p 14"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/normal.jsonl",
+      "kind": "game",
+      "pair": 8,
+      "candidateCommit": "3ff79718c85466d429948ca0175acdde479671e2",
+      "candidateWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "baselineWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11",
+      "results": {
+        "candidateSente": "unresolved",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 1,
+      "divergentMoves": {
+        "candidateSente": "1i1h",
+        "candidateGote": "8g8c+"
+      },
+      "divergentPositions": {
+        "candidateSente": "1+p1ps2nb/+p1lgn+pp+rk/1sp1pglp+p/9/9/9/1LPPG1SL+P/PG2PPRP1/SPK1B1PN+N b - 1",
+        "candidateGote": "1+p1ps2nb/+p1lgn+pp+rk/1sp1pglp+p/9/9/9/1LPPG1SL+P/PG2PPRP1/SPK1B1PN+N b - 1"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/normal.jsonl",
+      "kind": "hirate",
+      "pair": 8,
+      "candidateCommit": "3ff79718c85466d429948ca0175acdde479671e2",
+      "candidateWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "baselineWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11",
+      "results": {
+        "candidateSente": "unresolved",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 4,
+      "divergentMoves": {
+        "candidateSente": "7a7b",
+        "candidateGote": "6a5b"
+      },
+      "divergentPositions": {
+        "candidateSente": "lnsg1g1nl/1r3ksb1/p1pppp1pp/6p2/1p7/2PP3P1/PPB1PPP1P/2SG3R1/LN2KGSNL w - 12",
+        "candidateGote": "lnsg1g1nl/1r3ksb1/p1pppp1pp/6p2/1p7/2PP3P1/PPB1PPP1P/2SG3R1/LN2KGSNL w - 12"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    }
+  ]
+}

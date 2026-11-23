@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "budgetMs": 100,
+  "corpusSha256": "86a44f84a928b506ca6d82e21d5bab63d7d5e26a9316ad9961b67a1b270e31bc",
+  "candidateWasmSha256": "370feb09e53325b05178fadc3ad1a42514a5b9f4013d7e6e710b5c6b9502ca56",
+  "baselineWasmSha256": "080f3b060f3319440beb6713eae41a4171f164d18def63ac15858dfd2a27c982",
+  "candidateWorkerSha256": "fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2",
+  "baselineWorkerSha256": "fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2",
+  "total": 100,
+  "byCategory": [
+    {
+      "category": "evade-forced-win",
+      "total": 20,
+      "candidateCorrect": 20,
+      "baselineCorrect": 20,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 20
+    },
+    {
+      "category": "mate-in-one",
+      "total": 20,
+      "candidateCorrect": 20,
+      "baselineCorrect": 20,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 20
+    },
+    {
+      "category": "material-gain",
+      "total": 20,
+      "candidateCorrect": 13,
+      "baselineCorrect": 13,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 20
+    },
+    {
+      "category": "no-legal-loss",
+      "total": 20,
+      "candidateCorrect": 20,
+      "baselineCorrect": 20,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 20
+    },
+    {
+      "category": "ray-blocking",
+      "total": 20,
+      "candidateCorrect": 12,
+      "baselineCorrect": 12,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 20
+    }
+  ],
+  "byBoardCategory": [
+    {
+      "group": "blackhole/evade-forced-win",
+      "category": "evade-forced-win",
+      "kind": "blackhole",
+      "total": 10,
+      "candidateCorrect": 10,
+      "baselineCorrect": 10,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    },
+    {
+      "group": "pit/evade-forced-win",
+      "category": "evade-forced-win",
+      "kind": "pit",
+      "total": 10,
+      "candidateCorrect": 10,
+      "baselineCorrect": 10,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    },
+    {
+      "group": "blackhole/mate-in-one",
+      "category": "mate-in-one",
+      "kind": "blackhole",
+      "total": 10,
+      "candidateCorrect": 10,
+      "baselineCorrect": 10,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    },
+    {
+      "group": "pit/mate-in-one",
+      "category": "mate-in-one",
+      "kind": "pit",
+      "total": 10,
+      "candidateCorrect": 10,
+      "baselineCorrect": 10,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    },
+    {
+      "group": "blackhole/material-gain",
+      "category": "material-gain",
+      "kind": "blackhole",
+      "total": 10,
+      "candidateCorrect": 7,
+      "baselineCorrect": 7,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    },
+    {
+      "group": "pit/material-gain",
+      "category": "material-gain",
+      "kind": "pit",
+      "total": 10,
+      "candidateCorrect": 6,
+      "baselineCorrect": 6,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    },
+    {
+      "group": "blackhole/no-legal-loss",
+      "category": "no-legal-loss",
+      "kind": "blackhole",
+      "total": 10,
+      "candidateCorrect": 10,
+      "baselineCorrect": 10,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    },
+    {
+      "group": "pit/no-legal-loss",
+      "category": "no-legal-loss",
+      "kind": "pit",
+      "total": 10,
+      "candidateCorrect": 10,
+      "baselineCorrect": 10,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    },
+    {
+      "group": "blackhole/ray-blocking",
+      "category": "ray-blocking",
+      "kind": "blackhole",
+      "total": 10,
+      "candidateCorrect": 6,
+      "baselineCorrect": 6,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    },
+    {
+      "group": "pit/ray-blocking",
+      "category": "ray-blocking",
+      "kind": "pit",
+      "total": 10,
+      "candidateCorrect": 6,
+      "baselineCorrect": 6,
+      "improved": 0,
+      "regressed": 0,
+      "unchanged": 10
+    }
+  ],
+  "changedProblems": [],
+  "warning": "These are archived, previously seen tactical labels and not a fresh holdout, a mathematical blunder proof, a complete game-rules proof, or evidence of overall improved playing strength. Regressions must be investigated, not ignored."
+}
