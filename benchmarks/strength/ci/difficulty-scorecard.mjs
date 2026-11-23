@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {planTurn} from './clock-budget.mjs';
 
 // Report *relative* engine strengths only. Never treat a capped game as a
 // draw/loss or a move-time budget as proof of an amateur rank.
@@ -50,6 +51,22 @@ export function scoreDifficultyGames(events, {
       assert.ok(Number.isFinite(turn.requestMs)&&turn.requestMs>0);
       assert.ok(turn.requestMs<=
         (turn.engine==='candidate'?config.budget:config.opponentBudget));
+      // New game-clock-aware trials must prove EVERY recorded search budget
+      // came from the same policy as the game, including pre-move delay.
+      if(config.clockDelayMethod==='virtual-debit-not-wall-wait'){
+        const candidate=turn.engine==='candidate';
+        const nominalMs=candidate?config.budget:config.opponentBudget;
+        const divisor=candidate?config.candidateClockDivisor:config.opponentClockDivisor;
+        const preMoveDelayMs=candidate?config.candidatePreMoveDelayMs:config.opponentPreMoveDelayMs;
+        const plan=planTurn({remainingMs:turn.clockBeforeMs,nominalMs,divisor,preMoveDelayMs});
+        assert.equal(turn.clockDivisor,divisor);
+        assert.equal(turn.requestMs,plan.searchMs,'Observed Worker budget must match real game policy');
+        assert.equal(turn.preMoveDelayChargedMs,plan.preMoveDelayChargedMs);
+        assert.equal(turn.clockAfterDelayMs,plan.clockAfterDelayMs);
+        assert.ok(Math.abs(turn.chargedMs-(turn.elapsed+plan.preMoveDelayChargedMs))<0.001);
+        assert.ok(Math.abs(turn.clockAfterTurnMs-(plan.clockAfterDelayMs-turn.elapsed))<1.01,
+          'Remaining time does not agree with search and pre-move delay');
+      }
     }
   }
   assert.equal(groups.size,config.pairs*2,'Unexpected number of opening pairs');
@@ -72,6 +89,8 @@ export function scoreDifficultyGames(events, {
       nativeTurns:moves.length, meanSearchDepth:mean('depth'),
       meanElapsedMs:mean('elapsed'), meanNodes:mean('nodes'),
       overruns50ms:moves.filter(t=>t.elapsed>t.requestMs+50).length,
+      meanClockChargeMs:mean('chargedMs'),
+      totalPreMoveDelayMs:moves.reduce((sum,t)=>sum+(t.preMoveDelayChargedMs||0),0),
     };
   };
   const kindBreakdown=Object.fromEntries(['pit','blackhole'].map(kind=>{
@@ -96,6 +115,12 @@ export function scoreDifficultyGames(events, {
     breakdownByObstacle:kindBreakdown,
     performance:{candidate:scoreSide('candidate'),opponent:scoreSide('opponent')},
     sameModelAndWorker:true,
+    clockPolicy:config.clockDelayMethod?{
+      method:config.clockDelayMethod,
+      candidate:{divisor:config.candidateClockDivisor,preMoveDelayMs:config.candidatePreMoveDelayMs},
+      opponent:{divisor:config.opponentClockDivisor,preMoveDelayMs:config.opponentPreMoveDelayMs},
+      note:'Virtual pre-move delay is charged to actual 3-minute clocks; browser animations and hardware latencies not simulated.',
+    }:null,
     source:{engineWasmSha256:config.candidateSha,
       workerSha256:config.candidateWorkerSha,
       fixtureSha256:config.fixtureSha, capPlies:config.cap},
