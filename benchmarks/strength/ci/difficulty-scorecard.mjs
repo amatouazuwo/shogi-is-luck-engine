@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {planTurn} from './clock-budget.mjs';
+import {chooseAdaptiveThink} from './adaptive-think-policy.mjs';
 
 // Report *relative* engine strengths only. Never treat a capped game as a
 // draw/loss or a move-time budget as proof of an amateur rank.
@@ -55,7 +56,16 @@ export function scoreDifficultyGames(events, {
       // came from the same policy as the game, including pre-move delay.
       if(config.clockDelayMethod==='virtual-debit-not-wall-wait'){
         const candidate=turn.engine==='candidate';
-        const nominalMs=candidate?config.budget:config.opponentBudget;
+        let nominalMs=candidate?config.budget:config.opponentBudget;
+        if(config.candidatePolicy==='adaptive-feature-v1'&&candidate){
+          assert.ok(turn.tacticalFeatures,'Adaptive turn must preserve referee tactical features');
+          const decision=chooseAdaptiveThink(turn.tacticalFeatures,turn.clockBeforeMs);
+          assert.deepEqual(turn.policyDecision,decision,'Adaptive search decision must be independently reproducible');
+          assert.ok(Number.isFinite(turn.featureDetectionMs)&&turn.featureDetectionMs>=0);
+          assert.ok(Math.abs((turn.clockBeforeFeatureMs-turn.featureDetectionMs)-turn.clockBeforeMs)<1.01,
+            'Tactical feature processing must be charged to game clock');
+          nominalMs=decision.maxThinkMs;
+        }
         const divisor=candidate?config.candidateClockDivisor:config.opponentClockDivisor;
         const preMoveDelayMs=candidate?config.candidatePreMoveDelayMs:config.opponentPreMoveDelayMs;
         const plan=planTurn({remainingMs:turn.clockBeforeMs,nominalMs,divisor,preMoveDelayMs});
@@ -89,6 +99,8 @@ export function scoreDifficultyGames(events, {
       nativeTurns:moves.length, meanSearchDepth:mean('depth'),
       meanElapsedMs:mean('elapsed'), meanNodes:mean('nodes'),
       overruns50ms:moves.filter(t=>t.elapsed>t.requestMs+50).length,
+      featureDetectionMs:moves.reduce((sum,t)=>sum+(t.featureDetectionMs||0),0),
+      adaptiveDecisions:moves.filter(t=>t.policyDecision).length,
       meanClockChargeMs:mean('chargedMs'),
       totalPreMoveDelayMs:moves.reduce((sum,t)=>sum+(t.preMoveDelayChargedMs||0),0),
     };
