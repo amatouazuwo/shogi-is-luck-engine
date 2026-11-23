@@ -6,13 +6,18 @@ import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {Worker} from 'node:worker_threads';
-const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline, mode='obstacle', customFixture, opponentBudgetStr=budgetStr]=process.argv.slice(2);
+import {planTurn} from './clock-budget.mjs';
+const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline, mode='obstacle', customFixture, opponentBudgetStr=budgetStr, candidateDivisorStr='20', opponentDivisorStr='20', candidatePreDelayStr='0', opponentPreDelayStr='0']=process.argv.slice(2);
 const budget=Number(budgetStr), opponentBudget=Number(opponentBudgetStr), cap=Number(capStr), pairs=Number(pairsStr), offset=Number(offsetStr);
+const candidateDivisor=Number(candidateDivisorStr), opponentDivisor=Number(opponentDivisorStr);
+const candidatePreDelay=Number(candidatePreDelayStr), opponentPreDelay=Number(opponentPreDelayStr);
 assert.ok([100,500,1500,6000].includes(budget),'Candidate time budget must be a configured tier');
 assert.ok([100,500,1500,6000].includes(opponentBudget),'Opponent time budget must be 100, 500, 1500, or 6000ms');
 assert.ok(Number.isInteger(cap)&&cap>=1&&cap<=300, 'Ply cap must be within 1–300');
 assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&&offset>=0);
 assert.ok(['normal','normal-worker','obstacle'].includes(mode));
+for(const divisor of [candidateDivisor,opponentDivisor])assert.ok(Number.isInteger(divisor)&&divisor>=2&&divisor<=100);
+for(const delay of [candidatePreDelay,opponentPreDelay])assert.ok(Number.isFinite(delay)&&delay>=0&&delay<=10000);
 const normal=mode==='normal'||mode==='normal-worker';
 const raw=readFileSync(customFixture ? resolve(customFixture) :
  new URL(normal?'../experiments/normal-continuous/expansion/openings.jsonl':'../experiments/holdout-openings.jsonl',import.meta.url),'utf8');
@@ -69,7 +74,7 @@ const a=engine(sdk,normal), b=baseline?engine(baseline):null;
 const scores=[];
 try{
   for(const e of [a,b].filter(Boolean))await e.send('init',{wasm:e.wasm,hash_mb:16,moduleUrl:e.moduleUrl});
-  log('config',{budget,opponentBudget,cap,pairs,offset,fixtureSha:hash(raw),candidateSha:a.sha,candidateWorkerSha:a.workerSha,baselineSha:b?.sha,baselineWorkerSha:b?.workerSha,referenceSha:hash(readFileSync(binary)),node:process.version,opponent:b?'baseline':'reference',clockMs:180000});
+  log('config',{budget,opponentBudget,cap,pairs,offset,fixtureSha:hash(raw),candidateSha:a.sha,candidateWorkerSha:a.workerSha,baselineSha:b?.sha,baselineWorkerSha:b?.workerSha,referenceSha:hash(readFileSync(binary)),node:process.version,opponent:b?'baseline':'reference',clockMs:180000,candidateClockDivisor:candidateDivisor,opponentClockDivisor:opponentDivisor,candidatePreMoveDelayMs:candidatePreDelay,opponentPreMoveDelayMs:opponentPreDelay,clockDelayMethod:'virtual-debit-not-wall-wait'});
   for(const f of fixtures.filter(f=>ids.includes(f.pair))){
     const holes=f.holes.join(',');
     const first=await request('legal',f.sfen,holes);
@@ -88,8 +93,15 @@ try{
         if(seen.get(key)>=4){reason='repetition-unadjudicated';break;}
         if(ply===cap)break;
         const e=side===candidateSide?a:b;
-        const currentBudget=side===candidateSide?budget:opponentBudget;
-        const ms=Math.max(1,Math.min(currentBudget,Math.floor(clocks[side]/20),clocks[side]-150));
+        const isCandidate=side===candidateSide;
+        const currentBudget=isCandidate?budget:opponentBudget;
+        const clockDivisor=isCandidate?candidateDivisor:opponentDivisor;
+        const preDelayMs=isCandidate?candidatePreDelay:opponentPreDelay;
+        const plan=planTurn({remainingMs:clocks[side],nominalMs:currentBudget,
+          divisor:clockDivisor,preMoveDelayMs:preDelayMs});
+        clocks[side]-=plan.preMoveDelayChargedMs;
+        if(clocks[side]<=0){winner=1-side;reason='clock';break;}
+        const ms=plan.searchMs;
         if(e){
           await e.send('position',{sfen,holes:f.holes,moves:[]});
           if(!normal){const sdkLegal=await e.send('legalMoves');
@@ -101,7 +113,10 @@ try{
         catch(error){throw Error('Search failed: '+error.message);}
         const elapsed=performance.now()-started;
         clocks[side]-=elapsed;
-        turns.push({side,engine:side===candidateSide?'candidate':'opponent',sfenBefore:sfen,move:result.bestmove,depth:result.depth,nodes:result.nodes,elapsed,requestMs:ms});
+        turns.push({side,engine:side===candidateSide?'candidate':'opponent',sfenBefore:sfen,move:result.bestmove,depth:result.depth,nodes:result.nodes,elapsed,requestMs:ms,
+          clockDivisor,preMoveDelayChargedMs:plan.preMoveDelayChargedMs,
+          chargedMs:plan.preMoveDelayChargedMs+elapsed,clockBeforeMs:plan.clockBeforeMs,
+          clockAfterDelayMs:plan.clockAfterDelayMs,clockAfterTurnMs:clocks[side]});
         if(clocks[side]<=0){winner=1-side;reason='clock';break;}
         if(result.bestmove==='resign'){winner=1-side;reason='resign';break;}
         assert.ok(legal.includes(result.bestmove),'Illegal move '+result.bestmove+' in '+sfen);
