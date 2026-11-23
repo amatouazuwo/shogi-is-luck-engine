@@ -1,0 +1,86 @@
+name: Forced check responses 3s versus 6s - controlled A-B
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/forced-check-three-vs-six.yml'
+      - 'benchmarks/strength/ci/adaptive-think-policy-v2-check3s.mjs'
+      - 'benchmarks/strength/ci/adaptive-think-policy-v2-check3s.test.mjs'
+      - 'benchmarks/strength/ci/forced-check-timing-scorecard.mjs'
+      - 'benchmarks/strength/ci/forced-check-timing-scorecard.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: forced-check-three-v-six-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  fixed-hypothesis-versus-six:
+    strategy:
+      fail-fast: false
+      matrix:
+        opening_offset: [0, 3]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check both timing policies and clock scoring
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/match.mjs
+          node --check benchmarks/strength/ci/difficulty-scorecard.mjs
+          node --check benchmarks/strength/ci/forced-check-timing-scorecard.mjs
+          node --test benchmarks/strength/ci/adaptive-think-policy-v2.test.mjs \
+            benchmarks/strength/ci/adaptive-think-policy-v2-check3s.test.mjs \
+            benchmarks/strength/ci/forced-check-timing-scorecard.test.mjs \
+            benchmarks/strength/ci/difficulty-scorecard.test.mjs \
+            benchmarks/strength/ci/clock-budget.test.mjs
+      - name: Build the same unchanged native engine for both sides
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/check-time-sdk"
+          (cd "$RUNNER_TEMP/check-time-sdk" && sha256sum -c SHA256SUMS)
+      - name: Build independent tactical and legal move referee
+        run: |
+          set -euo pipefail
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/check-time-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs "$RUNNER_TEMP/check-time-referee"
+      - name: New randomized obstacle layouts, two different opening families
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/check-time-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/check-time-openings.jsonl 20261213 \
+            | tee results/check-time-openings-manifest.json
+      - name: Run real 3-minute rsshogi match on pit and blackhole with color swap
+        run: |
+          set -euo pipefail
+          # Both policies identical except v2 forced king defense of <=3 legal
+          # moves: old 6000ms, experiment 3000ms. Same WASM/Worker, /12 clock,
+          # 1300ms charged pre-move delay; feature detection charged to own clock.
+          node benchmarks/strength/ci/match.mjs \
+            "$RUNNER_TEMP/check-time-referee" "$RUNNER_TEMP/check-time-sdk" \
+            6000 300 1 ${{ matrix.opening_offset }} "$RUNNER_TEMP/check-time-sdk" obstacle \
+            results/check-time-openings.jsonl 6000 12 12 1300 1300 \
+            adaptive-feature-v2-check3s adaptive-feature-v2 \
+            | tee results/check-time-${{ matrix.opening_offset }}-games.jsonl
+      - name: Recompute all decisions and report wins, forced-check encounters, clocks
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/forced-check-timing-scorecard.mjs \
+            results/check-time-${{ matrix.opening_offset }}-games.jsonl \
+            | tee results/check-time-${{ matrix.opening_offset }}-scorecard.json
+          cat results/check-time-${{ matrix.opening_offset }}-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: State the scope honestly
+        if: always()
+        run: |
+          echo 'Experimental question: do <=3 legal check responses merit automatic 6s? Trial tests 3s versus 6s, changes nothing else.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Four paired-color games for each of two different opening families (one job per family), pit and blackhole, max300ply, neutral undecided.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'If few/no forced-check responses arise, do not infer any result about the targeted condition. Even 8 games are not a grade/Elo calibration.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No CPU production changes; preserve Draft PR, main/develop and Render.' >> "$GITHUB_STEP_SUMMARY"
