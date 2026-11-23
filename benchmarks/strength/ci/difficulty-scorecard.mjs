@@ -128,6 +128,20 @@ export function scoreDifficultyGames(events, {
       undecided:rows.filter(g=>g.winner===null).length,
     }];
   }));
+  // A game won on the board is not equivalent to a clock-flag win in a
+  // three-minute game. Report both separately so stronger but slower search
+  // does not hide real time-forfeit risk.
+  const byTermination=Object.fromEntries([
+    'no-legal','resign','clock','ply-cap','repetition-unadjudicated',
+  ].map(reason=>{
+    const rows=games.filter(g=>g.reason===reason);
+    return [reason,{
+      games:rows.length,
+      candidateWins:rows.filter(g=>g.winner===g.candidateSide).length,
+      opponentWins:rows.filter(g=>g.winner!==null&&g.winner!==g.candidateSide).length,
+      neutralUndecided:rows.filter(g=>g.winner===null).length,
+    }];
+  }));
   const n=games.length;
   return {
     event:'amateur-tier-relative-scorecard',
@@ -139,6 +153,7 @@ export function scoreDifficultyGames(events, {
       Math.round((wins+undecided)/n*10000)/10000],
     candidateDecidedWinRate:wins+losses?Math.round(wins/(wins+losses)*10000)/10000:null,
     breakdownByObstacle:kindBreakdown,
+    byTermination,
     performance:{candidate:scoreSide('candidate'),opponent:scoreSide('opponent')},
     sameModelAndWorker:true,
     clockPolicy:config.clockDelayMethod?{
