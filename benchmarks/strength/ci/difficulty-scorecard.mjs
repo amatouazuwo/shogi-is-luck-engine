@@ -16,8 +16,8 @@ export function scoreDifficultyGames(events, {
   assert.equal(config.candidateSha,config.baselineSha,'Model and WASM must match');
   assert.equal(config.candidateWorkerSha,config.baselineWorkerSha,
     'Worker implementations must match');
-  assert.ok([100,500,1500,6000].includes(config.budget));
-  assert.ok([100,500,1500,6000].includes(config.opponentBudget));
+  assert.ok([100,500,1000,1500,3000,6000].includes(config.budget));
+  assert.ok([100,500,1000,1500,3000,6000].includes(config.opponentBudget));
   if (expectedCandidateBudget!==undefined)assert.equal(config.budget,expectedCandidateBudget);
   if (expectedOpponentBudget!==undefined)assert.equal(config.opponentBudget,expectedOpponentBudget);
   assert.ok(Number.isInteger(config.pairs)&&config.pairs>=1&&config.pairs<=6);
