@@ -1,0 +1,109 @@
+name: Calibrate NNUE node tiers against genuine Gikou2 depth2 to depth5
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/gikou-depth-grid-calibration.yml'
+      - 'benchmarks/strength/ci/external-usi-depth-grid-match.mjs'
+      - 'benchmarks/strength/ci/external-usi-depth-grid-scorecard.mjs'
+      - 'benchmarks/strength/ci/external-usi-depth-grid-scorecard.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gikou-depth-grid-calibration-draft
+  cancel-in-progress: true
+jobs:
+  real-external-paired-grid:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - label: depth2-intermediate
+            depths: '2'
+            node_tiers: '1000,2000,4000,7000'
+            opening_ids: '8,9,10,11,12,13'
+          - label: depth3-to5-upper
+            depths: '3 4 5'
+            node_tiers: '10000,50000'
+            opening_ids: '8,9,10,11'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify scorecards prevent false grade, missing pair and clock errors
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/external-usi-depth-grid-match.mjs
+          node --check benchmarks/strength/ci/external-usi-depth-grid-scorecard.mjs
+          node --test benchmarks/strength/ci/external-usi-depth-grid-scorecard.test.mjs \
+            benchmarks/strength/ci/external-usi-calibration-contract.test.mjs \
+            benchmarks/strength/ci/clock-budget.test.mjs
+      - name: Build pinned Gikou2 real USI engine
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/gikou-src" "$RUNNER_TEMP/gikou-eval"
+          git -C "$RUNNER_TEMP/gikou-src" init -q
+          git -C "$RUNNER_TEMP/gikou-src" fetch -q --depth 1 \
+            https://github.com/gikou-official/Gikou.git \
+            f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-src" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/gikou-src" rev-parse HEAD)" = \
+            f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          make -C "$RUNNER_TEMP/gikou-src" release -j2
+          test -x "$RUNNER_TEMP/gikou-src/bin/release"
+          sha256sum "$RUNNER_TEMP/gikou-src/bin/release"
+      - name: Pin official Gikou2 parameters with SHA256, never upload evaluation data
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 300 \
+            -o "$RUNNER_TEMP/gikou2_win.zip" \
+            https://github.com/gikou-official/Gikou/releases/download/v2.0.2/gikou2_win.zip
+          echo "3bbb667bfd77e0236b052593b5c61b7fe1827ed72b5b5f437760c60974852757  $RUNNER_TEMP/gikou2_win.zip" | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/gikou2_win.zip" -d "$RUNNER_TEMP/gikou-eval"
+          PARAM=$(find "$RUNNER_TEMP/gikou-eval" -type f -name params.bin -print -quit)
+          test -n "$PARAM"
+          cp "$PARAM" "$RUNNER_TEMP/gikou-src/params.bin"
+          echo "6bbc573306839fe019634dd94b06af7c22834a641e8bc060e23889ae9b3b2195  $RUNNER_TEMP/gikou-src/params.bin" | sha256sum -c -
+      - name: Build unchanged real NNUE obstacle WASM and independently coded referee
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/calibration-sdk"
+          (cd "$RUNNER_TEMP/calibration-sdk" && sha256sum -c SHA256SUMS)
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/calibration-referee"
+      - name: Play all opposite colors on recorded normal positions and audit results
+        env:
+          DEPTHS: ${{ matrix.depths }}
+          NODES: ${{ matrix.node_tiers }}
+          OPENINGS: ${{ matrix.opening_ids }}
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          for DEPTH in $DEPTHS; do
+            echo "::group::Gikou2 depth $DEPTH vs NNUE nodes $NODES"
+            node benchmarks/strength/ci/external-usi-depth-grid-match.mjs \
+              "$RUNNER_TEMP/gikou-src/bin/release" "$RUNNER_TEMP/gikou-src" \
+              "$RUNNER_TEMP/calibration-sdk" "$RUNNER_TEMP/calibration-referee" \
+              benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+              "$DEPTH" "$NODES" "$OPENINGS" \
+              | tee "results/gikou-depth$DEPTH-matches.jsonl"
+            node benchmarks/strength/ci/external-usi-depth-grid-scorecard.mjs \
+              "results/gikou-depth$DEPTH-matches.jsonl" \
+              benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+              "$DEPTH" "$NODES" "$OPENINGS" \
+              | tee "results/gikou-depth$DEPTH-audited.json"
+            cat "results/gikou-depth$DEPTH-audited.json" >> "$GITHUB_STEP_SUMMARY"
+            echo "::endgroup::"
+          done
+      - name: State that external engine comparisons are not human rank certifications
+        if: always()
+        run: |
+          echo 'Gikou2 depth uses no one-second hard cap; rsshogi node tier does use 1000ms max. Both have 180s virtual clocks.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'All matches use normal shogi only. Special-board strength requires separate NNUE evaluation.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Opening pairs are correlated; results are not Elo, Shogi Club 24 rank nor general amateur grades.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No production CPU profiles, main, develop, Render or game PR modifications.' >> "$GITHUB_STEP_SUMMARY"
