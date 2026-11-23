@@ -1,0 +1,17 @@
+diff --git a/src/movepick.cc b/src/movepick.cc
+--- a/src/movepick.cc
++++ b/src/movepick.cc
+@@ -327,8 +327,13 @@ void MovePicker::GenerateNext() {
+       cur_ = moves_.begin();
+       end_ = GenerateMoves<kAllMoves>(pos_, cur_);
+       end_ = RemoveIllegalMoves(pos_, cur_, end_);
+       size_t num_moves = end_ - cur_;
+ 
++      // A terminal (checkmated) node has no legal moves.
++      // Do not ask the move-probability softmax to normalize an empty array.
++      // NextMove() will advance from this empty stage to kStop.
++      if (num_moves == 0) return;
++
+       // 指し手の実現確率を計算する
+       const HistoryStats* cmh = (ss_-1)->countermoves_history;
+       const HistoryStats* fmh = (ss_-2)->countermoves_history;
