@@ -11,8 +11,8 @@ const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', b
 const budget=Number(budgetStr), opponentBudget=Number(opponentBudgetStr), cap=Number(capStr), pairs=Number(pairsStr), offset=Number(offsetStr);
 const candidateDivisor=Number(candidateDivisorStr), opponentDivisor=Number(opponentDivisorStr);
 const candidatePreDelay=Number(candidatePreDelayStr), opponentPreDelay=Number(opponentPreDelayStr);
-assert.ok([100,500,1500,6000].includes(budget),'Candidate time budget must be a configured tier');
-assert.ok([100,500,1500,6000].includes(opponentBudget),'Opponent time budget must be 100, 500, 1500, or 6000ms');
+assert.ok([100,500,1000,1500,3000,6000].includes(budget),'Candidate time budget must be a configured or experimental tier');
+assert.ok([100,500,1000,1500,3000,6000].includes(opponentBudget),'Opponent time budget must be configured or experimental tier');
 assert.ok(Number.isInteger(cap)&&cap>=1&&cap<=300, 'Ply cap must be within 1–300');
 assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&&offset>=0);
 assert.ok(['normal','normal-worker','obstacle'].includes(mode));
