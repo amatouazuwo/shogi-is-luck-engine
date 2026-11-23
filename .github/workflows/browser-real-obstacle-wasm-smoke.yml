@@ -86,12 +86,15 @@ jobs:
               assert isinstance(x['move'],str) and x['move']
               assert x['legal']>0 and x['nodes']>=0 and x['depth']>=0
               if x['cap'] is not None: assert x['nodes']<=x['cap']==25000
-          print('PASS: actual Chromium Web Worker + exact private-game pinned NNUE WASM/Worker, real legal moves, pits/blackhole, forced termination and recovery')
+          if evidence['wasmSha256']!=expected_wasm:
+              print('PASS: real Chromium Worker using freshly built obstacle NNUE with pinned SOURCE. WARNING: NOT byte-identical to private-game WASM; do not claim game runtime compatibility verified.')
+          else:
+              print('PASS: real Chromium Worker using game-byte-identical WASM; native legal moves, pits/blackhole and recovery verified.')
           PY
           {
             echo '### Actual browser/Web Worker validation'
             echo 'Expected five audited checks: normal search, pit, 3x3 blackhole, forced termination, and post-termination replacement search.'
-            echo 'Uses real Chromium Web Worker and source-pinned NNUE WASM; SDK file hashes must be compared to private game pins separately, and exact identity must NOT be claimed if different.'
+            echo 'Uses real Chromium Web Worker and source-pinned NNUE WASM. Do not infer byte-identical game SDK unless all compared hashes match.'
             echo 'Does NOT run the private game UI, 3-minute clock controller, rare 1% events, or certify human amateur ranks.'
             cat results/browser-obstacle-worker-smoke.jsonl
           } >> "$GITHUB_STEP_SUMMARY"
