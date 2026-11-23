@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {planTurn} from './clock-budget.mjs';
 import {auditNormalReferenceGrid,PINNED_GIKOU_PARAMS_SHA}
  from './external-usi-depth-grid-scorecard.mjs';
+import {FOUR_DAN_PROVISIONAL_GIKOU} from './gikou-reference-proxies.mjs';
 const hash=s=>createHash('sha256').update(s).digest('hex');
 
 function sample(){
@@ -95,4 +96,19 @@ test('native depth/node cap and game clock are audited on every move',()=>{
  const c=sample();
  c.events[0].referenceUsesDepthInsteadOfTimeLimit=false;
  assert.throws(()=>auditNormalReferenceGrid(c.events,c.raw,options),/Reference is limited by DEPTH/);
+});
+
+test('depth8 is shown only as an explicitly provisional amateur fourth-dan comparison',()=>{
+ const {raw,events}=sample();
+ events[0].depthLimit=8;
+ events[0].referenceProxy=FOUR_DAN_PROVISIONAL_GIKOU;
+ for(const summary of events.filter(x=>x.event==='gikou-normal-match-summary'))
+   summary.depthLimit=8;
+ const r=auditNormalReferenceGrid(events,raw,{...options,expectedDepth:8});
+ assert.equal(r.provisionalReference.label,'アマ四段程度（仮）');
+ assert.equal(r.amateurGradeAssigned,false);
+ assert.equal(r.humanValidationRequested,false);
+ const changed=sample();changed.events[0].depthLimit=8;
+ assert.throws(()=>auditNormalReferenceGrid(changed.events,changed.raw),
+   /Provisional reference rank label must match/);
 });
