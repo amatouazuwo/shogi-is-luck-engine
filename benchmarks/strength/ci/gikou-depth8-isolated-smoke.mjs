@@ -47,7 +47,13 @@ async function readUntil(predicate,deadlineMs){
       stdout.next(),
       new Promise((_,reject)=>timer=setTimeout(()=>reject(Error('USI deadline '+JSON.stringify({active,exitDetails,stderr}))),available)),
     ]).finally(()=>clearTimeout(timer));
-    if(res.done)throw Error('Gikou stdout closed '+JSON.stringify({active,exitDetails,pendingError,stderr}));
+    if(res.done){
+      // The stdout close notification can race the child exit(code,signal) event.
+      await new Promise(ok=>setTimeout(ok,100));
+      throw Error('Gikou stdout closed '+JSON.stringify({active,exitDetails,
+        pendingError,stderr,peakVmRssKiB:Math.max(0,...telemetry),
+        recentInfo:telemetry.lastInfo??null}));
+    }
     const line=res.value.trim();
     if(line.startsWith('info ')&&line.includes(' depth ')){
       // Only record the most recent progress, never stream hundreds of search lines.
