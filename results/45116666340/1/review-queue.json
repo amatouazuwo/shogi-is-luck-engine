@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "file": "results/direct.jsonl",
+      "kind": "blackhole",
+      "pair": 21,
+      "candidateCommit": "43f3ca06d2348430b3a6735cfc776c4406296561",
+      "candidateWasmSha256": "3818f6f8eb80f38fd0d0a931a3c58509ea670e5d810996b688aef8df24b9a15a",
+      "baselineWasmSha256": "145fea024bff12f778ebfb578117847ac216548f6c55c5db8edc4af3a3b184ec",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "results": {
+        "candidateSente": "win",
+        "candidateGote": "loss"
+      },
+      "divergencePly": 7,
+      "divergentMoves": {
+        "candidateSente": "6g7h",
+        "candidateGote": "6h5h"
+      },
+      "divergentPositions": {
+        "candidateSente": "sppb4+L/pkg1p1lp1/3pnppg1/1s7/1n7/9/1G1BP+RNS1/1SlK1PGP1/PP1P+N1P2 b RP2p 15",
+        "candidateGote": "sppb4+L/pkg1p1lp1/3pnppg1/1s7/1n7/9/1G1BP+RNS1/1SlK1PGP1/PP1P+N1P2 b RP2p 15"
+      },
+      "reviewCandidates": [
+        {
+          "candidateSide": 1,
+          "lastCandidatePly": 58,
+          "lastCandidateMove": "7b6a",
+          "lastCandidateSfen": "2p5+L/Spk4p1/R1+P1pppg1/1B1pg4/1n7/p1L6/1G+n1PGN2/1SB+N1P1PS/PP1P1KP1P w Prsl 66",
+          "precedingMoves": [
+            "1h1d",
+            "1b2c",
+            "1d1a+",
+            "9c8e",
+            "9g8g",
+            "4a5c",
+            "6h5h",
+            "7b7c",
+            "R*6b",
+            "6a7b",
+            "6b5b+",
+            "5c6e",
+            "6g7h",
+            "8b9c",
+            "L*9f",
+            "9c8c",
+            "5i6h",
+            "9a8b",
+            "5b3b",
+            "6c6d",
+            "5h4i",
+            "P*1h",
+            "2g1h",
+            "7b5d",
+            "P*1i",
+            "9b9c",
+            "L*7f",
+            "7c6c",
+            "3b5b",
+            "9c9d",
+            "4g5f",
+            "8c9c",
+            "3h4g",
+            "P*5c",
+            "P*7d",
+            "9d9e",
+            "5f5d",
+            "6c5d",
+            "5b6c",
+            "9c9b",
+            "B*6f",
+            "6e7g+",
+            "6f8d",
+            "9e9f",
+            "S*9c",
+            "9b9a",
+            "9c8b+",
+            "8a8b",
+            "6c9c",
+            "R*9b",
+            "9c9b",
+            "9a9b",
+            "R*9c",
+            "9b8a",
+            "S*9b",
+            "8a7b",
+            "7d7c+"
+          ],
+          "reason": "no-legal",
+          "plies": 59
+        }
+      ],
+      "priority": "review-single-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateCommit": "43f3ca06d2348430b3a6735cfc776c4406296561",
+      "candidateWasmSha256": "3818f6f8eb80f38fd0d0a931a3c58509ea670e5d810996b688aef8df24b9a15a",
+      "baselineWasmSha256": "145fea024bff12f778ebfb578117847ac216548f6c55c5db8edc4af3a3b184ec",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "results": {
+        "candidateSente": "win",
+        "candidateGote": "loss"
+      },
+      "divergencePly": 2,
+      "divergentMoves": {
+        "candidateSente": "9c8e",
+        "candidateGote": "1b2c"
+      },
+      "divergentPositions": {
+        "candidateSente": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6L/9/6L2/G2BP+RNS1/1SlK1PGP1/PP1P+N1P2 w R2p 10",
+        "candidateGote": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6L/9/6L2/G2BP+RNS1/1SlK1PGP1/PP1P+N1P2 w R2p 10"
+      },
+      "reviewCandidates": [
+        {
+          "candidateSide": 1,
+          "lastCandidatePly": 44,
+          "lastCandidateMove": "8c8b",
+          "lastCandidateSfen": "spp2n2+L/p1g1+R1lp1/1k1p2pg1/1G7/1R2n4/6L2/4P1NG1/1SlK+NP1P1/PP1P2P2 w BS3Pbs2p 52",
+          "precedingMoves": [
+            "1h1d",
+            "1b2c",
+            "1d1a+",
+            "P*1f",
+            "R*8f",
+            "7b7c",
+            "5i5h",
+            "1f1g+",
+            "9g9f",
+            "1g2g",
+            "3h2g",
+            "6a8c",
+            "4g4c",
+            "S*8e",
+            "4c5b",
+            "7c7b",
+            "P*7c",
+            "8b7c",
+            "6g8e",
+            "9c8e",
+            "9f8e",
+            "8d8e",
+            "8f8e",
+            "B*6f",
+            "S*7e",
+            "G*7d",
+            "7e7d",
+            "8c7d",
+            "N*6e",
+            "7d6e",
+            "8e6e",
+            "N*5e",
+            "B*5a",
+            "7c8c",
+            "6e8e",
+            "S*8d",
+            "S*9d",
+            "8c9d",
+            "G*9e",
+            "9d8c",
+            "5a8d+",
+            "6f8d",
+            "9e8d"
+          ],
+          "reason": "no-legal",
+          "plies": 45
+        }
+      ],
+      "priority": "review-single-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/normal.jsonl",
+      "kind": "game",
+      "pair": 8,
+      "candidateCommit": "43f3ca06d2348430b3a6735cfc776c4406296561",
+      "candidateWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "baselineWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11",
+      "results": {
+        "candidateSente": "win",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 4,
+      "divergentMoves": {
+        "candidateSente": "1c1d",
+        "candidateGote": "8c9c"
+      },
+      "divergentPositions": {
+        "candidateSente": "1+p1ps2nb/2lgn+pp+rk/1+pp1pglp+p/9/9/9/2PPG1SL+P/PG2PPRP+N/SPK1B1PN1 w Sl 4",
+        "candidateGote": "1+p1ps2nb/2lgn+pp+rk/1+pp1pglp+p/9/9/9/2PPG1SL+P/PG2PPRP+N/SPK1B1PN1 w Sl 4"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/normal.jsonl",
+      "kind": "hirate",
+      "pair": 8,
+      "candidateCommit": "43f3ca06d2348430b3a6735cfc776c4406296561",
+      "candidateWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "baselineWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11",
+      "results": {
+        "candidateSente": "unresolved",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 4,
+      "divergentMoves": {
+        "candidateSente": "7a6b",
+        "candidateGote": "6a5b"
+      },
+      "divergentPositions": {
+        "candidateSente": "lnsg1g1nl/1r3ksb1/p1pppp1pp/6p2/1p7/2PP3P1/PPB1PPP1P/2SG3R1/LN2KGSNL w - 12",
+        "candidateGote": "lnsg1g1nl/1r3ksb1/p1pppp1pp/6p2/1p7/2PP3P1/PPB1PPP1P/2SG3R1/LN2KGSNL w - 12"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    }
+  ]
+}
