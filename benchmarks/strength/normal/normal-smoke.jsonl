@@ -1,0 +1,8 @@
+{"event":"config","levels":[100,500,1500],"families":["hirate"],"pairCount":1,"pairOffset":0,"plyCap":200,"wasmSha":"feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d","rulesSha":"b1acf7b7a595150d8a2766111d8171ff84ccbd718ea33239f5b5b7f513c51344","engineSha":"5ad6baa616fe11b64f8a63cd8d3b6aab264e401f67979e27ad7e8fc001e500f7","evalSha":"768068f0d534a0603a5d38bcd143de6bbca820d5f1c95a14d40863e5b7892d76","node":"v22.23.5","mode":"smoke"}
+{"event":"smoke","engine":0,"ms":100,"wall":222.15848199999994,"move":"1g1f","nodes":1,"depth":0,"time":211}
+{"event":"smoke","engine":0,"ms":500,"wall":510.31926,"move":"2g2f","nodes":54054,"depth":9,"time":501}
+{"event":"smoke","engine":0,"ms":1500,"wall":1508.504173,"move":"2g2f","nodes":288927,"depth":11,"time":1501}
+{"event":"usi-ready","id":["id name YaneuraOu NNUE 8.30git 64AVX2","id author by yaneurao"],"ready":["info string EvalDirectory = /workspace/work/strength/normal/eval","info string loading eval file : /workspace/work/strength/normal/eval/nn.bin","info string USI_Hash : Start clearing with 1 threads , Hash size =  16[MB]","info string USI_Hash : Finish clearing.","readyok"],"settings":{"Threads":1,"USI_Hash":16,"USI_OwnBook":"false","BookFile":"no_book","USI_Ponder":"false","EvalDir":"/workspace/work/strength/normal/eval","FV_SCALE":24,"NetworkDelay":0,"NetworkDelay2":0,"MinimumThinkingTime":0,"MultiPV":1}}
+{"event":"smoke","engine":1,"ms":100,"wall":101.3270279999997,"move":"2g2f","nodes":79191,"depth":15,"time":101}
+{"event":"smoke","engine":1,"ms":500,"wall":520.7476649999999,"move":"2g2f","nodes":327076,"depth":18,"time":519}
+{"event":"smoke","engine":1,"ms":1500,"wall":1505.0533189999996,"move":"2g2f","nodes":984690,"depth":22,"time":1501}

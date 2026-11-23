@@ -1,0 +1,495 @@
+[
+  {
+    "budget": 100,
+    "group": "all",
+    "engines": {
+      "baseline": {
+        "positions": 36,
+        "correct": 36,
+        "illegal": 0,
+        "meanDepth": 7.611,
+        "meanWallMs": 104.834,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "c2": {
+        "positions": 36,
+        "correct": 35,
+        "illegal": 0,
+        "meanDepth": 7.806,
+        "meanWallMs": 102.556,
+        "overBudget50": 1,
+        "guardStatuses": {
+          "not-proved-in-subset": 9
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "guard-v2": {
+        "positions": 36,
+        "correct": 34,
+        "illegal": 0,
+        "meanDepth": 7.611,
+        "meanWallMs": 102.511,
+        "overBudget50": 1,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      }
+    },
+    "paired": [
+      {
+        "candidate": "c2",
+        "pairedGains": [],
+        "pairedLosses": [
+          "unseen/pit/win7/01"
+        ]
+      },
+      {
+        "candidate": "guard-v2",
+        "pairedGains": [],
+        "pairedLosses": [
+          "unseen/blackhole/win7/04",
+          "unseen/pit/win7/02"
+        ]
+      }
+    ]
+  },
+  {
+    "budget": 100,
+    "group": "attack",
+    "engines": {
+      "baseline": {
+        "positions": 24,
+        "correct": 24,
+        "illegal": 0,
+        "meanDepth": 8.5,
+        "meanWallMs": 105.246,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "c2": {
+        "positions": 24,
+        "correct": 23,
+        "illegal": 0,
+        "meanDepth": 8.875,
+        "meanWallMs": 105.965,
+        "overBudget50": 1,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "guard-v2": {
+        "positions": 24,
+        "correct": 22,
+        "illegal": 0,
+        "meanDepth": 8.583,
+        "meanWallMs": 103.174,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      }
+    },
+    "paired": [
+      {
+        "candidate": "c2",
+        "pairedGains": [],
+        "pairedLosses": [
+          "unseen/pit/win7/01"
+        ]
+      },
+      {
+        "candidate": "guard-v2",
+        "pairedGains": [],
+        "pairedLosses": [
+          "unseen/blackhole/win7/04",
+          "unseen/pit/win7/02"
+        ]
+      }
+    ]
+  },
+  {
+    "budget": 100,
+    "group": "defense",
+    "engines": {
+      "baseline": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "meanDepth": 5.833,
+        "meanWallMs": 104.011,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "c2": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "meanDepth": 5.667,
+        "meanWallMs": 95.736,
+        "overBudget50": 0,
+        "guardStatuses": {
+          "not-proved-in-subset": 9
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "guard-v2": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "meanDepth": 5.667,
+        "meanWallMs": 101.185,
+        "overBudget50": 1,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      }
+    },
+    "paired": [
+      {
+        "candidate": "c2",
+        "pairedGains": [],
+        "pairedLosses": []
+      },
+      {
+        "candidate": "guard-v2",
+        "pairedGains": [],
+        "pairedLosses": []
+      }
+    ]
+  },
+  {
+    "budget": 500,
+    "group": "all",
+    "engines": {
+      "baseline": {
+        "positions": 36,
+        "correct": 36,
+        "illegal": 0,
+        "meanDepth": 11.833,
+        "meanWallMs": 502.947,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "c2": {
+        "positions": 36,
+        "correct": 36,
+        "illegal": 0,
+        "meanDepth": 12,
+        "meanWallMs": 498.786,
+        "overBudget50": 0,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "guard-v2": {
+        "positions": 36,
+        "correct": 36,
+        "illegal": 0,
+        "meanDepth": 12.111,
+        "meanWallMs": 499.954,
+        "overBudget50": 1,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      }
+    },
+    "paired": [
+      {
+        "candidate": "c2",
+        "pairedGains": [],
+        "pairedLosses": []
+      },
+      {
+        "candidate": "guard-v2",
+        "pairedGains": [],
+        "pairedLosses": []
+      }
+    ]
+  },
+  {
+    "budget": 500,
+    "group": "attack",
+    "engines": {
+      "baseline": {
+        "positions": 24,
+        "correct": 24,
+        "illegal": 0,
+        "meanDepth": 14.333,
+        "meanWallMs": 502.489,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "c2": {
+        "positions": 24,
+        "correct": 24,
+        "illegal": 0,
+        "meanDepth": 14.292,
+        "meanWallMs": 504.392,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "guard-v2": {
+        "positions": 24,
+        "correct": 24,
+        "illegal": 0,
+        "meanDepth": 14.375,
+        "meanWallMs": 505.597,
+        "overBudget50": 1,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      }
+    },
+    "paired": [
+      {
+        "candidate": "c2",
+        "pairedGains": [],
+        "pairedLosses": []
+      },
+      {
+        "candidate": "guard-v2",
+        "pairedGains": [],
+        "pairedLosses": []
+      }
+    ]
+  },
+  {
+    "budget": 500,
+    "group": "defense",
+    "engines": {
+      "baseline": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "meanDepth": 6.833,
+        "meanWallMs": 503.862,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "c2": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "meanDepth": 7.417,
+        "meanWallMs": 487.574,
+        "overBudget50": 0,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "guard-v2": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "meanDepth": 7.583,
+        "meanWallMs": 488.668,
+        "overBudget50": 0,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      }
+    },
+    "paired": [
+      {
+        "candidate": "c2",
+        "pairedGains": [],
+        "pairedLosses": []
+      },
+      {
+        "candidate": "guard-v2",
+        "pairedGains": [],
+        "pairedLosses": []
+      }
+    ]
+  },
+  {
+    "budget": 1500,
+    "group": "all",
+    "engines": {
+      "baseline": {
+        "positions": 36,
+        "correct": 35,
+        "illegal": 0,
+        "meanDepth": 13.444,
+        "meanWallMs": 1503.57,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "c2": {
+        "positions": 36,
+        "correct": 35,
+        "illegal": 0,
+        "meanDepth": 13.417,
+        "meanWallMs": 1498.197,
+        "overBudget50": 0,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "guard-v2": {
+        "positions": 36,
+        "correct": 35,
+        "illegal": 0,
+        "meanDepth": 13.389,
+        "meanWallMs": 1498.095,
+        "overBudget50": 0,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      }
+    },
+    "paired": [
+      {
+        "candidate": "c2",
+        "pairedGains": [],
+        "pairedLosses": []
+      },
+      {
+        "candidate": "guard-v2",
+        "pairedGains": [],
+        "pairedLosses": []
+      }
+    ]
+  },
+  {
+    "budget": 1500,
+    "group": "attack",
+    "engines": {
+      "baseline": {
+        "positions": 24,
+        "correct": 23,
+        "illegal": 0,
+        "meanDepth": 16,
+        "meanWallMs": 1503.197,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "c2": {
+        "positions": 24,
+        "correct": 23,
+        "illegal": 0,
+        "meanDepth": 15.958,
+        "meanWallMs": 1503.046,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "guard-v2": {
+        "positions": 24,
+        "correct": 23,
+        "illegal": 0,
+        "meanDepth": 15.917,
+        "meanWallMs": 1503.431,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      }
+    },
+    "paired": [
+      {
+        "candidate": "c2",
+        "pairedGains": [],
+        "pairedLosses": []
+      },
+      {
+        "candidate": "guard-v2",
+        "pairedGains": [],
+        "pairedLosses": []
+      }
+    ]
+  },
+  {
+    "budget": 1500,
+    "group": "defense",
+    "engines": {
+      "baseline": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "meanDepth": 8.333,
+        "meanWallMs": 1504.316,
+        "overBudget50": 0,
+        "guardStatuses": {},
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "c2": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "meanDepth": 8.333,
+        "meanWallMs": 1488.498,
+        "overBudget50": 0,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      },
+      "guard-v2": {
+        "positions": 12,
+        "correct": 12,
+        "illegal": 0,
+        "meanDepth": 8.333,
+        "meanWallMs": 1487.424,
+        "overBudget50": 0,
+        "guardStatuses": {
+          "not-proved-in-subset": 8
+        },
+        "witnessLeaves": 0,
+        "exactSafetyNodes": 0
+      }
+    },
+    "paired": [
+      {
+        "candidate": "c2",
+        "pairedGains": [],
+        "pairedLosses": []
+      },
+      {
+        "candidate": "guard-v2",
+        "pairedGains": [],
+        "pairedLosses": []
+      }
+    ]
+  }
+]

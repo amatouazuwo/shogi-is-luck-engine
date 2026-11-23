@@ -1,0 +1,21 @@
+{
+  "positions": 36,
+  "tallies": {
+    "blackhole/attack/3": 4,
+    "blackhole/attack/5": 4,
+    "blackhole/attack/7": 4,
+    "pit/attack/3": 4,
+    "pit/attack/5": 4,
+    "pit/attack/7": 4,
+    "blackhole/escape/3": 2,
+    "blackhole/escape/5": 2,
+    "blackhole/escape/7": 2,
+    "pit/escape/3": 2,
+    "pit/escape/5": 2,
+    "pit/escape/7": 2
+  },
+  "digests": {
+    "heldout.jsonl": "01096417dea7bed5c5cba251530e0c2283bb9b91caf889f622b6191129658d84"
+  },
+  "independentNodes": 11630901
+}

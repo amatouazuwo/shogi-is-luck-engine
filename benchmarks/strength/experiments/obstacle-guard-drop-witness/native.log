@@ -1,0 +1,12 @@
+   Compiling rsshogi-nnue-mini v0.4.0 (/workspace/work/strength/c2-obstacle/engine)
+    Finished `release` profile [optimized] target(s) in 1m 00s
+     Running unittests src/lib.rs (/workspace/work/strength/forensics/engine/native-target/release/deps/rsshogi_nnue_mini-2a65d7d8aa876eb3)
+
+running 4 tests
+test search::obstacle_guard::tests::dynamic_drop_proof_matches_full_leaves_in_both_hazards ... ok
+test search::obstacle_guard::tests::exact_screen_rejects_a_faster_mate_that_the_selective_screen_misses ... ok
+test search::obstacle_guard::tests::no_drop_witness_without_two_unblocked_live_squares ... ok
+test search::obstacle_guard::tests::checks_and_near_king_captures_expose_both_obstacle_traps ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 235 filtered out; finished in 0.01s
+

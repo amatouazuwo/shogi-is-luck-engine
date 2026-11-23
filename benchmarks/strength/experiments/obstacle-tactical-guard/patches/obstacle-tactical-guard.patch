@@ -1,0 +1,457 @@
+--- a/src/api.rs
++++ b/src/api.rs
+@@ -212,6 +212,30 @@
+         Ok(())
+     }
+
++    pub(crate) fn obstacle_root_guard(
++        &self,
++        bestmove: &str,
++        movetime_ms: u64,
++        allow_replacement: bool,
++    ) -> Result<crate::search::ObstacleGuardOutput, String> {
++        if self.position.obstacle_mask().is_empty() || !(1..=60).contains(&movetime_ms) {
++            return Err("the obstacle guard requires holes and a budget of 1..=60 ms".into());
++        }
++        let mv = self
++            .position
++            .move32_from_usi(bestmove)
++            .filter(|&mv| self.position.is_legal_move32(mv))
++            .ok_or("invalid guard candidate")?;
++        Ok(crate::search::guard_obstacle_move(
++            &self.position,
++            mv,
++            &self.table,
++            self.evaluator()?,
++            movetime_ms,
++            allow_replacement,
++        ))
++    }
++
+     fn install_position(&mut self, position: Position) {
+         if self.position.obstacle_mask() != position.obstacle_mask() {
+             self.table.clear();
+--- a/src/ffi.rs
++++ b/src/ffi.rs
+@@ -37,6 +37,12 @@
+     NewGame,
+     Evaluate,
+     LegalMoves,
++    ObstacleRootGuard {
++        bestmove: String,
++        movetime_ms: u64,
++        #[serde(default)]
++        allow_replacement: bool,
++    },
+     Search {
+         depth: Option<u32>,
+         nodes: Option<u64>,
+@@ -149,6 +155,10 @@
+             Ok(json!({"ok": true}))
+         }
+         Request::LegalMoves => Ok(json!({"ok": true, "result": engine.legal_moves()})),
++        Request::ObstacleRootGuard { bestmove, movetime_ms, allow_replacement } => {
++            let result = engine.obstacle_root_guard(&bestmove, movetime_ms, allow_replacement)?;
++            Ok(json!({"ok":true,"result":result}))
++        }
+         Request::Evaluate => Ok(json!({"ok": true, "score": engine.evaluate()?})),
+         Request::Search { depth, nodes, movetime_ms } => {
+             if depth.is_none() && nodes.is_none() && movetime_ms.is_none() {
+--- a/src/search.rs
++++ b/src/search.rs
+@@ -5,6 +5,7 @@
+ mod history;
+ mod lmr;
+ mod negamax;
++mod obstacle_guard;
+ mod ordering;
+ mod params;
+ mod pruning;
+@@ -33,6 +34,7 @@
+
+ use context::{SearchContext, stats};
+ pub(crate) use coordinator::SearchCoordinator;
++pub(crate) use obstacle_guard::{ObstacleGuardOutput, guard_obstacle_move};
+ pub(crate) use params::SearchParams;
+ #[cfg(feature = "tuning")]
+ pub(crate) use params::tunable_manifest;
+--- a/bindings/wasm/worker.js
++++ b/bindings/wasm/worker.js
+@@ -8,8 +8,16 @@
+ let generation = 0;
+ let active = null;
+ let initialization = 0;
++let obstaclePosition = false;
+ const sliceMs = 35;
+
++function guardBudget(job) {
++  if (!job.obstacles || job.nodes !== undefined || job.time === undefined || job.time < 80
++      || !job.latest || job.latest.score > -1000 || ["resign", "win"].includes(job.latest.bestmove)) return 0;
++  return Math.min(24, Math.floor(job.time / 8));
++}
++const searchTime = job => job.time === undefined ? undefined : job.time - guardBudget(job);
++
+ const reply = (message, data) => postMessage({ id: message.id, command: message.command, ...data });
+ const requireEngine = () => {
+   if (!engine) throw new Error("engine is not initialized");
+@@ -23,21 +31,39 @@
+   generation++;
+   active = null;
+ };
+-const finish = job => {
++const finish = (job, allowGuard = true) => {
+   if (active !== job || job.generation !== generation) return;
+   active = null;
+-  reply(job.message, { ok: true, event: "bestmove", result: { ...job.latest, elapsed_ms: Math.round(performance.now() - job.started) } });
++  let result = job.latest;
++  const reserve = allowGuard ? guardBudget(job) : 0;
++  const remaining = reserve ? Math.min(reserve, Math.floor(job.time - (performance.now() - job.started))) : 0;
++  if (remaining > 0) {
++    try {
++      const guarded = unwrap(requireEngine().request({
++        command: "obstacle_root_guard", bestmove: result.bestmove,
++        movetime_ms: remaining, allow_replacement: true,
++      })).result;
++      const guard = { ...guarded, searchedMove: result.bestmove, searchedScore: result.score, searchedDepth: result.depth };
++      result = { ...result, nodes: result.nodes + guard.nodes, guard };
++      if (guard.status === "replaced-proved-loss") {
++        result = { ...result, bestmove: guard.bestmove, score: guard.replacement_score, depth: 0, ponder: null, pv: [guard.bestmove] };
++      }
++    } catch (error) {
++      result = { ...result, guard: { status: "error", error: String(error.message ?? error) } };
++    }
++  }
++  reply(job.message, { ok: true, event: "bestmove", result: { ...result, elapsed_ms: Math.round(performance.now() - job.started) } });
+ };
+
+ function slice(job) {
+   if (active !== job || job.generation !== generation) return;
+-  if (job.latest && ((job.time !== undefined && performance.now() - job.started >= job.time)
++  if (job.latest && ((job.time !== undefined && performance.now() - job.started >= searchTime(job))
+       || (job.nodes !== undefined && job.usedNodes >= job.nodes))) {
+     finish(job);
+     return;
+   }
+   try {
+-    const remainingMs = job.time === undefined ? sliceMs : Math.max(1, Math.ceil(job.time - (performance.now() - job.started)));
++    const remainingMs = job.time === undefined ? sliceMs : Math.max(1, Math.ceil(searchTime(job) - (performance.now() - job.started)));
+     const request = { command: "search", depth: job.depth, movetime_ms: Math.min(sliceMs, remainingMs) };
+     if (job.nodes !== undefined) request.nodes = Math.max(1, job.nodes - job.usedNodes);
+     const { result } = unwrap(requireEngine().request(request));
+@@ -48,7 +74,7 @@
+     reply(job.message, { ok: true, event: "info", result: job.latest });
+     if (result.depth >= job.target || ["resign", "win"].includes(result.bestmove)
+         || (job.nodes !== undefined && job.usedNodes >= job.nodes)
+-        || (job.time !== undefined && performance.now() - job.started >= job.time)) {
++        || (job.time !== undefined && performance.now() - job.started >= searchTime(job))) {
+       finish(job);
+       return;
+     }
+@@ -70,6 +96,7 @@
+         const token = ++initialization;
+         engine?.dispose();
+         engine = null;
++        obstaclePosition = false;
+         const created = await MiniEngine.create(message.url ?? message.wasm);
+         if (token !== initialization) { created.dispose(); return; }
+         try {
+@@ -87,9 +114,13 @@
+         }
+         if (message.holes?.length) {
+           if (message.moves?.length) throw new Error("obstacle positions require current SFEN without replay");
+-          reply(message, requireEngine().request({ command: "set_obstacle_position", sfen: message.sfen, holes: message.holes }));
++          const result = requireEngine().request({ command: "set_obstacle_position", sfen: message.sfen, holes: message.holes });
++          if (result.ok) obstaclePosition = true;
++          reply(message, result);
+         } else {
+-          reply(message, requireEngine().request({ command: "set_position", sfen: message.sfen ?? "startpos", moves: message.moves ?? [] }));
++          const result = requireEngine().request({ command: "set_position", sfen: message.sfen ?? "startpos", moves: message.moves ?? [] });
++          if (result.ok) obstaclePosition = false;
++          reply(message, result);
+         }
+         break;
+       case "legalMoves":
+@@ -97,6 +128,7 @@
+         break;
+       case "new_game":
+         invalidate();
++        obstaclePosition = false;
+         reply(message, requireEngine().request({ command: "new_game" }));
+         break;
+       case "go": {
+@@ -110,14 +142,14 @@
+           throw new Error("worker go requires movetime_ms or nodes; depth alone cannot bound cooperative slices");
+         }
+         invalidate();
+-        const job = { message, generation, target, depth: 1, nodes: message.nodes, time: message.movetime_ms, usedNodes: 0, started: performance.now(), latest: null };
++        const job = { message, generation, target, depth: 1, obstacles: obstaclePosition, nodes: message.nodes, time: message.movetime_ms, usedNodes: 0, started: performance.now(), latest: null };
+         active = job;
+         // Run one bounded slice before yielding, so an immediate stop has a move.
+         slice(job);
+         break;
+       }
+       case "stop":
+-        if (active) finish(active);
++        if (active) finish(active, false);
+         reply(message, { ok: true });
+         break;
+       case "dispose":
+@@ -125,6 +157,7 @@
+         initialization++;
+         engine?.dispose();
+         engine = null;
++        obstaclePosition = false;
+         reply(message, { ok: true });
+         break;
+       default:
+--- /dev/null
++++ b/src/search/obstacle_guard.rs
+@@ -0,0 +1,248 @@
++//! Bounded, constructive tactical loss detection at the obstacle root.
++
++use rsshogi::board::{self, Captures, Move32List, Position};
++use rsshogi::mate::solve_mate_in_one;
++use rsshogi::types::{Color, Move32, PieceType};
++use serde::Serialize;
++use std::time::Duration;
++
++use super::context::tt_key;
++use super::score::score_from_tt;
++use super::time::Instant;
++use super::tt::TranspositionTable;
++use crate::eval::Evaluator;
++use crate::position::SearchPositionExt;
++
++const HORIZON: u8 = 5;
++const MAX_NODES: u32 = 12_000;
++
++#[derive(Serialize)]
++pub(crate) struct ObstacleGuardOutput {
++    pub(crate) status: &'static str,
++    pub(crate) bestmove: String,
++    pub(crate) nodes: u32,
++    pub(crate) proof_nodes: u32,
++    pub(crate) proof_ms: u64,
++    pub(crate) elapsed_ms: u64,
++    pub(crate) replacement_score: Option<i32>,
++}
++
++struct Probe {
++    start: Instant,
++    budget: Duration,
++    nodes: u32,
++}
++
++impl Probe {
++    fn alive(&self) -> bool {
++        self.nodes < MAX_NODES && self.start.elapsed() < self.budget
++    }
++
++    /// Completeness applies only to the chosen attacking move subset. A positive
++    /// result covers every legal response and therefore proves the loss regardless.
++    fn forced(&mut self, position: &mut Position, attacker: Color, remaining: u8) -> Option<bool> {
++        if !self.alive() {
++            return None;
++        }
++        self.nodes += 1;
++        if position.turn() == attacker {
++            if remaining == 0 {
++                return Some(false);
++            }
++            if solve_mate_in_one(position).is_some() {
++                return Some(true);
++            }
++            if remaining == 1 {
++                return Some(false);
++            }
++            let moves = forcing_moves(position);
++            for (_, mv) in moves {
++                position.apply_move32(mv);
++                let won = self.forced(position, attacker, remaining - 1);
++                position.undo_move32(mv).expect("guard move was legal");
++                if won? {
++                    return Some(true);
++                }
++            }
++            Some(false)
++        } else {
++            if remaining == 0 {
++                return Some(position.is_mated());
++            }
++            let mut replies = Move32List::new();
++            board::generate_legal_all_move32(position, &mut replies);
++            for &mv in replies.as_slice() {
++                position.apply_move32(mv);
++                let won = self.forced(position, attacker, remaining - 1);
++                position.undo_move32(mv).expect("guard response was legal");
++                if !won? {
++                    return Some(false);
++                }
++            }
++            Some(true)
++        }
++    }
++}
++
++/// Only checked moves and near-king captures can be proving attacker steps.
++fn forcing_moves(position: &Position) -> Vec<(i32, Move32)> {
++    let owner = position.turn();
++    let enemy_king = position.king_square(owner.flip());
++    let mut moves = Move32List::new();
++    board::movegen::generate_checks_all_move32(position, &mut moves);
++    let mut candidates: Vec<_> = moves
++        .as_slice()
++        .iter()
++        .copied()
++        .filter(|&mv| position.is_legal_move32(mv))
++        .map(|mv| {
++            let distance = i32::from(enemy_king.distance(mv.to_sq()));
++            (2000 - 15 * distance, mv)
++        })
++        .collect();
++    let mut captures = Move32List::new();
++    board::generate_moves_move32::<Captures>(position, &mut captures);
++    for &mv in captures.as_slice() {
++        let distance = i32::from(enemy_king.distance(mv.to_sq()));
++        if distance > 2
++            || candidates.iter().any(|&(_, existing)| existing == mv)
++            || !position.is_legal_move32(mv)
++        {
++            continue;
++        }
++        let moving = position.move_facts(mv).piece_after_move().piece_type();
++        let priority = if moving == PieceType::KING { 2400 } else { 1800 };
++        candidates.push((priority - 15 * distance, mv));
++    }
++    candidates.sort_by_key(|&(priority, _)| std::cmp::Reverse(priority));
++    candidates
++}
++
++fn compare_after(
++    probe: &mut Probe,
++    position: &mut Position,
++    attacker: Color,
++    mv: Move32,
++) -> Option<bool> {
++    position.apply_move32(mv);
++    let verdict = probe.forced(position, attacker, HORIZON);
++    position.undo_move32(mv).expect("guard root candidate was legal");
++    verdict
++}
++
++pub(crate) fn guard_obstacle_move(
++    source: &Position,
++    incumbent: Move32,
++    table: &TranspositionTable,
++    mut evaluator: Evaluator,
++    movetime_ms: u64,
++    allow_replacement: bool,
++) -> ObstacleGuardOutput {
++    let mut probe =
++        Probe { start: Instant::now(), budget: Duration::from_millis(movetime_ms), nodes: 0 };
++    let mut position = source.clone_for_search();
++    let attacker = position.turn().flip();
++    let outcome = compare_after(&mut probe, &mut position, attacker, incumbent);
++    let proof_nodes = probe.nodes;
++    let proof_ms = probe.start.elapsed().as_millis().min(u128::from(u64::MAX)) as u64;
++    let mut selected = incumbent;
++    let mut replacement_score = None;
++    let mut status = match outcome {
++        Some(true) => "proved-loss",
++        Some(false) => "not-proved-in-subset",
++        None => "budget",
++    };
++    if outcome == Some(true) && allow_replacement && probe.alive() {
++        let mut alternatives = Vec::new();
++        let mut moves = Move32List::new();
++        board::generate_legal_all_move32(&position, &mut moves);
++        evaluator.initialize(&position);
++        for &candidate in moves.as_slice() {
++            if candidate == incumbent {
++                continue;
++            }
++            if !probe.alive() {
++                break;
++            }
++            position.apply_move32(candidate);
++            let score = table
++                .probe(tt_key(&position, 0))
++                .map(|entry| -score_from_tt(entry.score, 1))
++                .unwrap_or_else(|| {
++                    evaluator.advance(&position, candidate);
++                    let score = -evaluator.evaluate(&position);
++                    evaluator.undo();
++                    score
++                });
++            position.undo_move32(candidate).expect("guard candidate was legal");
++            alternatives.push((score, candidate));
++        }
++        alternatives.sort_by_key(|&(score, _)| std::cmp::Reverse(score));
++        for (score, candidate) in alternatives {
++            if compare_after(&mut probe, &mut position, attacker, candidate) == Some(false)
++                && probe.alive()
++            {
++                selected = candidate;
++                replacement_score = Some(score);
++                status = "replaced-proved-loss";
++                break;
++            }
++            if !probe.alive() {
++                break;
++            }
++        }
++    }
++    ObstacleGuardOutput {
++        status,
++        bestmove: selected.to_usi(),
++        nodes: probe.nodes,
++        proof_nodes,
++        proof_ms,
++        elapsed_ms: probe.start.elapsed().as_millis().min(u128::from(u64::MAX)) as u64,
++        replacement_score,
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use rsshogi::types::{Bitboard, Square};
++
++    #[test]
++    fn checks_and_near_king_captures_expose_both_obstacle_traps() {
++        let fixtures = [
++            (
++                "p1+pgp4/bs1k3p+B/1+lp2+N3/2sp5/2g5p/6P2/1PPP3PP/P+N+SLP2G1/2K1S1RN1 w RGNL3Pl 40",
++                &["2e"][..],
++                "L*4a",
++                "6a5b",
++            ),
++            (
++                "p3+R4/1k2+P3+B/+p1ps5/3p1+R3/K2l5/9/7PP/P2PP2G1/4S2N1 w B3G2S3N3L6P 94",
++                &["3d", "2d", "1d", "3e", "2e", "1e", "3f", "2f", "1f"][..],
++                "9c9d",
++                "6e6h+",
++            ),
++        ];
++        board::init();
++        for (sfen, holes, losing, alternative) in fixtures {
++            let mut position = board::position_from_sfen(sfen).unwrap();
++            let mut mask = Bitboard::EMPTY;
++            for hole in holes {
++                mask.set(Square::from_usi(hole).unwrap());
++            }
++            assert!(position.set_obstacle_mask(mask));
++            let attacker = position.turn().flip();
++            let losing = position.move32_from_usi(losing).unwrap();
++            let alternative = position.move32_from_usi(alternative).unwrap();
++            let mut probe = Probe { start: Instant::now(), budget: Duration::MAX, nodes: 0 };
++            assert_eq!(compare_after(&mut probe, &mut position, attacker, losing), Some(true));
++            assert_eq!(
++                compare_after(&mut probe, &mut position, attacker, alternative),
++                Some(false)
++            );
++            assert_eq!(position.to_sfen(None), sfen);
++            assert_eq!(position.obstacle_mask(), mask);
++        }
++    }
++}

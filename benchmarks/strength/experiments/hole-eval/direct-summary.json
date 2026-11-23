@@ -1,0 +1,358 @@
+{
+  "groups": [
+    {
+      "budget": 100,
+      "kind": "blackhole",
+      "games": 6,
+      "sente": [
+        1,
+        0,
+        0,
+        2
+      ],
+      "gote": [
+        0,
+        2,
+        0,
+        1
+      ],
+      "total": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "reasons": {
+        "mate": 3,
+        "ply-cap": 3
+      },
+      "timeouts": {},
+      "failuresByEngine": {},
+      "score": {
+        "distinctStarts": 3,
+        "observedScoreRange": [
+          0.1667,
+          0.6667
+        ],
+        "hoeffding95WithCappedGames": [
+          0,
+          1
+        ]
+      },
+      "nnue": {
+        "count": 240,
+        "meanDepth": 4.25,
+        "meanNodes": 3710.43,
+        "meanWallMs": 111.66,
+        "overRequestedPlus50": 8,
+        "above50Ms": 77.54
+      },
+      "opponent": {
+        "count": 241,
+        "meanDepth": 4.4,
+        "meanNodes": 4072.07,
+        "meanWallMs": 110.73,
+        "overRequestedPlus50": 7,
+        "above50Ms": 72.13
+      }
+    },
+    {
+      "budget": 100,
+      "kind": "pit",
+      "games": 6,
+      "sente": [
+        2,
+        0,
+        0,
+        1
+      ],
+      "gote": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "total": [
+        3,
+        1,
+        0,
+        2
+      ],
+      "reasons": {
+        "mate": 4,
+        "ply-cap": 2
+      },
+      "timeouts": {},
+      "failuresByEngine": {},
+      "score": {
+        "distinctStarts": 3,
+        "observedScoreRange": [
+          0.5,
+          0.8333
+        ],
+        "hoeffding95WithCappedGames": [
+          0,
+          1
+        ]
+      },
+      "nnue": {
+        "count": 187,
+        "meanDepth": 4.24,
+        "meanNodes": 3665.46,
+        "meanWallMs": 111.83,
+        "overRequestedPlus50": 4,
+        "above50Ms": 202.93
+      },
+      "opponent": {
+        "count": 186,
+        "meanDepth": 4.37,
+        "meanNodes": 3598.58,
+        "meanWallMs": 111.58,
+        "overRequestedPlus50": 5,
+        "above50Ms": 221.28
+      }
+    },
+    {
+      "budget": 500,
+      "kind": "blackhole",
+      "games": 2,
+      "sente": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "gote": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "total": [
+        1,
+        0,
+        0,
+        1
+      ],
+      "reasons": {
+        "ply-cap": 1,
+        "mate": 1
+      },
+      "timeouts": {},
+      "failuresByEngine": {},
+      "score": {
+        "distinctStarts": 1,
+        "observedScoreRange": [
+          0.5,
+          1.0
+        ],
+        "hoeffding95WithCappedGames": [
+          0,
+          1
+        ]
+      },
+      "nnue": {
+        "count": 71,
+        "meanDepth": 6.23,
+        "meanNodes": 27660.28,
+        "meanWallMs": 516.02,
+        "overRequestedPlus50": 6,
+        "above50Ms": 100.43
+      },
+      "opponent": {
+        "count": 71,
+        "meanDepth": 5.9,
+        "meanNodes": 24083.23,
+        "meanWallMs": 516.14,
+        "overRequestedPlus50": 5,
+        "above50Ms": 115.6
+      }
+    },
+    {
+      "budget": 500,
+      "kind": "pit",
+      "games": 2,
+      "sente": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "gote": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "total": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "reasons": {
+        "ply-cap": 1,
+        "mate": 1
+      },
+      "timeouts": {},
+      "failuresByEngine": {},
+      "score": {
+        "distinctStarts": 1,
+        "observedScoreRange": [
+          0.0,
+          0.5
+        ],
+        "hoeffding95WithCappedGames": [
+          0,
+          1
+        ]
+      },
+      "nnue": {
+        "count": 87,
+        "meanDepth": 4.25,
+        "meanNodes": 18078.64,
+        "meanWallMs": 512.46,
+        "overRequestedPlus50": 2,
+        "above50Ms": 56.34
+      },
+      "opponent": {
+        "count": 88,
+        "meanDepth": 4.58,
+        "meanNodes": 17906.38,
+        "meanWallMs": 517.33,
+        "overRequestedPlus50": 1,
+        "above50Ms": 413.91
+      }
+    },
+    {
+      "budget": 1500,
+      "kind": "blackhole",
+      "games": 2,
+      "sente": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "gote": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "total": [
+        1,
+        0,
+        0,
+        1
+      ],
+      "reasons": {
+        "ply-cap": 1,
+        "mate": 1
+      },
+      "timeouts": {},
+      "failuresByEngine": {},
+      "score": {
+        "distinctStarts": 1,
+        "observedScoreRange": [
+          0.5,
+          1.0
+        ],
+        "hoeffding95WithCappedGames": [
+          0,
+          1
+        ]
+      },
+      "nnue": {
+        "count": 80,
+        "meanDepth": 7.81,
+        "meanNodes": 207462.16,
+        "meanWallMs": 1504.47,
+        "overRequestedPlus50": 0,
+        "above50Ms": 46.61
+      },
+      "opponent": {
+        "count": 80,
+        "meanDepth": 7.35,
+        "meanNodes": 193916.26,
+        "meanWallMs": 1504.58,
+        "overRequestedPlus50": 0,
+        "above50Ms": 21.64
+      }
+    },
+    {
+      "budget": 1500,
+      "kind": "pit",
+      "games": 2,
+      "sente": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "gote": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "total": [
+        1,
+        0,
+        0,
+        1
+      ],
+      "reasons": {
+        "mate": 1,
+        "ply-cap": 1
+      },
+      "timeouts": {},
+      "failuresByEngine": {},
+      "score": {
+        "distinctStarts": 1,
+        "observedScoreRange": [
+          0.5,
+          1.0
+        ],
+        "hoeffding95WithCappedGames": [
+          0,
+          1
+        ]
+      },
+      "nnue": {
+        "count": 86,
+        "meanDepth": 6.48,
+        "meanNodes": 119967.72,
+        "meanWallMs": 1506.59,
+        "overRequestedPlus50": 1,
+        "above50Ms": 69.34
+      },
+      "opponent": {
+        "count": 85,
+        "meanDepth": 6.62,
+        "meanNodes": 119654.91,
+        "meanWallMs": 1507.11,
+        "overRequestedPlus50": 1,
+        "above50Ms": 59.75
+      }
+    }
+  ],
+  "total": [
+    7,
+    4,
+    0,
+    9
+  ],
+  "score": {
+    "distinctStarts": 6,
+    "observedScoreRange": [
+      0.3056,
+      0.7778
+    ],
+    "hoeffding95WithCappedGames": [
+      0,
+      1
+    ]
+  },
+  "unpaired": []
+}

@@ -1,0 +1,275 @@
+[
+  {
+    "budget": 100,
+    "group": "all",
+    "pairs": 36,
+    "baseline": {
+      "correct": 27,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 12,
+      "meanActiveWall": 134.44,
+      "meanActiveDepth": 5.28,
+      "meanActiveNodes": 3753
+    },
+    "candidate": {
+      "correct": 31,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 7,
+      "meanActiveWall": 130.9,
+      "meanActiveDepth": 6.14,
+      "meanActiveNodes": 4414.17
+    },
+    "pairedGains": [
+      "heldout/pit/escape3/2",
+      "heldout/blackhole/escape3/2",
+      "heldout/blackhole/win7/01",
+      "heldout/pit/win7/02"
+    ],
+    "pairedLosses": []
+  },
+  {
+    "budget": 100,
+    "group": "attack",
+    "pairs": 24,
+    "baseline": {
+      "correct": 18,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 8,
+      "meanActiveWall": 133.63,
+      "meanActiveDepth": 5.62,
+      "meanActiveNodes": 4145.46
+    },
+    "candidate": {
+      "correct": 20,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 5,
+      "meanActiveWall": 129.03,
+      "meanActiveDepth": 6.88,
+      "meanActiveNodes": 4944.17
+    },
+    "pairedGains": [
+      "heldout/blackhole/win7/01",
+      "heldout/pit/win7/02"
+    ],
+    "pairedLosses": []
+  },
+  {
+    "budget": 100,
+    "group": "escape",
+    "pairs": 12,
+    "baseline": {
+      "correct": 9,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 4,
+      "meanActiveWall": 136.07,
+      "meanActiveDepth": 4.58,
+      "meanActiveNodes": 2968.08
+    },
+    "candidate": {
+      "correct": 11,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 2,
+      "meanActiveWall": 134.65,
+      "meanActiveDepth": 4.67,
+      "meanActiveNodes": 3354.17
+    },
+    "pairedGains": [
+      "heldout/pit/escape3/2",
+      "heldout/blackhole/escape3/2"
+    ],
+    "pairedLosses": []
+  },
+  {
+    "budget": 500,
+    "group": "all",
+    "pairs": 36,
+    "baseline": {
+      "correct": 31,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 12,
+      "meanActiveWall": 538.14,
+      "meanActiveDepth": 10.64,
+      "meanActiveNodes": 23112.72
+    },
+    "candidate": {
+      "correct": 31,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 13,
+      "meanActiveWall": 539.31,
+      "meanActiveDepth": 10.47,
+      "meanActiveNodes": 18415.31
+    },
+    "pairedGains": [
+      "heldout/blackhole/escape7/1"
+    ],
+    "pairedLosses": [
+      "heldout/pit/escape3/2"
+    ]
+  },
+  {
+    "budget": 500,
+    "group": "attack",
+    "pairs": 24,
+    "baseline": {
+      "correct": 21,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 6,
+      "meanActiveWall": 535.36,
+      "meanActiveDepth": 12.33,
+      "meanActiveNodes": 25253.75
+    },
+    "candidate": {
+      "correct": 21,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 6,
+      "meanActiveWall": 533.41,
+      "meanActiveDepth": 12,
+      "meanActiveNodes": 19937.67
+    },
+    "pairedGains": [],
+    "pairedLosses": []
+  },
+  {
+    "budget": 500,
+    "group": "escape",
+    "pairs": 12,
+    "baseline": {
+      "correct": 10,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 6,
+      "meanActiveWall": 543.69,
+      "meanActiveDepth": 7.25,
+      "meanActiveNodes": 18830.67
+    },
+    "candidate": {
+      "correct": 10,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 7,
+      "meanActiveWall": 551.09,
+      "meanActiveDepth": 7.42,
+      "meanActiveNodes": 15370.58
+    },
+    "pairedGains": [
+      "heldout/blackhole/escape7/1"
+    ],
+    "pairedLosses": [
+      "heldout/pit/escape3/2"
+    ]
+  },
+  {
+    "budget": 1500,
+    "group": "all",
+    "pairs": 36,
+    "baseline": {
+      "correct": 33,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 8,
+      "meanActiveWall": 1548.61,
+      "meanActiveDepth": 12.92,
+      "meanActiveNodes": 96891.44
+    },
+    "candidate": {
+      "correct": 32,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 9,
+      "meanActiveWall": 1536.34,
+      "meanActiveDepth": 12.58,
+      "meanActiveNodes": 67959.03
+    },
+    "pairedGains": [
+      "heldout/pit/escape3/2"
+    ],
+    "pairedLosses": [
+      "heldout/blackhole/win3/02",
+      "heldout/blackhole/escape7/1"
+    ]
+  },
+  {
+    "budget": 1500,
+    "group": "attack",
+    "pairs": 24,
+    "baseline": {
+      "correct": 22,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 4,
+      "meanActiveWall": 1545.94,
+      "meanActiveDepth": 14.75,
+      "meanActiveNodes": 105919.21
+    },
+    "candidate": {
+      "correct": 21,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 5,
+      "meanActiveWall": 1533.43,
+      "meanActiveDepth": 14.5,
+      "meanActiveNodes": 73602
+    },
+    "pairedGains": [],
+    "pairedLosses": [
+      "heldout/blackhole/win3/02"
+    ]
+  },
+  {
+    "budget": 1500,
+    "group": "escape",
+    "pairs": 12,
+    "baseline": {
+      "correct": 11,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 4,
+      "meanActiveWall": 1553.94,
+      "meanActiveDepth": 9.25,
+      "meanActiveNodes": 78835.92
+    },
+    "candidate": {
+      "correct": 11,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 4,
+      "meanActiveWall": 1542.16,
+      "meanActiveDepth": 8.75,
+      "meanActiveNodes": 56673.08
+    },
+    "pairedGains": [
+      "heldout/pit/escape3/2"
+    ],
+    "pairedLosses": [
+      "heldout/blackhole/escape7/1"
+    ]
+  }
+]

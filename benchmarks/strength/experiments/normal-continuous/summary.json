@@ -1,0 +1,2549 @@
+{
+  "total": 44,
+  "cells": [
+    {
+      "file": "match-stock-100-extension.jsonl",
+      "key": "hirate 100",
+      "opponentEngine": "stock",
+      "sample": 6,
+      "pairs": 3,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 4,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 1,
+        "moves": 404,
+        "wallMeanMs": 109.34,
+        "wallMaxMs": 240.04194199999984,
+        "meanReportedMs": 104.97,
+        "meanDepth": 4.55,
+        "meanNodes": 3470.48,
+        "over5ms": 181,
+        "over50ms": 5,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 1,
+        "losses": 4,
+        "draws": 0,
+        "unresolved": 1,
+        "moves": 402,
+        "wallMeanMs": 107.25,
+        "wallMaxMs": 163.1886150000064,
+        "meanReportedMs": 105.42,
+        "meanDepth": 3.82,
+        "meanNodes": 4196.27,
+        "over5ms": 158,
+        "over50ms": 4,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 1,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 118,
+          "family": "hirate"
+        },
+        {
+          "pair": 1,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 137,
+          "family": "hirate"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 127,
+          "family": "hirate"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 98,
+          "family": "hirate"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 1,
+          "winner": null,
+          "reason": "ply-cap",
+          "plies": 200,
+          "family": "hirate"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 126,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 2,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 1
+      },
+      "pairedDirections": {
+        "positive": 2,
+        "negative": 0,
+        "equal": 0,
+        "unresolved": 1
+      },
+      "observedScoreRangePct": [
+        66.67,
+        83.33
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "file": "match-stock-100-extension.jsonl",
+      "key": "game 100",
+      "opponentEngine": "stock",
+      "sample": 6,
+      "pairs": 3,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 4,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 313,
+        "wallMeanMs": 109.18,
+        "wallMaxMs": 190.54062500000873,
+        "meanReportedMs": 105.41,
+        "meanDepth": 3.93,
+        "meanNodes": 3226.85,
+        "over5ms": 133,
+        "over50ms": 5,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 2,
+        "losses": 4,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 312,
+        "wallMeanMs": 106.36,
+        "wallMaxMs": 206.71007600001758,
+        "meanReportedMs": 104.7,
+        "meanDepth": 3.29,
+        "meanNodes": 3747.65,
+        "over5ms": 105,
+        "over50ms": 1,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 1,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 83,
+          "family": "game"
+        },
+        {
+          "pair": 1,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 99,
+          "family": "game"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 105,
+          "family": "game"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 95,
+          "family": "game"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 176,
+          "family": "game"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 67,
+          "family": "game"
+        }
+      ],
+      "sente": {
+        "wins": 3,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 1,
+        "negative": 0,
+        "equal": 2,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        66.67,
+        66.67
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "file": "match-stock-100-second-holdout.jsonl",
+      "key": "hirate 100",
+      "opponentEngine": "stock",
+      "sample": 8,
+      "pairs": 4,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 6,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 453,
+        "wallMeanMs": 103.71,
+        "wallMaxMs": 166.60731699999997,
+        "meanReportedMs": 101.63,
+        "meanDepth": 6.13,
+        "meanNodes": 8104.32,
+        "over5ms": 87,
+        "over50ms": 1,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 2,
+        "losses": 6,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 451,
+        "wallMeanMs": 103.74,
+        "wallMaxMs": 230.2436779999989,
+        "meanReportedMs": 102.7,
+        "meanDepth": 5.64,
+        "meanNodes": 11113.35,
+        "over5ms": 84,
+        "over50ms": 1,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 4,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 138,
+          "family": "hirate"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 112,
+          "family": "hirate"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 64,
+          "family": "hirate"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 85,
+          "family": "hirate"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 109,
+          "family": "hirate"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 199,
+          "family": "hirate"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 70,
+          "family": "hirate"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 127,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 3,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 3,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 2,
+        "negative": 0,
+        "equal": 2,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        75,
+        75
+      ],
+      "illustrativePaired95Pct": [
+        7.09,
+        100
+      ]
+    },
+    {
+      "file": "match-stock-100-second-holdout.jsonl",
+      "key": "game 100",
+      "opponentEngine": "stock",
+      "sample": 8,
+      "pairs": 4,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 6,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 290,
+        "wallMeanMs": 103.33,
+        "wallMaxMs": 177.17524799999956,
+        "meanReportedMs": 101.34,
+        "meanDepth": 6.44,
+        "meanNodes": 9019.39,
+        "over5ms": 32,
+        "over50ms": 1,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 2,
+        "losses": 6,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 288,
+        "wallMeanMs": 103.52,
+        "wallMaxMs": 173.762068,
+        "meanReportedMs": 102.53,
+        "meanDepth": 5.89,
+        "meanNodes": 11403.44,
+        "over5ms": 40,
+        "over50ms": 1,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 4,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 99,
+          "family": "game"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 98,
+          "family": "game"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 42,
+          "family": "game"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 81,
+          "family": "game"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 43,
+          "family": "game"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 27,
+          "family": "game"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 76,
+          "family": "game"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 112,
+          "family": "game"
+        }
+      ],
+      "sente": {
+        "wins": 3,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 3,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 2,
+        "negative": 0,
+        "equal": 2,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        75,
+        75
+      ],
+      "illustrativePaired95Pct": [
+        7.09,
+        100
+      ]
+    },
+    {
+      "file": "match-stock-100.jsonl",
+      "key": "hirate 100",
+      "opponentEngine": "stock",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 117,
+        "wallMeanMs": 114.41,
+        "wallMaxMs": 155.02272399999856,
+        "meanReportedMs": 106.32,
+        "meanDepth": 3.97,
+        "meanNodes": 2905.22,
+        "over5ms": 79,
+        "over50ms": 3,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 116,
+        "wallMeanMs": 112.42,
+        "wallMaxMs": 154.54815700000108,
+        "meanReportedMs": 106.47,
+        "meanDepth": 3.94,
+        "meanNodes": 3879.18,
+        "over5ms": 76,
+        "over50ms": 2,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 93,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 140,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 1,
+        "negative": 0,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        100,
+        100
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "file": "match-stock-100.jsonl",
+      "key": "game 100",
+      "opponentEngine": "stock",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 85,
+        "wallMeanMs": 112.34,
+        "wallMaxMs": 159.69085899999482,
+        "meanReportedMs": 105.38,
+        "meanDepth": 3.94,
+        "meanNodes": 4227.88,
+        "over5ms": 52,
+        "over50ms": 3,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 84,
+        "wallMeanMs": 110.71,
+        "wallMaxMs": 154.45884300000034,
+        "meanReportedMs": 105.71,
+        "meanDepth": 3.25,
+        "meanNodes": 4310.8,
+        "over5ms": 50,
+        "over50ms": 2,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 81,
+          "family": "game"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 88,
+          "family": "game"
+        }
+      ],
+      "sente": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 1,
+        "negative": 0,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        100,
+        100
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "file": "match-stock-hirate-high.jsonl",
+      "key": "hirate 500",
+      "opponentEngine": "stock",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 1,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 100,
+        "wallMeanMs": 508.28,
+        "wallMaxMs": 613.0726290000002,
+        "meanReportedMs": 504.39,
+        "meanDepth": 8.19,
+        "meanNodes": 24870.67,
+        "over5ms": 50,
+        "over50ms": 2,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 1,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 100,
+        "wallMeanMs": 505.44,
+        "wallMaxMs": 538.7331080000004,
+        "meanReportedMs": 502.8,
+        "meanDepth": 7.06,
+        "meanNodes": 45801.13,
+        "over5ms": 34,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 134,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 66,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 0,
+        "negative": 0,
+        "equal": 1,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        50,
+        50
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "file": "match-stock-hirate-high.jsonl",
+      "key": "hirate 1500",
+      "opponentEngine": "stock",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 124,
+        "wallMeanMs": 1514.92,
+        "wallMaxMs": 1598.2364560000133,
+        "meanReportedMs": 1506.48,
+        "meanDepth": 8.78,
+        "meanNodes": 41651.09,
+        "over5ms": 86,
+        "over50ms": 4,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 123,
+        "wallMeanMs": 1512,
+        "wallMaxMs": 1572.2425330000115,
+        "meanReportedMs": 1508.1,
+        "meanDepth": 6.98,
+        "meanNodes": 99244.2,
+        "over5ms": 76,
+        "over50ms": 5,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 113,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 134,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 1,
+        "negative": 0,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        100,
+        100
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "file": "match-stock-nodes-15000.jsonl",
+      "key": "hirate 500",
+      "opponentEngine": "stock",
+      "sharedNodes": 15000,
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 112,
+        "wallMeanMs": 323.46,
+        "wallMaxMs": 539.1928070000004,
+        "meanReportedMs": 319.46,
+        "meanDepth": 7.34,
+        "meanNodes": 14230.18,
+        "over5ms": 8,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 111,
+        "wallMeanMs": 216.6,
+        "wallMaxMs": 510.14410899999893,
+        "meanReportedMs": 214.59,
+        "meanDepth": 5.92,
+        "meanNodes": 14924.07,
+        "over5ms": 4,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 49,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 174,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 1,
+        "negative": 0,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        100,
+        100
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "file": "match-suisho5-20000-100.jsonl",
+      "key": "hirate 100",
+      "opponentEngine": "suisho5",
+      "referenceNodes": 20000,
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 156,
+        "wallMeanMs": 107.46,
+        "wallMaxMs": 165.2846580000005,
+        "meanReportedMs": 103.76,
+        "meanDepth": 5.22,
+        "meanNodes": 5703.08,
+        "over5ms": 69,
+        "over50ms": 2,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 157,
+        "wallMeanMs": 45.29,
+        "wallMaxMs": 104.31315399999949,
+        "meanReportedMs": 44.86,
+        "meanDepth": 12.01,
+        "meanNodes": 19193.98,
+        "over5ms": 0,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 186,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 127,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 0,
+        "negative": 1,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        0,
+        0
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "file": "match-suisho5-5000-100.jsonl",
+      "key": "hirate 100",
+      "opponentEngine": "suisho5",
+      "referenceNodes": 5000,
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 123,
+        "wallMeanMs": 105.02,
+        "wallMaxMs": 143.3575390000001,
+        "meanReportedMs": 102.11,
+        "meanDepth": 6.17,
+        "meanNodes": 7398.2,
+        "over5ms": 27,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 122,
+        "wallMeanMs": 9.94,
+        "wallMaxMs": 60.94863600000008,
+        "meanReportedMs": 10.33,
+        "meanDepth": 9.4,
+        "meanNodes": 4859.43,
+        "over5ms": 0,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 153,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 92,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 1,
+        "negative": 0,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        100,
+        100
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "file": "match-suisho5-80000-100.jsonl",
+      "key": "hirate 100",
+      "opponentEngine": "suisho5",
+      "referenceNodes": 80000,
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 103,
+        "wallMeanMs": 109.21,
+        "wallMaxMs": 183.84338799999932,
+        "meanReportedMs": 104.31,
+        "meanDepth": 5.37,
+        "meanNodes": 5083.36,
+        "over5ms": 45,
+        "over50ms": 3,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 104,
+        "wallMeanMs": 95.73,
+        "wallMaxMs": 161.78008700000282,
+        "meanReportedMs": 95.85,
+        "meanDepth": 13.77,
+        "meanNodes": 44691.86,
+        "over5ms": 12,
+        "over50ms": 1,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 106,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 101,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 0,
+        "negative": 1,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        0,
+        0
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    }
+  ],
+  "combined": [
+    {
+      "key": "stock timed 100 hirate",
+      "sample": 16,
+      "pairs": 8,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 12,
+        "losses": 3,
+        "draws": 0,
+        "unresolved": 1,
+        "moves": 974,
+        "wallMeanMs": 107.33,
+        "wallMaxMs": 240.04194199999984,
+        "meanReportedMs": 103.58,
+        "meanDepth": 5.22,
+        "meanNodes": 5557.74,
+        "over5ms": 347,
+        "over50ms": 9,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 3,
+        "losses": 12,
+        "draws": 0,
+        "unresolved": 1,
+        "moves": 969,
+        "wallMeanMs": 106.23,
+        "wallMaxMs": 230.2436779999989,
+        "meanReportedMs": 104.28,
+        "meanDepth": 4.68,
+        "meanNodes": 7377.71,
+        "over5ms": 318,
+        "over50ms": 7,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 1,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 118,
+          "family": "hirate"
+        },
+        {
+          "pair": 1,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 137,
+          "family": "hirate"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 127,
+          "family": "hirate"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 98,
+          "family": "hirate"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 1,
+          "winner": null,
+          "reason": "ply-cap",
+          "plies": 200,
+          "family": "hirate"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 126,
+          "family": "hirate"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 138,
+          "family": "hirate"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 112,
+          "family": "hirate"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 64,
+          "family": "hirate"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 85,
+          "family": "hirate"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 109,
+          "family": "hirate"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 199,
+          "family": "hirate"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 70,
+          "family": "hirate"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 127,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 93,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 140,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 6,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 6,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 1
+      },
+      "pairedDirections": {
+        "positive": 5,
+        "negative": 0,
+        "equal": 2,
+        "unresolved": 1
+      },
+      "observedScoreRangePct": [
+        75,
+        81.25
+      ],
+      "illustrativePaired95Pct": [
+        26.98,
+        100
+      ]
+    },
+    {
+      "key": "stock timed 100 pooled",
+      "sample": 32,
+      "pairs": 16,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 24,
+        "losses": 7,
+        "draws": 0,
+        "unresolved": 1,
+        "moves": 1662,
+        "wallMeanMs": 107.23,
+        "wallMaxMs": 240.04194199999984,
+        "meanReportedMs": 103.62,
+        "meanDepth": 5.12,
+        "meanNodes": 5654.77,
+        "over5ms": 564,
+        "over50ms": 18,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 7,
+        "losses": 24,
+        "draws": 0,
+        "unresolved": 1,
+        "moves": 1653,
+        "wallMeanMs": 106.01,
+        "wallMaxMs": 230.2436779999989,
+        "meanReportedMs": 104.13,
+        "meanDepth": 4.55,
+        "meanNodes": 7238.09,
+        "over5ms": 513,
+        "over50ms": 11,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 1,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 118,
+          "family": "hirate"
+        },
+        {
+          "pair": 1,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 137,
+          "family": "hirate"
+        },
+        {
+          "pair": 1,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 83,
+          "family": "game"
+        },
+        {
+          "pair": 1,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 99,
+          "family": "game"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 127,
+          "family": "hirate"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 98,
+          "family": "hirate"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 105,
+          "family": "game"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 95,
+          "family": "game"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 1,
+          "winner": null,
+          "reason": "ply-cap",
+          "plies": 200,
+          "family": "hirate"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 126,
+          "family": "hirate"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 176,
+          "family": "game"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 67,
+          "family": "game"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 138,
+          "family": "hirate"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 112,
+          "family": "hirate"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 99,
+          "family": "game"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 98,
+          "family": "game"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 64,
+          "family": "hirate"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 85,
+          "family": "hirate"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 42,
+          "family": "game"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 81,
+          "family": "game"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 109,
+          "family": "hirate"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 199,
+          "family": "hirate"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 43,
+          "family": "game"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 27,
+          "family": "game"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 70,
+          "family": "hirate"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 127,
+          "family": "hirate"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 76,
+          "family": "game"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 112,
+          "family": "game"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 93,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 140,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 81,
+          "family": "game"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 88,
+          "family": "game"
+        }
+      ],
+      "sente": {
+        "wins": 13,
+        "losses": 3,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 11,
+        "losses": 4,
+        "draws": 0,
+        "unresolved": 1
+      },
+      "pairedDirections": {
+        "positive": 9,
+        "negative": 0,
+        "equal": 6,
+        "unresolved": 1
+      },
+      "observedScoreRangePct": [
+        75,
+        78.13
+      ],
+      "illustrativePaired95Pct": [
+        41.05,
+        100
+      ]
+    },
+    {
+      "key": "stock timed 100 game",
+      "sample": 16,
+      "pairs": 8,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 12,
+        "losses": 4,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 688,
+        "wallMeanMs": 107.1,
+        "wallMaxMs": 190.54062500000873,
+        "meanReportedMs": 103.69,
+        "meanDepth": 4.99,
+        "meanNodes": 5792.15,
+        "over5ms": 217,
+        "over50ms": 9,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 4,
+        "losses": 12,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 684,
+        "wallMeanMs": 105.7,
+        "wallMaxMs": 206.71007600001758,
+        "meanReportedMs": 103.91,
+        "meanDepth": 4.38,
+        "meanNodes": 7040.3,
+        "over5ms": 195,
+        "over50ms": 4,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 1,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 83,
+          "family": "game"
+        },
+        {
+          "pair": 1,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 99,
+          "family": "game"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 105,
+          "family": "game"
+        },
+        {
+          "pair": 2,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 95,
+          "family": "game"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 176,
+          "family": "game"
+        },
+        {
+          "pair": 3,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 67,
+          "family": "game"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 99,
+          "family": "game"
+        },
+        {
+          "pair": 4,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 98,
+          "family": "game"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 42,
+          "family": "game"
+        },
+        {
+          "pair": 5,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 81,
+          "family": "game"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 43,
+          "family": "game"
+        },
+        {
+          "pair": 6,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 27,
+          "family": "game"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 76,
+          "family": "game"
+        },
+        {
+          "pair": 7,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 112,
+          "family": "game"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 81,
+          "family": "game"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 88,
+          "family": "game"
+        }
+      ],
+      "sente": {
+        "wins": 7,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 5,
+        "losses": 3,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 4,
+        "negative": 0,
+        "equal": 4,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        75,
+        75
+      ],
+      "illustrativePaired95Pct": [
+        26.98,
+        100
+      ]
+    },
+    {
+      "key": "stock timed 500 hirate",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 1,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 100,
+        "wallMeanMs": 508.28,
+        "wallMaxMs": 613.0726290000002,
+        "meanReportedMs": 504.39,
+        "meanDepth": 8.19,
+        "meanNodes": 24870.67,
+        "over5ms": 50,
+        "over50ms": 2,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 1,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 100,
+        "wallMeanMs": 505.44,
+        "wallMaxMs": 538.7331080000004,
+        "meanReportedMs": 502.8,
+        "meanDepth": 7.06,
+        "meanNodes": 45801.13,
+        "over5ms": 34,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 134,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 66,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 0,
+        "negative": 0,
+        "equal": 1,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        50,
+        50
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "key": "stock timed 1500 hirate",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 124,
+        "wallMeanMs": 1514.92,
+        "wallMaxMs": 1598.2364560000133,
+        "meanReportedMs": 1506.48,
+        "meanDepth": 8.78,
+        "meanNodes": 41651.09,
+        "over5ms": 86,
+        "over50ms": 4,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 123,
+        "wallMeanMs": 1512,
+        "wallMaxMs": 1572.2425330000115,
+        "meanReportedMs": 1508.1,
+        "meanDepth": 6.98,
+        "meanNodes": 99244.2,
+        "over5ms": 76,
+        "over50ms": 5,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 113,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 134,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 1,
+        "negative": 0,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        100,
+        100
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "key": "stock nodes 15000 500 hirate",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 112,
+        "wallMeanMs": 323.46,
+        "wallMaxMs": 539.1928070000004,
+        "meanReportedMs": 319.46,
+        "meanDepth": 7.34,
+        "meanNodes": 14230.18,
+        "over5ms": 8,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 111,
+        "wallMeanMs": 216.6,
+        "wallMaxMs": 510.14410899999893,
+        "meanReportedMs": 214.59,
+        "meanDepth": 5.92,
+        "meanNodes": 14924.07,
+        "over5ms": 4,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 49,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 174,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 1,
+        "negative": 0,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        100,
+        100
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "key": "suisho5 nodes 20000 100 hirate",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 156,
+        "wallMeanMs": 107.46,
+        "wallMaxMs": 165.2846580000005,
+        "meanReportedMs": 103.76,
+        "meanDepth": 5.22,
+        "meanNodes": 5703.08,
+        "over5ms": 69,
+        "over50ms": 2,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 157,
+        "wallMeanMs": 45.29,
+        "wallMaxMs": 104.31315399999949,
+        "meanReportedMs": 44.86,
+        "meanDepth": 12.01,
+        "meanNodes": 19193.98,
+        "over5ms": 0,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 186,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 127,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 0,
+        "negative": 1,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        0,
+        0
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "key": "suisho5 nodes 5000 100 hirate",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 123,
+        "wallMeanMs": 105.02,
+        "wallMaxMs": 143.3575390000001,
+        "meanReportedMs": 102.11,
+        "meanDepth": 6.17,
+        "meanNodes": 7398.2,
+        "over5ms": 27,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 122,
+        "wallMeanMs": 9.94,
+        "wallMaxMs": 60.94863600000008,
+        "meanReportedMs": 10.33,
+        "meanDepth": 9.4,
+        "meanNodes": 4859.43,
+        "over5ms": 0,
+        "over50ms": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 153,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 92,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 1,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 1,
+        "negative": 0,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        100,
+        100
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    },
+    {
+      "key": "suisho5 nodes 80000 100 hirate",
+      "sample": 2,
+      "pairs": 1,
+      "unpaired": 0,
+      "candidates": {
+        "wins": 0,
+        "losses": 2,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 103,
+        "wallMeanMs": 109.21,
+        "wallMaxMs": 183.84338799999932,
+        "meanReportedMs": 104.31,
+        "meanDepth": 5.37,
+        "meanNodes": 5083.36,
+        "over5ms": 45,
+        "over50ms": 3,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "opponent": {
+        "wins": 2,
+        "losses": 0,
+        "draws": 0,
+        "unresolved": 0,
+        "moves": 104,
+        "wallMeanMs": 95.73,
+        "wallMaxMs": 161.78008700000282,
+        "meanReportedMs": 95.85,
+        "meanDepth": 13.77,
+        "meanNodes": 44691.86,
+        "over5ms": 12,
+        "over50ms": 1,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "clockFlags": 0,
+        "resign": 0,
+        "declaration": 0
+      },
+      "outcomes": [
+        {
+          "pair": 0,
+          "candidateSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 106,
+          "family": "hirate"
+        },
+        {
+          "pair": 0,
+          "candidateSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 101,
+          "family": "hirate"
+        }
+      ],
+      "sente": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "gote": {
+        "wins": 0,
+        "losses": 1,
+        "draws": 0,
+        "unresolved": 0
+      },
+      "pairedDirections": {
+        "positive": 0,
+        "negative": 1,
+        "equal": 0,
+        "unresolved": 0
+      },
+      "observedScoreRangePct": [
+        0,
+        0
+      ],
+      "illustrativePaired95Pct": [
+        0,
+        100
+      ]
+    }
+  ]
+}

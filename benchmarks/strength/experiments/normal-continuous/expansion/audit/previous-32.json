@@ -1,0 +1,145 @@
+{
+  "scope": "Normal-shogi SFEN, ignoring move number for novelty. Canonical form includes mirrored files and 180-degree color exchange.",
+  "previewFiles": [],
+  "priorFiles": [],
+  "matchFiles": [
+    {
+      "file": "match-stock-100.jsonl",
+      "sha256": "29bae4132f6afc381fea45685ba49742726ba4bd12e24d98b813702539d3b69a"
+    },
+    {
+      "file": "match-stock-100-extension.jsonl",
+      "sha256": "e4ee5a74fb0fbec4527153f8cc2469dd08a288aee566687ebb1b66b2bb9f3b4e"
+    },
+    {
+      "file": "match-stock-100-second-holdout.jsonl",
+      "sha256": "23c8a4ba6136e8f9b348b1bc2bd9d83a2e940d007f8af6c9f5feee5ccc42ec90"
+    }
+  ],
+  "previewCount": 0,
+  "novelty": {
+    "exact": {
+      "priorDistinct": 0,
+      "previewDistinct": 0,
+      "duplicatePreview": [],
+      "previousOverlap": []
+    },
+    "canonical": {
+      "priorDistinct": 0,
+      "previewDistinct": 0,
+      "duplicatePreview": [],
+      "previousOverlap": []
+    }
+  },
+  "profiles": [],
+  "matchSummary": {
+    "100": {
+      "pooled": {
+        "completedPairs": 16,
+        "partial": [],
+        "withoutCompletedGames": [],
+        "outcomes": {
+          "wins": 24,
+          "losses": 7,
+          "draws": 0,
+          "capped": 1
+        },
+        "directions": {
+          "positive": 9,
+          "equal": 6,
+          "censored": 1
+        },
+        "observedPct": [
+          75.0,
+          78.13
+        ],
+        "illustrativePaired95Pct": [
+          41.05,
+          100.0
+        ],
+        "indexBlockSensitivity": {
+          "blocks": 8,
+          "observedPct": [
+            75.0,
+            78.13
+          ],
+          "illustrative95Pct": [
+            26.98,
+            100.0
+          ]
+        }
+      },
+      "family": {
+        "game": {
+          "completedPairs": 8,
+          "partial": [],
+          "withoutCompletedGames": [],
+          "outcomes": {
+            "wins": 12,
+            "losses": 4,
+            "draws": 0,
+            "capped": 0
+          },
+          "directions": {
+            "positive": 4,
+            "equal": 4
+          },
+          "observedPct": [
+            75.0,
+            75.0
+          ],
+          "illustrativePaired95Pct": [
+            26.98,
+            100.0
+          ],
+          "indexBlockSensitivity": {
+            "blocks": 8,
+            "observedPct": [
+              75.0,
+              75.0
+            ],
+            "illustrative95Pct": [
+              26.98,
+              100.0
+            ]
+          }
+        },
+        "hirate": {
+          "completedPairs": 8,
+          "partial": [],
+          "withoutCompletedGames": [],
+          "outcomes": {
+            "wins": 12,
+            "losses": 3,
+            "draws": 0,
+            "capped": 1
+          },
+          "directions": {
+            "positive": 5,
+            "censored": 1,
+            "equal": 2
+          },
+          "observedPct": [
+            75.0,
+            81.25
+          ],
+          "illustrativePaired95Pct": [
+            26.98,
+            100.0
+          ],
+          "indexBlockSensitivity": {
+            "blocks": 8,
+            "observedPct": [
+              75.0,
+              81.25
+            ],
+            "illustrative95Pct": [
+              26.98,
+              100.0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

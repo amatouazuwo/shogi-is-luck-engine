@@ -1,0 +1,133 @@
+{"event":"config","wasm":"0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108","worker":"fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2","node":"v22.23.5"}
+{"event":"eval","id":"pit/mate-in-one/01","on":{"eval":1637,"legal":84},"off":{"eval":1637,"legal":85},"same":true}
+{"event":"eval","id":"pit/mate-in-one/02","on":{"eval":1331,"legal":84},"off":{"eval":1331,"legal":85},"same":true}
+{"event":"eval","id":"pit/mate-in-one/03","on":{"eval":2108,"legal":102},"off":{"eval":2108,"legal":103},"same":true}
+{"event":"eval","id":"pit/mate-in-one/04","on":{"eval":1541,"legal":84},"off":{"eval":1541,"legal":85},"same":true}
+{"event":"eval","id":"pit/mate-in-one/05","on":{"eval":1511,"legal":84},"off":{"eval":1511,"legal":85},"same":true}
+{"event":"eval","id":"pit/mate-in-one/06","on":{"eval":1637,"legal":84},"off":{"eval":1637,"legal":85},"same":true}
+{"event":"eval","id":"pit/mate-in-one/07","on":{"eval":1331,"legal":84},"off":{"eval":1331,"legal":85},"same":true}
+{"event":"eval","id":"pit/mate-in-one/08","on":{"eval":2108,"legal":102},"off":{"eval":2108,"legal":103},"same":true}
+{"event":"eval","id":"pit/mate-in-one/09","on":{"eval":1541,"legal":84},"off":{"eval":1541,"legal":85},"same":true}
+{"event":"eval","id":"pit/mate-in-one/10","on":{"eval":1511,"legal":84},"off":{"eval":1511,"legal":85},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/01","on":{"eval":-1834,"legal":3},"off":{"eval":-1834,"legal":3},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/02","on":{"eval":-1806,"legal":3},"off":{"eval":-1806,"legal":3},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/03","on":{"eval":-1732,"legal":3},"off":{"eval":-1732,"legal":3},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/04","on":{"eval":-2280,"legal":3},"off":{"eval":-2280,"legal":3},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/05","on":{"eval":-2023,"legal":3},"off":{"eval":-2023,"legal":1},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/06","on":{"eval":-1834,"legal":3},"off":{"eval":-1834,"legal":3},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/07","on":{"eval":-1806,"legal":3},"off":{"eval":-1806,"legal":3},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/08","on":{"eval":-1732,"legal":3},"off":{"eval":-1732,"legal":3},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/09","on":{"eval":-2280,"legal":3},"off":{"eval":-2280,"legal":3},"same":true}
+{"event":"eval","id":"pit/evade-forced-win/10","on":{"eval":-2023,"legal":3},"off":{"eval":-2023,"legal":1},"same":true}
+{"event":"eval","id":"pit/material-gain/01","on":{"eval":55,"legal":50},"off":{"eval":55,"legal":50},"same":true}
+{"event":"eval","id":"pit/material-gain/02","on":{"eval":1249,"legal":49},"off":{"eval":1249,"legal":49},"same":true}
+{"event":"eval","id":"pit/material-gain/03","on":{"eval":671,"legal":46},"off":{"eval":671,"legal":46},"same":true}
+{"event":"eval","id":"pit/material-gain/04","on":{"eval":665,"legal":43},"off":{"eval":665,"legal":45},"same":true}
+{"event":"eval","id":"pit/material-gain/05","on":{"eval":112,"legal":32},"off":{"eval":112,"legal":35},"same":true}
+{"event":"eval","id":"pit/material-gain/06","on":{"eval":144,"legal":36},"off":{"eval":144,"legal":40},"same":true}
+{"event":"eval","id":"pit/material-gain/07","on":{"eval":106,"legal":40},"off":{"eval":106,"legal":40},"same":true}
+{"event":"eval","id":"pit/material-gain/08","on":{"eval":749,"legal":70},"off":{"eval":749,"legal":70},"same":true}
+{"event":"eval","id":"pit/material-gain/09","on":{"eval":196,"legal":39},"off":{"eval":196,"legal":41},"same":true}
+{"event":"eval","id":"pit/material-gain/10","on":{"eval":618,"legal":50},"off":{"eval":618,"legal":57},"same":true}
+{"event":"eval","id":"pit/ray-blocking/01","on":{"eval":-616,"legal":21},"off":{"eval":-616,"legal":26},"same":true}
+{"event":"eval","id":"pit/ray-blocking/02","on":{"eval":-197,"legal":8},"off":{"eval":-197,"legal":14},"same":true}
+{"event":"eval","id":"pit/ray-blocking/03","on":{"eval":-839,"legal":8},"off":{"eval":-839,"legal":14},"same":true}
+{"event":"eval","id":"pit/ray-blocking/04","on":{"eval":-419,"legal":21},"off":{"eval":-419,"legal":26},"same":true}
+{"event":"eval","id":"pit/ray-blocking/05","on":{"eval":-299,"legal":8},"off":{"eval":-299,"legal":14},"same":true}
+{"event":"eval","id":"pit/ray-blocking/06","on":{"eval":-616,"legal":21},"off":{"eval":-616,"legal":26},"same":true}
+{"event":"eval","id":"pit/ray-blocking/07","on":{"eval":-197,"legal":8},"off":{"eval":-197,"legal":14},"same":true}
+{"event":"eval","id":"pit/ray-blocking/08","on":{"eval":-839,"legal":8},"off":{"eval":-839,"legal":14},"same":true}
+{"event":"eval","id":"pit/ray-blocking/09","on":{"eval":-419,"legal":21},"off":{"eval":-419,"legal":26},"same":true}
+{"event":"eval","id":"pit/ray-blocking/10","on":{"eval":-299,"legal":8},"off":{"eval":-299,"legal":14},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/01","on":{"eval":-1174,"legal":0},"off":{"eval":-1174,"legal":1},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/02","on":{"eval":-1132,"legal":0},"off":{"eval":-1132,"legal":1},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/03","on":{"eval":-1119,"legal":0},"off":{"eval":-1119,"legal":1},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/04","on":{"eval":-1756,"legal":0},"off":{"eval":-1756,"legal":1},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/05","on":{"eval":-1428,"legal":0},"off":{"eval":-1428,"legal":1},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/06","on":{"eval":-1174,"legal":0},"off":{"eval":-1174,"legal":1},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/07","on":{"eval":-1132,"legal":0},"off":{"eval":-1132,"legal":1},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/08","on":{"eval":-1119,"legal":0},"off":{"eval":-1119,"legal":1},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/09","on":{"eval":-1756,"legal":0},"off":{"eval":-1756,"legal":1},"same":true}
+{"event":"eval","id":"pit/no-legal-loss/10","on":{"eval":-1428,"legal":0},"off":{"eval":-1428,"legal":1},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/01","on":{"eval":987,"legal":75},"off":{"eval":987,"legal":84},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/02","on":{"eval":1025,"legal":75},"off":{"eval":1025,"legal":84},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/03","on":{"eval":987,"legal":75},"off":{"eval":987,"legal":84},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/04","on":{"eval":1025,"legal":75},"off":{"eval":1025,"legal":84},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/05","on":{"eval":351,"legal":70},"off":{"eval":351,"legal":76},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/06","on":{"eval":260,"legal":70},"off":{"eval":260,"legal":76},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/07","on":{"eval":351,"legal":70},"off":{"eval":351,"legal":76},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/08","on":{"eval":260,"legal":70},"off":{"eval":260,"legal":76},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/09","on":{"eval":1041,"legal":78},"off":{"eval":1041,"legal":87},"same":true}
+{"event":"eval","id":"blackhole/mate-in-one/10","on":{"eval":1041,"legal":78},"off":{"eval":1041,"legal":87},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/01","on":{"eval":-962,"legal":3},"off":{"eval":-962,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/02","on":{"eval":-1209,"legal":3},"off":{"eval":-1209,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/03","on":{"eval":-1327,"legal":3},"off":{"eval":-1327,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/04","on":{"eval":-1446,"legal":3},"off":{"eval":-1446,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/05","on":{"eval":-938,"legal":3},"off":{"eval":-938,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/06","on":{"eval":-962,"legal":3},"off":{"eval":-962,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/07","on":{"eval":-1209,"legal":3},"off":{"eval":-1209,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/08","on":{"eval":-1327,"legal":3},"off":{"eval":-1327,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/09","on":{"eval":-1446,"legal":3},"off":{"eval":-1446,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/evade-forced-win/10","on":{"eval":-938,"legal":3},"off":{"eval":-938,"legal":5},"same":true}
+{"event":"eval","id":"blackhole/material-gain/01","on":{"eval":-532,"legal":36},"off":{"eval":-532,"legal":42},"same":true}
+{"event":"eval","id":"blackhole/material-gain/02","on":{"eval":-526,"legal":35},"off":{"eval":-526,"legal":44},"same":true}
+{"event":"eval","id":"blackhole/material-gain/03","on":{"eval":2437,"legal":36},"off":{"eval":2437,"legal":44},"same":true}
+{"event":"eval","id":"blackhole/material-gain/04","on":{"eval":-1132,"legal":36},"off":{"eval":-1132,"legal":36},"same":true}
+{"event":"eval","id":"blackhole/material-gain/05","on":{"eval":937,"legal":37},"off":{"eval":937,"legal":40},"same":true}
+{"event":"eval","id":"blackhole/material-gain/06","on":{"eval":479,"legal":43},"off":{"eval":479,"legal":52},"same":true}
+{"event":"eval","id":"blackhole/material-gain/07","on":{"eval":-754,"legal":31},"off":{"eval":-754,"legal":36},"same":true}
+{"event":"eval","id":"blackhole/material-gain/08","on":{"eval":-21,"legal":35},"off":{"eval":-21,"legal":39},"same":true}
+{"event":"eval","id":"blackhole/material-gain/09","on":{"eval":-752,"legal":38},"off":{"eval":-752,"legal":41},"same":true}
+{"event":"eval","id":"blackhole/material-gain/10","on":{"eval":1242,"legal":45},"off":{"eval":1242,"legal":48},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/01","on":{"eval":-616,"legal":19},"off":{"eval":-616,"legal":26},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/02","on":{"eval":-197,"legal":7},"off":{"eval":-197,"legal":14},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/03","on":{"eval":-839,"legal":7},"off":{"eval":-839,"legal":14},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/04","on":{"eval":-419,"legal":19},"off":{"eval":-419,"legal":26},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/05","on":{"eval":-299,"legal":7},"off":{"eval":-299,"legal":14},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/06","on":{"eval":-616,"legal":19},"off":{"eval":-616,"legal":26},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/07","on":{"eval":-197,"legal":7},"off":{"eval":-197,"legal":14},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/08","on":{"eval":-839,"legal":7},"off":{"eval":-839,"legal":14},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/09","on":{"eval":-419,"legal":19},"off":{"eval":-419,"legal":26},"same":true}
+{"event":"eval","id":"blackhole/ray-blocking/10","on":{"eval":-299,"legal":7},"off":{"eval":-299,"legal":14},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/01","on":{"eval":-384,"legal":0},"off":{"eval":-384,"legal":2},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/02","on":{"eval":-679,"legal":0},"off":{"eval":-679,"legal":2},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/03","on":{"eval":-821,"legal":0},"off":{"eval":-821,"legal":1},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/04","on":{"eval":-854,"legal":0},"off":{"eval":-854,"legal":1},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/05","on":{"eval":-357,"legal":0},"off":{"eval":-357,"legal":2},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/06","on":{"eval":-384,"legal":0},"off":{"eval":-384,"legal":2},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/07","on":{"eval":-679,"legal":0},"off":{"eval":-679,"legal":2},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/08","on":{"eval":-821,"legal":0},"off":{"eval":-821,"legal":1},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/09","on":{"eval":-854,"legal":0},"off":{"eval":-854,"legal":1},"same":true}
+{"event":"eval","id":"blackhole/no-legal-loss/10","on":{"eval":-357,"legal":0},"off":{"eval":-357,"legal":2},"same":true}
+{"event":"child_eval","id":"pit/material-gain/02","move":"8h8f","good":true,"gain":7,"child":{"sfen":"2l5s/P6p1/1k5Gp/9/1n1L5/1r6N/R3SP3/2b5g/6K2 b b 31","holes":["2f"]},"on":{"eval":-2651,"legal":33},"off":{"eval":-2651,"legal":33}}
+{"event":"child_eval","id":"pit/material-gain/02","move":"8h8f+","good":true,"gain":7,"child":{"sfen":"2l5s/P6p1/1k5Gp/9/1n1L5/1+r6N/R3SP3/2b5g/6K2 b b 31","holes":["2f"]},"on":{"eval":-3046,"legal":33},"off":{"eval":-3046,"legal":33}}
+{"event":"child_eval","id":"pit/material-gain/02","move":"8e9g+","good":false,"gain":6,"child":{"sfen":"2l5s/P6p1/1k5Gp/9/3L5/1B6N/+n3SP3/1rb5g/6K2 b r 31","holes":["2f"]},"on":{"eval":-3216,"legal":36},"off":{"eval":-3216,"legal":36}}
+{"event":"child_eval","id":"pit/material-gain/03","move":"6f1a","good":true,"gain":7,"child":{"sfen":"1sl3RnB/2L5p/2k6/1b4G2/1gP6/9/1K5Sp/1N7/P8 w R 32","holes":["8b"]},"on":{"eval":-2528,"legal":21},"off":{"eval":-2528,"legal":23}}
+{"event":"child_eval","id":"pit/material-gain/03","move":"6f1a+","good":true,"gain":7,"child":{"sfen":"1sl3Rn+B/2L5p/2k6/1b4G2/1gP6/9/1K5Sp/1N7/P8 w R 32","holes":["8b"]},"on":{"eval":-2675,"legal":21},"off":{"eval":-2675,"legal":23}}
+{"event":"child_eval","id":"pit/material-gain/03","move":"3a7a+","good":false,"gain":0,"child":{"sfen":"1s+R4nr/2L5p/2k6/1b4G2/1gP6/3B5/1K5Sp/1N7/P8 w L 32","holes":["8b"]},"on":{"eval":-2020,"legal":18},"off":{"eval":-2020,"legal":19}}
+{"event":"child_eval","id":"pit/material-gain/04","move":"4f5g","good":true,"gain":10,"child":{"sfen":"6p2/7LR/3g2k2/9/BP2pG3/2ln5/bS2K4/1s4PN1/9 w R 44","holes":["6h"]},"on":{"eval":-2621,"legal":38},"off":{"eval":-2621,"legal":38}}
+{"event":"child_eval","id":"pit/material-gain/04","move":"1b1c+","good":false,"gain":null,"child":{"sfen":"6p2/7L1/3g2k1+R/9/BP2pG3/2ln1K3/bS2r4/1s4PN1/9 w - 44","holes":["6h"]},"on":{"eval":-1403,"legal":2},"off":{"eval":-1403,"legal":2}}
+{"event":"child_eval","id":"pit/material-gain/07","move":"5e5d","good":true,"gain":4,"child":{"sfen":"1k4B2/b7P/2p6/p1n1r2N1/3l5/9/1s3KG1P/4S1g2/5L3 b r 75","holes":["8e"]},"on":{"eval":-2332,"legal":31},"off":{"eval":-2332,"legal":31}}
+{"event":"child_eval","id":"pit/material-gain/07","move":"3h3g","good":false,"gain":0,"child":{"sfen":"1k4B2/b7P/2p6/p1n1R2N1/3lr4/9/1s3Kg1P/4S4/5L3 b g 75","holes":["8e"]},"on":{"eval":-1330,"legal":2},"off":{"eval":-1330,"legal":2}}
+{"event":"child_eval","id":"pit/material-gain/10","move":"3e4d","good":true,"gain":4,"child":{"sfen":"p1kl5/9/1S4GPB/5s3/1n7/1b6p/4R2L1/8r/P5K1g b n 99","holes":["6e"]},"on":{"eval":-1412,"legal":49},"off":{"eval":-1412,"legal":49}}
+{"event":"child_eval","id":"pit/material-gain/10","move":"8f7e","good":false,"gain":null,"child":{"sfen":"p1kl5/9/1S4GPB/5N3/1nb3s2/8p/4R2L1/8r/P5K1g b - 99","holes":["6e"]},"on":{"eval":-571,"legal":32},"off":{"eval":-571,"legal":32}}
+{"event":"child_eval","id":"pit/ray-blocking/01","move":"6h7f","good":true,"gain":6,"child":{"sfen":"7k1/9/9/9/R7r/2N6/9/9/1K7 w G 63","holes":["5e"]},"on":{"eval":-914,"legal":19},"off":{"eval":-914,"legal":24}}
+{"event":"child_eval","id":"pit/ray-blocking/01","move":"9e9a+","good":false,"gain":null,"child":{"sfen":"+R6k1/9/9/9/8r/2g6/9/3N5/1K7 w - 63","holes":["5e"]},"on":{"eval":30,"legal":3},"off":{"eval":30,"legal":3}}
+{"event":"child_eval","id":"pit/ray-blocking/04","move":"4h3f","good":true,"gain":6,"child":{"sfen":"1k7/9/9/9/r7R/6N2/9/9/7K1 w G 66","holes":["5e"]},"on":{"eval":-957,"legal":19},"off":{"eval":-957,"legal":24}}
+{"event":"child_eval","id":"pit/ray-blocking/04","move":"1e1a+","good":false,"gain":null,"child":{"sfen":"1k6+R/9/9/9/r8/6g2/9/5N3/7K1 w - 66","holes":["5e"]},"on":{"eval":-209,"legal":3},"off":{"eval":-209,"legal":3}}
+{"event":"child_eval","id":"pit/ray-blocking/06","move":"4b3d","good":true,"gain":6,"child":{"sfen":"7k1/9/9/6n2/R7r/9/9/9/1K7 b g 69","holes":["5e"]},"on":{"eval":-914,"legal":19},"off":{"eval":-914,"legal":24}}
+{"event":"child_eval","id":"pit/ray-blocking/06","move":"1e1i+","good":false,"gain":null,"child":{"sfen":"7k1/5n3/9/6G2/R8/9/9/9/1K6+r b - 69","holes":["5e"]},"on":{"eval":30,"legal":3},"off":{"eval":30,"legal":3}}
+{"event":"child_eval","id":"pit/ray-blocking/09","move":"6b7d","good":true,"gain":6,"child":{"sfen":"1k7/9/9/2n6/r7R/9/9/9/7K1 b g 72","holes":["5e"]},"on":{"eval":-957,"legal":19},"off":{"eval":-957,"legal":24}}
+{"event":"child_eval","id":"pit/ray-blocking/09","move":"9e9i+","good":false,"gain":null,"child":{"sfen":"1k7/3n5/9/2G6/8R/9/9/9/+r6K1 b - 72","holes":["5e"]},"on":{"eval":-209,"legal":3},"off":{"eval":-209,"legal":3}}
+{"event":"child_eval","id":"blackhole/material-gain/07","move":"8h9i+","good":true,"gain":4,"child":{"sfen":"9/6p2/2pkBPSs1/7r1/4G2n1/6P2/lL6g/9/+bK3R3 b n 101","holes":["9d","8d","7d","9e","8e","7e","9f","8f","7f"]},"on":{"eval":-8,"legal":2},"off":{"eval":-8,"legal":2}}
+{"event":"child_eval","id":"blackhole/material-gain/07","move":"8h5e+","good":false,"gain":-4,"child":{"sfen":"9/6p2/2pkBPSs1/7r1/4+b2n1/6P2/lL6g/9/NK3R3 b g 101","holes":["9d","8d","7d","9e","8e","7e","9f","8f","7f"]},"on":{"eval":-1450,"legal":44},"off":{"eval":-1450,"legal":58}}
+{"event":"child_eval","id":"blackhole/material-gain/09","move":"3h3i","good":true,"gain":5,"child":{"sfen":"1kB2p2S/8b/1P5r1/9/5p1Nl/1P2G4/1K4n2/1s5L1/6g2 b r 115","holes":["6g","5g","4g","6h","5h","4h","6i","5i","4i"]},"on":{"eval":-986,"legal":37},"off":{"eval":-986,"legal":38}}
+{"event":"child_eval","id":"blackhole/material-gain/09","move":"8a7a","good":false,"gain":2,"child":{"sfen":"2k2p2S/8b/1P5r1/9/5p1Nl/1P2G4/1K4n2/1s4gL1/6R2 b b 115","holes":["6g","5g","4g","6h","5h","4h","6i","5i","4i"]},"on":{"eval":-2269,"legal":24},"off":{"eval":-2269,"legal":31}}
+{"event":"child_eval","id":"blackhole/ray-blocking/01","move":"6h7f","good":true,"gain":6,"child":{"sfen":"7k1/9/9/9/R7r/2N6/9/9/1K7 w G 63","holes":["6d","5d","4d","6e","5e","4e","6f","5f","4f"]},"on":{"eval":-914,"legal":18},"off":{"eval":-914,"legal":24}}
+{"event":"child_eval","id":"blackhole/ray-blocking/01","move":"9e9a+","good":false,"gain":null,"child":{"sfen":"+R6k1/9/9/9/8r/2g6/9/3N5/1K7 w - 63","holes":["6d","5d","4d","6e","5e","4e","6f","5f","4f"]},"on":{"eval":30,"legal":3},"off":{"eval":30,"legal":3}}
+{"event":"child_eval","id":"blackhole/ray-blocking/04","move":"4h3f","good":true,"gain":6,"child":{"sfen":"1k7/9/9/9/r7R/6N2/9/9/7K1 w G 66","holes":["6d","5d","4d","6e","5e","4e","6f","5f","4f"]},"on":{"eval":-957,"legal":18},"off":{"eval":-957,"legal":24}}
+{"event":"child_eval","id":"blackhole/ray-blocking/04","move":"1e1a+","good":false,"gain":null,"child":{"sfen":"1k6+R/9/9/9/r8/6g2/9/5N3/7K1 w - 66","holes":["6d","5d","4d","6e","5e","4e","6f","5f","4f"]},"on":{"eval":-209,"legal":3},"off":{"eval":-209,"legal":3}}
+{"event":"child_eval","id":"blackhole/ray-blocking/06","move":"4b3d","good":true,"gain":6,"child":{"sfen":"7k1/9/9/6n2/R7r/9/9/9/1K7 b g 69","holes":["6d","5d","4d","6e","5e","4e","6f","5f","4f"]},"on":{"eval":-914,"legal":18},"off":{"eval":-914,"legal":24}}
+{"event":"child_eval","id":"blackhole/ray-blocking/06","move":"1e1i+","good":false,"gain":null,"child":{"sfen":"7k1/5n3/9/6G2/R8/9/9/9/1K6+r b - 69","holes":["6d","5d","4d","6e","5e","4e","6f","5f","4f"]},"on":{"eval":30,"legal":3},"off":{"eval":30,"legal":3}}
+{"event":"child_eval","id":"blackhole/ray-blocking/09","move":"6b7d","good":true,"gain":6,"child":{"sfen":"1k7/9/9/2n6/r7R/9/9/9/7K1 b g 72","holes":["6d","5d","4d","6e","5e","4e","6f","5f","4f"]},"on":{"eval":-957,"legal":18},"off":{"eval":-957,"legal":24}}
+{"event":"child_eval","id":"blackhole/ray-blocking/09","move":"9e9i+","good":false,"gain":null,"child":{"sfen":"1k7/3n5/9/2G6/8R/9/9/9/+r6K1 b - 72","holes":["6d","5d","4d","6e","5e","4e","6f","5f","4f"]},"on":{"eval":-209,"legal":3},"off":{"eval":-209,"legal":3}}

@@ -1,0 +1,249 @@
+[
+  {
+    "budget": 100,
+    "group": "all",
+    "pairs": 16,
+    "baseline": {
+      "correct": 1,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 106.13,
+      "meanActiveDepth": 5.38,
+      "meanActiveNodes": 3728.88
+    },
+    "candidate": {
+      "correct": 1,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 106.28,
+      "meanActiveDepth": 5.38,
+      "meanActiveNodes": 3478
+    },
+    "pairedGains": [],
+    "pairedLosses": []
+  },
+  {
+    "budget": 100,
+    "group": "material-gain",
+    "pairs": 8,
+    "baseline": {
+      "correct": 1,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 108.45,
+      "meanActiveDepth": 3.88,
+      "meanActiveNodes": 3253.12
+    },
+    "candidate": {
+      "correct": 1,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 108.41,
+      "meanActiveDepth": 3.75,
+      "meanActiveNodes": 2756
+    },
+    "pairedGains": [],
+    "pairedLosses": []
+  },
+  {
+    "budget": 100,
+    "group": "ray-blocking",
+    "pairs": 8,
+    "baseline": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 103.82,
+      "meanActiveDepth": 6.88,
+      "meanActiveNodes": 4204.62
+    },
+    "candidate": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 104.15,
+      "meanActiveDepth": 7,
+      "meanActiveNodes": 4200
+    },
+    "pairedGains": [],
+    "pairedLosses": []
+  },
+  {
+    "budget": 500,
+    "group": "all",
+    "pairs": 16,
+    "baseline": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 1,
+      "meanActiveWall": 515.59,
+      "meanActiveDepth": 6.75,
+      "meanActiveNodes": 21766.38
+    },
+    "candidate": {
+      "correct": 1,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 1,
+      "meanActiveWall": 511.03,
+      "meanActiveDepth": 7.12,
+      "meanActiveNodes": 20389.94
+    },
+    "pairedGains": [
+      "pit/material-gain/04"
+    ],
+    "pairedLosses": []
+  },
+  {
+    "budget": 500,
+    "group": "material-gain",
+    "pairs": 8,
+    "baseline": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 508.27,
+      "meanActiveDepth": 6.12,
+      "meanActiveNodes": 21092.75
+    },
+    "candidate": {
+      "correct": 1,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 1,
+      "meanActiveWall": 518.45,
+      "meanActiveDepth": 6.12,
+      "meanActiveNodes": 18258.5
+    },
+    "pairedGains": [
+      "pit/material-gain/04"
+    ],
+    "pairedLosses": []
+  },
+  {
+    "budget": 500,
+    "group": "ray-blocking",
+    "pairs": 8,
+    "baseline": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 1,
+      "meanActiveWall": 522.91,
+      "meanActiveDepth": 7.38,
+      "meanActiveNodes": 22440
+    },
+    "candidate": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 503.6,
+      "meanActiveDepth": 8.12,
+      "meanActiveNodes": 22521.38
+    },
+    "pairedGains": [],
+    "pairedLosses": []
+  },
+  {
+    "budget": 1500,
+    "group": "all",
+    "pairs": 16,
+    "baseline": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 1505.46,
+      "meanActiveDepth": 8.31,
+      "meanActiveNodes": 106518.69
+    },
+    "candidate": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 1507.09,
+      "meanActiveDepth": 8.5,
+      "meanActiveNodes": 89658.81
+    },
+    "pairedGains": [],
+    "pairedLosses": []
+  },
+  {
+    "budget": 1500,
+    "group": "material-gain",
+    "pairs": 8,
+    "baseline": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 1504.17,
+      "meanActiveDepth": 7.5,
+      "meanActiveNodes": 94605.38
+    },
+    "candidate": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 1508.89,
+      "meanActiveDepth": 7.38,
+      "meanActiveNodes": 72742.25
+    },
+    "pairedGains": [],
+    "pairedLosses": []
+  },
+  {
+    "budget": 1500,
+    "group": "ray-blocking",
+    "pairs": 8,
+    "baseline": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 1506.75,
+      "meanActiveDepth": 9.12,
+      "meanActiveNodes": 118432
+    },
+    "candidate": {
+      "correct": 0,
+      "illegal": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "overBudget50": 0,
+      "meanActiveWall": 1505.29,
+      "meanActiveDepth": 9.62,
+      "meanActiveNodes": 106575.38
+    },
+    "pairedGains": [],
+    "pairedLosses": []
+  }
+]

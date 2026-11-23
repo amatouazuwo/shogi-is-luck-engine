@@ -1,0 +1,54 @@
+{
+  "package": "rsshogi-nnue-mini-obstacle-tactical-guard",
+  "upstream_engine": {
+    "repository": "https://github.com/nyoki-mtl/rsshogi-nnue-mini",
+    "version": "0.4.0",
+    "revision": "4849e647deefed535d0902f80dccec21458dc79f"
+  },
+  "upstream_rules": {
+    "repository": "https://github.com/nyoki-mtl/rsshogi",
+    "version": "1.7.2",
+    "revision": "fb28c7cee94883a01d5ce43000be998138f95cc3"
+  },
+  "upstream_usi_version": "0.2.0",
+  "modifications": [
+    "Impassable squares in position, move generation, attacks, and mate search",
+    "Obstacle SFEN and legal-move JSON commands, transposition separation, and obstacle terminal scoring",
+    "Separate worker that supplies obstacle squares with the root position",
+    "Bounded obstacle-only root defense after proving loss for the incumbent"
+  ],
+  "rust_version": "1.95.0",
+  "target": "wasm32-unknown-unknown",
+  "cargo_features": [
+    "c-api",
+    "embedded-rsnn"
+  ],
+  "threads": 1,
+  "official_sdk_zip_sha256": "3d05b85949f5ae3bce3cef1f0678a3aeb31d9e8f935565bcc09da63bb19dd1d1",
+  "official_wasm_sha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+  "embedded_rsnn_sha256": "787739972eabb5a1c42c471d178ac0c97b688dce35c72b4291e7e1eeefa9786f",
+  "cargo_lock_sha256": "bf15328418b8905025a0fdffc1779533796479fdb1ba6bbc3cc6523a1e1eef95",
+  "patch_repository": "https://github.com/amatouazuwo/shogi-is-luck-engine",
+  "source_patches_sha256": {
+    "obstacle-engine.patch": "f8c433568dd6c85979a2fa98a7f24f16caf15650d236a9c8bb6dafb391ddc009",
+    "obstacle-rules.patch": "e686a50abafc4e623fc245e874f1a3a0c2c002c5c0fea4c7f751824545b5fecc"
+  },
+  "artifacts_sha256": {
+    "LICENSE": "0278bba6abd19e4cf6b11a93e793c990356161cb7708155ba44b82b3e567eb79",
+    "THIRD-PARTY-NOTICES.txt": "3aeb24cce57478797feeb6e4c6f895dfa442ac43c4f80a02bd81dac10c46d1fb",
+    "mini.js": "112294de3bbd5ee315a81da86a6aa85ab8e55725e13bca5f5b8e8268ba7306b1",
+    "package.json": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8",
+    "rsshogi_nnue_mini.wasm": "b2844b1baac9b68400af08d6354dd15ecf26d85a34036adb9bf0df39aab634bb",
+    "worker.js": "511bad73c72b05bf86b424a3e6b165e0e7c71b7c0c77d11d0c7edfacbe4bc986"
+  },
+  "patch_revision": "ae8d8effdb04b6b0e9f1a73a03cfafbd41843e67",
+  "candidate": {
+    "patch": "obstacle-tactical-guard.patch",
+    "patch_sha256": "cbf4ae3fbfb2dd37ddd453704f9f912a764a62c2675af303d67d7ba27d92f068",
+    "scope": "timed obstacle searches only, with no separate node limit and negative evaluation of at least 1,000 engine units",
+    "worker_reserve_ms": "min(24, floor(movetime_ms / 8)), minimum advertised search 80 ms",
+    "horizon_plies": 5,
+    "probe_node_cap": 12000,
+    "proof": "checks and near-king captures for the attacker, complete legal replies for the defender, and native mate-in-one at the leaf"
+  }
+}

@@ -1,0 +1,263 @@
+{
+  "groups": [
+    {
+      "budget": 100,
+      "kind": "blackhole",
+      "games": 4,
+      "sente": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "gote": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "total": [
+        4,
+        0,
+        0,
+        0
+      ],
+      "reasons": {
+        "mate": 4
+      },
+      "timeouts": {},
+      "nnue": {
+        "count": 124,
+        "meanDepth": 4.76,
+        "meanNodes": 7551.88,
+        "meanWallMs": 107.7,
+        "overRequestedPlus50": 2,
+        "above50Ms": 112.78
+      },
+      "reference": {
+        "count": 122,
+        "meanDepth": 3.51,
+        "meanNodes": 49905.89,
+        "meanWallMs": 96.65,
+        "overRequestedPlus50": 1,
+        "above50Ms": 52.71
+      }
+    },
+    {
+      "budget": 100,
+      "kind": "pit",
+      "games": 4,
+      "sente": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "gote": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "total": [
+        3,
+        1,
+        0,
+        0
+      ],
+      "reasons": {
+        "mate": 4
+      },
+      "timeouts": {},
+      "nnue": {
+        "count": 77,
+        "meanDepth": 4.81,
+        "meanNodes": 6696.09,
+        "meanWallMs": 110.04,
+        "overRequestedPlus50": 2,
+        "above50Ms": 260.04
+      },
+      "reference": {
+        "count": 76,
+        "meanDepth": 3.51,
+        "meanNodes": 36743.71,
+        "meanWallMs": 90.96,
+        "overRequestedPlus50": 0,
+        "above50Ms": 4.41
+      }
+    },
+    {
+      "budget": 500,
+      "kind": "blackhole",
+      "games": 4,
+      "sente": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "gote": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "total": [
+        3,
+        1,
+        0,
+        0
+      ],
+      "reasons": {
+        "mate": 4
+      },
+      "timeouts": {},
+      "nnue": {
+        "count": 93,
+        "meanDepth": 7.3,
+        "meanNodes": 58210.86,
+        "meanWallMs": 503.61,
+        "overRequestedPlus50": 0,
+        "above50Ms": 34.11
+      },
+      "reference": {
+        "count": 92,
+        "meanDepth": 5.07,
+        "meanNodes": 290610.52,
+        "meanWallMs": 448.33,
+        "overRequestedPlus50": 0,
+        "above50Ms": 35.28
+      }
+    },
+    {
+      "budget": 500,
+      "kind": "pit",
+      "games": 4,
+      "sente": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "gote": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "total": [
+        3,
+        1,
+        0,
+        0
+      ],
+      "reasons": {
+        "mate": 4
+      },
+      "timeouts": {},
+      "nnue": {
+        "count": 160,
+        "meanDepth": 5.96,
+        "meanNodes": 51597.07,
+        "meanWallMs": 504.85,
+        "overRequestedPlus50": 1,
+        "above50Ms": 60.67
+      },
+      "reference": {
+        "count": 159,
+        "meanDepth": 4.22,
+        "meanNodes": 286836.37,
+        "meanWallMs": 469.4,
+        "overRequestedPlus50": 0,
+        "above50Ms": 32.76
+      }
+    },
+    {
+      "budget": 1500,
+      "kind": "blackhole",
+      "games": 4,
+      "sente": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "gote": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "total": [
+        3,
+        1,
+        0,
+        0
+      ],
+      "reasons": {
+        "mate": 4
+      },
+      "timeouts": {},
+      "nnue": {
+        "count": 116,
+        "meanDepth": 8.92,
+        "meanNodes": 238926.9,
+        "meanWallMs": 1503.67,
+        "overRequestedPlus50": 0,
+        "above50Ms": 14.72
+      },
+      "reference": {
+        "count": 115,
+        "meanDepth": 5.51,
+        "meanNodes": 868263.59,
+        "meanWallMs": 1340.4,
+        "overRequestedPlus50": 0,
+        "above50Ms": 12.83
+      }
+    },
+    {
+      "budget": 1500,
+      "kind": "pit",
+      "games": 4,
+      "sente": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "gote": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "total": [
+        3,
+        1,
+        0,
+        0
+      ],
+      "reasons": {
+        "mate": 4
+      },
+      "timeouts": {},
+      "nnue": {
+        "count": 89,
+        "meanDepth": 8.49,
+        "meanNodes": 218541.36,
+        "meanWallMs": 1503.57,
+        "overRequestedPlus50": 0,
+        "above50Ms": 14.29
+      },
+      "reference": {
+        "count": 88,
+        "meanDepth": 5.23,
+        "meanNodes": 816483.6,
+        "meanWallMs": 1328.43,
+        "overRequestedPlus50": 2,
+        "above50Ms": 67.81
+      }
+    }
+  ],
+  "unpaired": []
+}

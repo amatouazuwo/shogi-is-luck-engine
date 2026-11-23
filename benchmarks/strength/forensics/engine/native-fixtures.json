@@ -1,0 +1,116 @@
+[
+  {
+    "id": "pit/material-gain/02",
+    "sfen": "2l5s/P6p1/1k5Gp/9/1n1L5/1B6N/R3SP3/1rb5g/6K2 w - 30",
+    "holes": [
+      "2f"
+    ],
+    "good": [
+      "8h8f",
+      "8h8f+"
+    ],
+    "observed": "8e9g+"
+  },
+  {
+    "id": "pit/material-gain/03",
+    "sfen": "1sl3Rnr/2L5p/2k6/1b4G2/1gP6/3B5/1K5Sp/1N7/P8 b - 31",
+    "holes": [
+      "8b"
+    ],
+    "good": [
+      "6f1a",
+      "6f1a+"
+    ],
+    "observed": "3a7a+"
+  },
+  {
+    "id": "pit/material-gain/04",
+    "sfen": "6p2/7LR/3g2k2/9/BP2pG3/2ln1K3/bS2r4/1s4PN1/9 b - 43",
+    "holes": [
+      "6h"
+    ],
+    "good": [
+      "4f5g"
+    ],
+    "observed": "1b1c+"
+  },
+  {
+    "id": "pit/material-gain/07",
+    "sfen": "1k4B2/b7P/2p6/p1n1R2N1/3lr4/9/1s3KG1P/4S1g2/5L3 w - 74",
+    "holes": [
+      "8e"
+    ],
+    "good": [
+      "5e5d"
+    ],
+    "observed": "3h3g"
+  },
+  {
+    "id": "pit/material-gain/10",
+    "sfen": "p1kl5/9/1S4GPB/5N3/1n4s2/1b6p/4R2L1/8r/P5K1g w - 98",
+    "holes": [
+      "6e"
+    ],
+    "good": [
+      "3e4d"
+    ],
+    "observed": "8f7e"
+  },
+  {
+    "id": "blackhole/material-gain/07",
+    "sfen": "9/6p2/2pkBPSs1/7r1/4G2n1/6P2/lL6g/1b7/NK3R3 w - 100",
+    "holes": [
+      "9d",
+      "8d",
+      "7d",
+      "9e",
+      "8e",
+      "7e",
+      "9f",
+      "8f",
+      "7f"
+    ],
+    "good": [
+      "8h9i+"
+    ],
+    "observed": "8h5e+"
+  },
+  {
+    "id": "blackhole/material-gain/09",
+    "sfen": "1kB2p2S/8b/1P5r1/9/5p1Nl/1P2G4/1K4n2/1s4gL1/6R2 w - 114",
+    "holes": [
+      "6g",
+      "5g",
+      "4g",
+      "6h",
+      "5h",
+      "4h",
+      "6i",
+      "5i",
+      "4i"
+    ],
+    "good": [
+      "3h3i"
+    ],
+    "observed": "8a7a"
+  },
+  {
+    "id": "blackhole/ray-blocking/01",
+    "sfen": "7k1/9/9/9/R7r/2g6/9/3N5/1K7 b - 62",
+    "holes": [
+      "6d",
+      "5d",
+      "4d",
+      "6e",
+      "5e",
+      "4e",
+      "6f",
+      "5f",
+      "4f"
+    ],
+    "good": [
+      "6h7f"
+    ],
+    "observed": "9e9a+"
+  }
+]

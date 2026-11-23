@@ -1,0 +1,154 @@
+--- a/src/eval.rs
++++ b/src/eval.rs
+@@ -1,4 +1,5 @@
+ mod nnue;
++mod obstacles;
+ 
+ use std::sync::Arc;
+ 
+@@ -50,7 +51,16 @@
+     /// 探索中の局面を評価する。NNUEでは`initialize`後の`advance`/`undo`と対応していること。
+     pub(crate) fn evaluate(&mut self, position: &Position) -> i32 {
+         match &mut self.nnue {
+-            Some(nnue) => nnue.stack.evaluate(&nnue.network, position),
++            Some(nnue) => {
++                let score = nnue.stack.evaluate(&nnue.network, position);
++                let holes = position.obstacle_mask();
++                if holes.is_empty() {
++                    score
++                } else {
++                    (score + obstacles::adjustment(position, holes))
++                        .clamp(-MAX_NNUE_EVAL, MAX_NNUE_EVAL)
++                }
++            }
+             None => evaluate_material(position, self.params),
+         }
+     }
+--- /dev/null
++++ b/src/eval/obstacles.rs
+@@ -0,0 +1,125 @@
++use rsshogi::board::Position;
++use rsshogi::board::attack_tables::{KING_ATTACKS, bishop_attacks, lance_attacks, rook_attacks};
++use rsshogi::types::{Bitboard, Color, PieceType, Square};
++
++const MAX_ADJUSTMENT: i32 = 160;
++
++/// The embedded ordinary-shogi network receives pieces and hands only. Correct for
++/// sliding reach and king escape squares that the obstacle mask actually removes.
++pub(super) fn adjustment(position: &Position, holes: Bitboard) -> i32 {
++    let occupied = position.pieces();
++    let black = restriction(position, Color::BLACK, occupied, holes);
++    let white = restriction(position, Color::WHITE, occupied, holes);
++    let score = if position.turn() == Color::BLACK {
++        white - black
++    } else {
++        black - white
++    };
++    score.clamp(-MAX_ADJUSTMENT, MAX_ADJUSTMENT)
++}
++
++fn restriction(position: &Position, side: Color, occupied: Bitboard, holes: Bitboard) -> i32 {
++    let ours = position.pieces_by_color(side);
++    let sliders = position.bitboards();
++    let blocked = occupied | holes;
++    let target_king = position.king_square(side.flip());
++    let target_zone = if target_king.is_none() {
++        Bitboard::EMPTY
++    } else {
++        KING_ATTACKS[target_king] | Bitboard::from_square(target_king)
++    };
++    let mut penalty = 0;
++    for square in (sliders.rook_dragon() & ours).iter() {
++        let open = rook_attacks(square, occupied);
++        if open.intersects(holes) {
++            let restricted = rook_attacks(square, blocked).and_not(holes);
++            penalty += slider_penalty(open.and_not(restricted | ours), target_zone, 7);
++        }
++    }
++    for square in (sliders.bishop_horse() & ours).iter() {
++        let open = bishop_attacks(square, occupied);
++        if open.intersects(holes) {
++            let restricted = bishop_attacks(square, blocked).and_not(holes);
++            penalty += slider_penalty(open.and_not(restricted | ours), target_zone, 7);
++        }
++    }
++    for square in position.pieces_for(PieceType::LANCE, side).iter() {
++        let open = lance_attacks(square, occupied, side);
++        if open.intersects(holes) {
++            let restricted = lance_attacks(square, blocked, side).and_not(holes);
++            penalty += slider_penalty(open.and_not(restricted | ours), target_zone, 4);
++        }
++    }
++    penalty + escape_penalty(position, side, occupied, ours, holes)
++}
++
++fn slider_penalty(lost: Bitboard, target_zone: Bitboard, mobility: i32) -> i32 {
++    lost.count() as i32 * mobility + (lost & target_zone).count() as i32 * 14
++}
++
++fn escape_penalty(
++    position: &Position,
++    side: Color,
++    occupied: Bitboard,
++    ours: Bitboard,
++    holes: Bitboard,
++) -> i32 {
++    let king = position.king_square(side);
++    if king.is_none() {
++        return 0;
++    }
++    let neighbors = KING_ATTACKS[king];
++    let closed = neighbors & holes;
++    if closed.is_empty() {
++        return 0;
++    }
++    let without_king = occupied.and_not(Bitboard::from_square(king));
++    let target_safe =
++        |square: Square| !position.is_attacked_by_color(side.flip(), square, without_king);
++    let safe_but_closed = closed
++        .into_iter()
++        .filter(|&square| target_safe(square))
++        .count() as i32;
++    if safe_but_closed == 0 {
++        return 0;
++    }
++    let open = neighbors.and_not(ours | holes);
++    let remaining = open
++        .into_iter()
++        .filter(|&square| target_safe(square))
++        .count() as i32;
++    14 * safe_but_closed + (2 - remaining).max(0) * 18
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use rsshogi::board;
++
++    fn score(sfen: &str, squares: &[&str]) -> i32 {
++        board::init();
++        let mut position = board::position_from_sfen(sfen).unwrap();
++        let mut holes = Bitboard::EMPTY;
++        for square in squares {
++            holes.set(Square::from_usi(square).unwrap());
++        }
++        assert!(position.set_obstacle_mask(holes));
++        adjustment(&position, holes)
++    }
++
++    #[test]
++    fn blocker_discounts_a_rook_ray() {
++        assert_eq!(score("k8/9/9/9/9/9/4R4/9/8K b - 1", &[]), 0);
++        let opening = score("k8/9/9/9/9/9/4R4/9/8K b - 1", &["5e"]);
++        assert!(opening < 0);
++        assert_eq!(score("k8/9/9/9/9/9/4R4/9/8K w - 1", &["5e"]), -opening);
++    }
++
++    #[test]
++    fn blocked_safe_king_escape_squares_penalize_the_restricted_side() {
++        let frozen = score("k8/9/9/9/9/9/9/9/8K b - 1", &["8a", "8b", "9b"]);
++        assert!(frozen > 50);
++        let one_closed = score("k8/9/9/9/9/9/9/9/8K b - 1", &["8a"]);
++        assert!(one_closed > 0 && one_closed < frozen);
++    }
++}

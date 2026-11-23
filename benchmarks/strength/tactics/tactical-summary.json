@@ -1,0 +1,1135 @@
+{
+  "analyses": [
+    {
+      "id": "primary",
+      "config": {
+        "event": "config",
+        "wasmSha256": "0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108",
+        "workerSha256": "fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2",
+        "corpusSha256": "86a44f84a928b506ca6d82e21d5bab63d7d5e26a9316ad9961b67a1b270e31bc",
+        "positions": 100,
+        "budgets": [
+          100,
+          500,
+          1500
+        ],
+        "seed": 286325,
+        "hash_mb": 16,
+        "threads": 1,
+        "deadlineExtraMs": 1750,
+        "note": "Actual archived browser worker under Node worker_threads; prepared warm. No test publishes requests or runs a Render service."
+      },
+      "proof": {
+        "event": "oracle-verification",
+        "corpusSha256": "86a44f84a928b506ca6d82e21d5bab63d7d5e26a9316ad9961b67a1b270e31bc",
+        "referenceSha256": "ec54fbca6e1d399e2ed1103f237ba6877e86db4f24ccf327f2972786ec298822",
+        "positions": 100,
+        "checks": {
+          "legal": 281,
+          "mate": 80
+        },
+        "moveSetDifferences": 0,
+        "labelDifferences": 0,
+        "verifiedChecks": true
+      },
+      "budgets": {
+        "100": {
+          "all": {
+            "count": 100,
+            "correct": 85,
+            "active": 80,
+            "activeCorrect": 65,
+            "meanWallMs": 109.47138291249996,
+            "meanDepth": 11.15,
+            "meanNodes": 11947.7875,
+            "illegal": 0,
+            "unexpectedResignation": 0,
+            "errors": 0,
+            "timeout": 0,
+            "overBudgetBy50": 0,
+            "throttled": 11,
+            "maxWallMs": 139.63889800000015
+          },
+          "strata": {
+            "pit/evade-forced-win": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 110.07691089999985,
+              "meanDepth": 14.3,
+              "meanNodes": 11298,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 2,
+              "maxWallMs": 133.12694199999987
+            },
+            "pit/material-gain": {
+              "count": 10,
+              "correct": 5,
+              "active": 10,
+              "activeCorrect": 5,
+              "meanWallMs": 114.28933230000014,
+              "meanDepth": 6.1,
+              "meanNodes": 6958.8,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 2,
+              "maxWallMs": 139.63889800000015
+            },
+            "pit/mate-in-one": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 110.9506812,
+              "meanDepth": 14,
+              "meanNodes": 17789.6,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 2,
+              "maxWallMs": 130.91386899999998
+            },
+            "blackhole/material-gain": {
+              "count": 10,
+              "correct": 8,
+              "active": 10,
+              "activeCorrect": 8,
+              "meanWallMs": 107.60436759999989,
+              "meanDepth": 6.6,
+              "meanNodes": 8785.4,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 1,
+              "maxWallMs": 109.07528000000002
+            },
+            "pit/ray-blocking": {
+              "count": 10,
+              "correct": 6,
+              "active": 10,
+              "activeCorrect": 6,
+              "meanWallMs": 109.58120310000008,
+              "meanDepth": 6.8,
+              "meanNodes": 7807.1,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 0,
+              "maxWallMs": 120.81310099999973
+            },
+            "blackhole/no-legal-loss": {
+              "count": 10,
+              "correct": 10,
+              "active": 0,
+              "activeCorrect": 0,
+              "meanWallMs": null,
+              "meanDepth": null,
+              "meanNodes": null,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 1,
+              "maxWallMs": 10.58804499999951
+            },
+            "blackhole/evade-forced-win": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 108.39525120000008,
+              "meanDepth": 18.7,
+              "meanNodes": 14927.3,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 1,
+              "maxWallMs": 111.54603700000007
+            },
+            "pit/no-legal-loss": {
+              "count": 10,
+              "correct": 10,
+              "active": 0,
+              "activeCorrect": 0,
+              "meanWallMs": null,
+              "meanDepth": null,
+              "meanNodes": null,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 0,
+              "maxWallMs": 9.774316999999428
+            },
+            "blackhole/mate-in-one": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 106.43931669999992,
+              "meanDepth": 16,
+              "meanNodes": 20449.5,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 2,
+              "maxWallMs": 107.81222800000023
+            },
+            "blackhole/ray-blocking": {
+              "count": 10,
+              "correct": 6,
+              "active": 10,
+              "activeCorrect": 6,
+              "meanWallMs": 108.4340002999998,
+              "meanDepth": 6.7,
+              "meanNodes": 7566.6,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 0,
+              "maxWallMs": 110.79865000000018
+            }
+          }
+        },
+        "500": {
+          "all": {
+            "count": 100,
+            "correct": 84,
+            "active": 80,
+            "activeCorrect": 64,
+            "meanWallMs": 511.558272125,
+            "meanDepth": 13.9125,
+            "meanNodes": 60605.5375,
+            "illegal": 0,
+            "unexpectedResignation": 0,
+            "errors": 0,
+            "timeout": 0,
+            "overBudgetBy50": 0,
+            "throttled": 56,
+            "maxWallMs": 528.2277240000003
+          },
+          "strata": {
+            "pit/ray-blocking": {
+              "count": 10,
+              "correct": 6,
+              "active": 10,
+              "activeCorrect": 6,
+              "meanWallMs": 512.235960399999,
+              "meanDepth": 8.1,
+              "meanNodes": 44993.2,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 8,
+              "maxWallMs": 517.0641570000007
+            },
+            "pit/mate-in-one": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 510.8610117000004,
+              "meanDepth": 16.9,
+              "meanNodes": 73036.6,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 8,
+              "maxWallMs": 515.0230159999992
+            },
+            "blackhole/material-gain": {
+              "count": 10,
+              "correct": 7,
+              "active": 10,
+              "activeCorrect": 7,
+              "meanWallMs": 512.4629738999993,
+              "meanDepth": 7.5,
+              "meanNodes": 40183.7,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 7,
+              "maxWallMs": 516.017955999996
+            },
+            "blackhole/ray-blocking": {
+              "count": 10,
+              "correct": 6,
+              "active": 10,
+              "activeCorrect": 6,
+              "meanWallMs": 513.5485560999999,
+              "meanDepth": 8.1,
+              "meanNodes": 44507.2,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 6,
+              "maxWallMs": 528.2277240000003
+            },
+            "blackhole/no-legal-loss": {
+              "count": 10,
+              "correct": 10,
+              "active": 0,
+              "activeCorrect": 0,
+              "meanWallMs": null,
+              "meanDepth": null,
+              "meanNodes": null,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 1,
+              "maxWallMs": 11.296899000000849
+            },
+            "blackhole/evade-forced-win": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 510.2210261000002,
+              "meanDepth": 21.7,
+              "meanNodes": 59183.5,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 5,
+              "maxWallMs": 513.8419869999998
+            },
+            "pit/material-gain": {
+              "count": 10,
+              "correct": 5,
+              "active": 10,
+              "activeCorrect": 5,
+              "meanWallMs": 513.6642126000008,
+              "meanDepth": 8,
+              "meanNodes": 41067.9,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 9,
+              "maxWallMs": 522.0293149999998
+            },
+            "blackhole/mate-in-one": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 510.010278500001,
+              "meanDepth": 21,
+              "meanNodes": 109395.6,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 8,
+              "maxWallMs": 514.8678790000013
+            },
+            "pit/no-legal-loss": {
+              "count": 10,
+              "correct": 10,
+              "active": 0,
+              "activeCorrect": 0,
+              "meanWallMs": null,
+              "meanDepth": null,
+              "meanNodes": null,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 0,
+              "maxWallMs": 11.214455999997881
+            },
+            "pit/evade-forced-win": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 509.46215769999947,
+              "meanDepth": 20,
+              "meanNodes": 72476.6,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 4,
+              "maxWallMs": 511.936732999995
+            }
+          }
+        },
+        "1500": {
+          "all": {
+            "count": 100,
+            "correct": 84,
+            "active": 80,
+            "activeCorrect": 64,
+            "meanWallMs": 1513.3769019124973,
+            "meanDepth": 15.375,
+            "meanNodes": 164400.175,
+            "illegal": 0,
+            "unexpectedResignation": 0,
+            "errors": 0,
+            "timeout": 0,
+            "overBudgetBy50": 1,
+            "throttled": 72,
+            "maxWallMs": 1598.7178549999953
+          },
+          "strata": {
+            "blackhole/mate-in-one": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 1520.1456706999961,
+              "meanDepth": 23.6,
+              "meanNodes": 274911.3,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 1,
+              "throttled": 9,
+              "maxWallMs": 1598.7178549999953
+            },
+            "blackhole/ray-blocking": {
+              "count": 10,
+              "correct": 6,
+              "active": 10,
+              "activeCorrect": 6,
+              "meanWallMs": 1510.7822475999965,
+              "meanDepth": 9.3,
+              "meanNodes": 127650.7,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 9,
+              "maxWallMs": 1513.8144509999984
+            },
+            "pit/evade-forced-win": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 1512.9906636999956,
+              "meanDepth": 21.1,
+              "meanNodes": 177903.4,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 10,
+              "maxWallMs": 1527.7109959999943
+            },
+            "blackhole/material-gain": {
+              "count": 10,
+              "correct": 7,
+              "active": 10,
+              "activeCorrect": 7,
+              "meanWallMs": 1515.9128549999994,
+              "meanDepth": 8.4,
+              "meanNodes": 117391,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 8,
+              "maxWallMs": 1542.884435999993
+            },
+            "pit/material-gain": {
+              "count": 10,
+              "correct": 5,
+              "active": 10,
+              "activeCorrect": 5,
+              "meanWallMs": 1511.5981108999963,
+              "meanDepth": 9.4,
+              "meanNodes": 125977.7,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 9,
+              "maxWallMs": 1517.5154970000003
+            },
+            "pit/ray-blocking": {
+              "count": 10,
+              "correct": 6,
+              "active": 10,
+              "activeCorrect": 6,
+              "meanWallMs": 1511.7050499000004,
+              "meanDepth": 8.9,
+              "meanNodes": 126148.6,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 8,
+              "maxWallMs": 1514.5590840000077
+            },
+            "pit/no-legal-loss": {
+              "count": 10,
+              "correct": 10,
+              "active": 0,
+              "activeCorrect": 0,
+              "meanWallMs": null,
+              "meanDepth": null,
+              "meanNodes": null,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 0,
+              "maxWallMs": 14.076830999998492
+            },
+            "blackhole/no-legal-loss": {
+              "count": 10,
+              "correct": 10,
+              "active": 0,
+              "activeCorrect": 0,
+              "meanWallMs": null,
+              "meanDepth": null,
+              "meanNodes": null,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 0,
+              "maxWallMs": 14.229342000006
+            },
+            "blackhole/evade-forced-win": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 1511.3814728999946,
+              "meanDepth": 23.7,
+              "meanNodes": 173932,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 10,
+              "maxWallMs": 1515.5169049999968
+            },
+            "pit/mate-in-one": {
+              "count": 10,
+              "correct": 10,
+              "active": 10,
+              "activeCorrect": 10,
+              "meanWallMs": 1512.4991445999985,
+              "meanDepth": 18.6,
+              "meanNodes": 191286.7,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 9,
+              "maxWallMs": 1514.7192490000016
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "evasion",
+      "config": {
+        "event": "config",
+        "wasmSha256": "0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108",
+        "workerSha256": "fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2",
+        "corpusSha256": "e2d7707d605bd2596c711da405547a71fac5d542ba30b7e305a30d19fdb225aa",
+        "positions": 16,
+        "budgets": [
+          100,
+          500,
+          1500
+        ],
+        "seed": 286325,
+        "hash_mb": 16,
+        "threads": 1,
+        "deadlineExtraMs": 1750,
+        "note": "Actual archived browser worker under Node worker_threads; prepared warm. No test publishes requests or runs a Render service."
+      },
+      "proof": {
+        "event": "oracle-verification",
+        "corpusSha256": "e2d7707d605bd2596c711da405547a71fac5d542ba30b7e305a30d19fdb225aa",
+        "referenceSha256": "ec54fbca6e1d399e2ed1103f237ba6877e86db4f24ccf327f2972786ec298822",
+        "positions": 16,
+        "checks": {
+          "legal": 16,
+          "mate": 94
+        },
+        "moveSetDifferences": 0,
+        "labelDifferences": 0,
+        "verifiedChecks": true
+      },
+      "budgets": {
+        "100": {
+          "all": {
+            "count": 16,
+            "correct": 16,
+            "active": 16,
+            "activeCorrect": 16,
+            "meanWallMs": 119.00922181249997,
+            "meanDepth": 5.75,
+            "meanNodes": 3010.375,
+            "illegal": 0,
+            "unexpectedResignation": 0,
+            "errors": 0,
+            "timeout": 0,
+            "overBudgetBy50": 1,
+            "throttled": 16,
+            "maxWallMs": 162.01142099999993
+          },
+          "strata": {
+            "pit/evade-forced-win": {
+              "count": 8,
+              "correct": 8,
+              "active": 8,
+              "activeCorrect": 8,
+              "meanWallMs": 119.42589475000003,
+              "meanDepth": 6.125,
+              "meanNodes": 2768.375,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 1,
+              "throttled": 8,
+              "maxWallMs": 162.01142099999993
+            },
+            "blackhole/evade-forced-win": {
+              "count": 8,
+              "correct": 8,
+              "active": 8,
+              "activeCorrect": 8,
+              "meanWallMs": 118.59254887499992,
+              "meanDepth": 5.375,
+              "meanNodes": 3252.375,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 8,
+              "maxWallMs": 144.59886599999982
+            }
+          }
+        },
+        "500": {
+          "all": {
+            "count": 16,
+            "correct": 16,
+            "active": 16,
+            "activeCorrect": 16,
+            "meanWallMs": 529.2926636875,
+            "meanDepth": 8,
+            "meanNodes": 22682.9375,
+            "illegal": 0,
+            "unexpectedResignation": 0,
+            "errors": 0,
+            "timeout": 0,
+            "overBudgetBy50": 3,
+            "throttled": 16,
+            "maxWallMs": 591.9976630000001
+          },
+          "strata": {
+            "pit/evade-forced-win": {
+              "count": 8,
+              "correct": 8,
+              "active": 8,
+              "activeCorrect": 8,
+              "meanWallMs": 526.3350696250002,
+              "meanDepth": 9.125,
+              "meanNodes": 23171.125,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 1,
+              "throttled": 8,
+              "maxWallMs": 591.9976630000001
+            },
+            "blackhole/evade-forced-win": {
+              "count": 8,
+              "correct": 8,
+              "active": 8,
+              "activeCorrect": 8,
+              "meanWallMs": 532.25025775,
+              "meanDepth": 6.875,
+              "meanNodes": 22194.75,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 2,
+              "throttled": 8,
+              "maxWallMs": 585.6130349999994
+            }
+          }
+        },
+        "1500": {
+          "all": {
+            "count": 16,
+            "correct": 16,
+            "active": 16,
+            "activeCorrect": 16,
+            "meanWallMs": 1522.1404638750007,
+            "meanDepth": 9.9375,
+            "meanNodes": 90126.5,
+            "illegal": 0,
+            "unexpectedResignation": 0,
+            "errors": 0,
+            "timeout": 0,
+            "overBudgetBy50": 2,
+            "throttled": 16,
+            "maxWallMs": 1565.8225760000023
+          },
+          "strata": {
+            "pit/evade-forced-win": {
+              "count": 8,
+              "correct": 8,
+              "active": 8,
+              "activeCorrect": 8,
+              "meanWallMs": 1516.8076178750007,
+              "meanDepth": 11.75,
+              "meanNodes": 95328,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 8,
+              "maxWallMs": 1547.3221940000003
+            },
+            "blackhole/evade-forced-win": {
+              "count": 8,
+              "correct": 8,
+              "active": 8,
+              "activeCorrect": 8,
+              "meanWallMs": 1527.473309875001,
+              "meanDepth": 8.125,
+              "meanNodes": 84925,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 2,
+              "throttled": 8,
+              "maxWallMs": 1565.8225760000023
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "mate-in-three",
+      "config": {
+        "event": "config",
+        "wasmSha256": "0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108",
+        "workerSha256": "fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2",
+        "corpusSha256": "a8a9d6c7cf33863e8c06cfdff921feef5fe6a9ccfd8e20b32312fb536cf91a66",
+        "positions": 12,
+        "budgets": [
+          100,
+          500,
+          1500
+        ],
+        "seed": 286325,
+        "hash_mb": 16,
+        "threads": 1,
+        "deadlineExtraMs": 1750,
+        "note": "Actual archived browser worker under Node worker_threads; prepared warm. No test publishes requests or runs a Render service."
+      },
+      "proof": {
+        "event": "oracle-verification",
+        "corpusSha256": "a8a9d6c7cf33863e8c06cfdff921feef5fe6a9ccfd8e20b32312fb536cf91a66",
+        "referenceSha256": "ec54fbca6e1d399e2ed1103f237ba6877e86db4f24ccf327f2972786ec298822",
+        "positions": 12,
+        "checks": {
+          "legal": 940,
+          "mate": 226
+        },
+        "moveSetDifferences": 0,
+        "labelDifferences": 0,
+        "verifiedChecks": true
+      },
+      "budgets": {
+        "100": {
+          "all": {
+            "count": 12,
+            "correct": 12,
+            "active": 12,
+            "activeCorrect": 12,
+            "meanWallMs": 117.1756208333333,
+            "meanDepth": 6.166666666666667,
+            "meanNodes": 3396.5833333333335,
+            "illegal": 0,
+            "unexpectedResignation": 0,
+            "errors": 0,
+            "timeout": 0,
+            "overBudgetBy50": 1,
+            "throttled": 12,
+            "maxWallMs": 155.2804329999999
+          },
+          "strata": {
+            "pit/mate-in-three": {
+              "count": 6,
+              "correct": 6,
+              "active": 6,
+              "activeCorrect": 6,
+              "meanWallMs": 111.00550133333324,
+              "meanDepth": 4.833333333333333,
+              "meanNodes": 3299.1666666666665,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 6,
+              "maxWallMs": 112.3536590000001
+            },
+            "blackhole/mate-in-three": {
+              "count": 6,
+              "correct": 6,
+              "active": 6,
+              "activeCorrect": 6,
+              "meanWallMs": 123.34574033333335,
+              "meanDepth": 7.5,
+              "meanNodes": 3494,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 1,
+              "throttled": 6,
+              "maxWallMs": 155.2804329999999
+            }
+          }
+        },
+        "500": {
+          "all": {
+            "count": 12,
+            "correct": 12,
+            "active": 12,
+            "activeCorrect": 12,
+            "meanWallMs": 519.5511845000002,
+            "meanDepth": 13.5,
+            "meanNodes": 35456.75,
+            "illegal": 0,
+            "unexpectedResignation": 0,
+            "errors": 0,
+            "timeout": 0,
+            "overBudgetBy50": 0,
+            "throttled": 12,
+            "maxWallMs": 545.0096130000002
+          },
+          "strata": {
+            "blackhole/mate-in-three": {
+              "count": 6,
+              "correct": 6,
+              "active": 6,
+              "activeCorrect": 6,
+              "meanWallMs": 516.8682083333333,
+              "meanDepth": 14.166666666666666,
+              "meanNodes": 33650.833333333336,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 6,
+              "maxWallMs": 545.0096130000002
+            },
+            "pit/mate-in-three": {
+              "count": 6,
+              "correct": 6,
+              "active": 6,
+              "activeCorrect": 6,
+              "meanWallMs": 522.2341606666672,
+              "meanDepth": 12.833333333333334,
+              "meanNodes": 37262.666666666664,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 6,
+              "maxWallMs": 544.3574670000016
+            }
+          }
+        },
+        "1500": {
+          "all": {
+            "count": 12,
+            "correct": 12,
+            "active": 12,
+            "activeCorrect": 12,
+            "meanWallMs": 1517.6935312499998,
+            "meanDepth": 14.666666666666666,
+            "meanNodes": 102087.66666666667,
+            "illegal": 0,
+            "unexpectedResignation": 0,
+            "errors": 0,
+            "timeout": 0,
+            "overBudgetBy50": 0,
+            "throttled": 12,
+            "maxWallMs": 1545.4177359999994
+          },
+          "strata": {
+            "blackhole/mate-in-three": {
+              "count": 6,
+              "correct": 6,
+              "active": 6,
+              "activeCorrect": 6,
+              "meanWallMs": 1511.0113663333332,
+              "meanDepth": 15.166666666666666,
+              "meanNodes": 97001.5,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 6,
+              "maxWallMs": 1512.9071509999994
+            },
+            "pit/mate-in-three": {
+              "count": 6,
+              "correct": 6,
+              "active": 6,
+              "activeCorrect": 6,
+              "meanWallMs": 1524.375696166666,
+              "meanDepth": 14.166666666666666,
+              "meanNodes": 107173.83333333333,
+              "illegal": 0,
+              "unexpectedResignation": 0,
+              "errors": 0,
+              "timeout": 0,
+              "overBudgetBy50": 0,
+              "throttled": 6,
+              "maxWallMs": 1545.4177359999994
+            }
+          }
+        }
+      }
+    }
+  ],
+  "examples": [
+    {
+      "id": "pit/mate-in-one/01",
+      "kind": "pit",
+      "category": "mate-in-one",
+      "family": "pit-corner-0",
+      "side": 0,
+      "sfen": "k8/9/9/1N7/9/9/9/9/3K5 b R 22",
+      "holes": [
+        "8b"
+      ],
+      "goodMoves": [
+        "R*1a",
+        "R*2a",
+        "R*3a",
+        "R*4a",
+        "R*5a",
+        "R*6a",
+        "R*7a"
+      ],
+      "inCheck": false,
+      "legalMovesCount": 84,
+      "movesByBudget": {
+        "100": "R*1a",
+        "500": "R*1a",
+        "1500": "R*1a"
+      }
+    },
+    {
+      "id": "blackhole/evade-supplement/1/2",
+      "kind": "blackhole",
+      "category": "evade-forced-win",
+      "family": "seeded-evasion",
+      "side": 1,
+      "sfen": "8G/5k3/5gBg1/4RN3/4K1S2/9/9/9/9 w - 43",
+      "holes": [
+        "8c",
+        "7c",
+        "6c",
+        "8d",
+        "7d",
+        "6d",
+        "8e",
+        "7e",
+        "6e"
+      ],
+      "goodMoves": [
+        "2c3c",
+        "4b3c",
+        "4c3c"
+      ],
+      "inCheck": true,
+      "legalMovesCount": 5,
+      "movesByBudget": {
+        "100": "4b3c",
+        "500": "4b3c",
+        "1500": "4b3c"
+      }
+    },
+    {
+      "id": "pit/material-gain/01",
+      "kind": "pit",
+      "category": "material-gain",
+      "family": "seeded-sparse",
+      "side": 0,
+      "sfen": "G1p4k1/4r4/3B3Pl/3P5/7SN/9/1nR1b3p/K2L5/s1g6 b - 27",
+      "holes": [
+        "2f"
+      ],
+      "goodMoves": [
+        "6c5b",
+        "6c5b+"
+      ],
+      "inCheck": false,
+      "bestGain": 6,
+      "legalMovesCount": 50,
+      "movesByBudget": {
+        "100": "6c5b+",
+        "500": "6c5b+",
+        "1500": "6c5b+"
+      }
+    },
+    {
+      "id": "blackhole/ray-blocking/01",
+      "kind": "blackhole",
+      "category": "ray-blocking",
+      "family": "blocked-rook",
+      "side": 0,
+      "sfen": "7k1/9/9/9/R7r/2g6/9/3N5/1K7 b - 62",
+      "holes": [
+        "6d",
+        "5d",
+        "4d",
+        "6e",
+        "5e",
+        "4e",
+        "6f",
+        "5f",
+        "4f"
+      ],
+      "goodMoves": [
+        "6h7f"
+      ],
+      "inCheck": false,
+      "bestGain": 6,
+      "openedBest": 10,
+      "blocked": [
+        "9e1e"
+      ],
+      "legalMovesCount": 19,
+      "movesByBudget": {
+        "100": "9e9a+",
+        "500": "9e9a+",
+        "1500": "9e9a+"
+      }
+    },
+    {
+      "id": "pit/no-legal-loss/01",
+      "kind": "pit",
+      "category": "no-legal-loss",
+      "family": "pit-corner-0",
+      "side": 1,
+      "sfen": "k8/9/2N6/1N7/9/9/9/9/3K5 w - 22",
+      "holes": [
+        "8b"
+      ],
+      "goodMoves": [
+        "resign"
+      ],
+      "inCheck": false,
+      "legalMovesCount": 0,
+      "movesByBudget": {
+        "100": "resign",
+        "500": "resign",
+        "1500": "resign"
+      }
+    },
+    {
+      "id": "blackhole/mate-in-three/0/1",
+      "kind": "blackhole",
+      "category": "mate-in-three",
+      "family": "seeded-forcing",
+      "side": 0,
+      "sfen": "9/5Lk2/2Bs5/2N6/3G4R/2S6/9/9/4K4 b N 55",
+      "holes": [
+        "5c",
+        "4c",
+        "3c",
+        "5d",
+        "4d",
+        "3d",
+        "5e",
+        "4e",
+        "3e"
+      ],
+      "goodMoves": [
+        "1e1b+"
+      ],
+      "inCheck": false,
+      "proof": {
+        "1e1b+": {
+          "3b3a": [
+            "N*2c"
+          ]
+        }
+      },
+      "legalMovesCount": 88,
+      "movesByBudget": {
+        "100": "1e1b+",
+        "500": "1e1b+",
+        "1500": "1e1b+"
+      }
+    }
+  ]
+}

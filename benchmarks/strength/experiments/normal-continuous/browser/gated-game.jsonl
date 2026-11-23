@@ -1,0 +1,20 @@
+{"event":"legal-cpu-move","profile":"desktop","path":"/ai/rsshogi-continuous-worker.mjs","budget":100,"bestmove":"1g1f","depth":0,"nodes":1,"elapsed_ms":2,"worker":1}
+{"event":"legal-cpu-move","profile":"desktop","path":"/ai/sdk/worker.js","budget":500,"bestmove":"2g2f","depth":7,"nodes":19509,"elapsed_ms":501,"worker":2}
+{"event":"legal-cpu-move","profile":"desktop","path":"/ai/sdk/worker.js","budget":1500,"bestmove":"2f2e","depth":10,"nodes":188867,"elapsed_ms":1503,"worker":2}
+{"event":"legal-cpu-move","profile":"desktop","path":"/ai/obstacle-sdk/worker.js","budget":500,"bestmove":"2e2d","depth":8,"nodes":38538,"elapsed_ms":502,"worker":3}
+{"event":"legal-cpu-move","profile":"desktop","path":"/ai/rsshogi-continuous-worker.mjs","budget":100,"bestmove":"2d2c+","depth":5,"nodes":2817,"elapsed_ms":62,"worker":4}
+{"event":"switch-and-release","profile":"desktop","workers":[1,2,3,4]}
+{"event":"cancel-and-ignore-stale-result","profile":"desktop","oldWorker":4,"id":5}
+{"event":"legal-cpu-move","profile":"desktop","path":"/ai/rsshogi-continuous-worker.mjs","budget":100,"bestmove":"1g1f","depth":0,"nodes":1,"elapsed_ms":2,"worker":5}
+{"event":"legal-fallback-after-worker-timeout","profile":"desktop"}
+{"event":"profile-pass","profile":"desktop"}
+{"event":"legal-cpu-move","profile":"Pixel 7","path":"/ai/rsshogi-continuous-worker.mjs","budget":100,"bestmove":"1g1f","depth":0,"nodes":1,"elapsed_ms":2,"worker":1}
+{"event":"legal-cpu-move","profile":"Pixel 7","path":"/ai/sdk/worker.js","budget":500,"bestmove":"2g2f","depth":6,"nodes":21512,"elapsed_ms":503,"worker":2}
+{"event":"legal-cpu-move","profile":"Pixel 7","path":"/ai/sdk/worker.js","budget":1500,"bestmove":"7g7f","depth":9,"nodes":173129,"elapsed_ms":1500,"worker":2}
+{"event":"legal-cpu-move","profile":"Pixel 7","path":"/ai/obstacle-sdk/worker.js","budget":500,"bestmove":"2f2e","depth":8,"nodes":35446,"elapsed_ms":504,"worker":3}
+{"event":"legal-cpu-move","profile":"Pixel 7","path":"/ai/rsshogi-continuous-worker.mjs","budget":100,"bestmove":"1f1e","depth":0,"nodes":1,"elapsed_ms":2,"worker":4}
+{"event":"switch-and-release","profile":"Pixel 7","workers":[1,2,3,4]}
+{"event":"cancel-and-ignore-stale-result","profile":"Pixel 7","oldWorker":4,"id":5}
+{"event":"legal-cpu-move","profile":"Pixel 7","path":"/ai/rsshogi-continuous-worker.mjs","budget":100,"bestmove":"2g2f","depth":3,"nodes":513,"elapsed_ms":29,"worker":5}
+{"event":"legal-fallback-after-worker-timeout","profile":"Pixel 7"}
+{"event":"profile-pass","profile":"Pixel 7"}

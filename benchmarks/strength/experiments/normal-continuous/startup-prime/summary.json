@@ -1,0 +1,250 @@
+[
+  {
+    "profile": "Pixel 7",
+    "mode": "nodes",
+    "n": 6,
+    "legal": 6,
+    "depth0": 0,
+    "depth": {
+      "min": 3,
+      "median": 5.5,
+      "max": 6
+    },
+    "initMs": {
+      "min": 355.4,
+      "median": 407.1,
+      "max": 467.9
+    },
+    "goWallMs": {
+      "min": 101.3,
+      "median": 104.7,
+      "max": 114.6
+    },
+    "initThroughMoveMs": {
+      "min": 459.4,
+      "median": 512.6,
+      "max": 584.6
+    },
+    "goWallOver125": 0,
+    "primeMs": {
+      "min": 53.8,
+      "median": 63.2,
+      "max": 96.3
+    },
+    "primeDepth": {
+      "min": 2,
+      "median": 2.0,
+      "max": 2
+    },
+    "primeNodes": {
+      "min": 192,
+      "median": 192.0,
+      "max": 192
+    },
+    "pairedInitThroughMoveDeltaMs": {
+      "min": -128.4,
+      "median": 24.8,
+      "max": 133.8
+    }
+  },
+  {
+    "profile": "Pixel 7",
+    "mode": "none",
+    "n": 6,
+    "legal": 6,
+    "depth0": 2,
+    "depth": {
+      "min": 0,
+      "median": 4.0,
+      "max": 5
+    },
+    "initMs": {
+      "min": 297.8,
+      "median": 337.3,
+      "max": 463.2
+    },
+    "goWallMs": {
+      "min": 106.6,
+      "median": 112.2,
+      "max": 178.5
+    },
+    "initThroughMoveMs": {
+      "min": 406.5,
+      "median": 451.2,
+      "max": 644.3
+    },
+    "goWallOver125": 2
+  },
+  {
+    "profile": "Pixel 7",
+    "mode": "time",
+    "n": 6,
+    "legal": 6,
+    "depth0": 0,
+    "depth": {
+      "min": 4,
+      "median": 6.0,
+      "max": 6
+    },
+    "initMs": {
+      "min": 344.7,
+      "median": 442.4,
+      "max": 864.5
+    },
+    "goWallMs": {
+      "min": 101.1,
+      "median": 103.9,
+      "max": 109.3
+    },
+    "initThroughMoveMs": {
+      "min": 452.2,
+      "median": 547.3,
+      "max": 967.2
+    },
+    "goWallOver125": 0,
+    "primeMs": {
+      "min": 55.3,
+      "median": 71.7,
+      "max": 164.6
+    },
+    "primeDepth": {
+      "min": 0,
+      "median": 2.0,
+      "max": 2
+    },
+    "primeNodes": {
+      "min": 1,
+      "median": 192.0,
+      "max": 192
+    },
+    "pairedInitThroughMoveDeltaMs": {
+      "min": -146.9,
+      "median": 81.8,
+      "max": 516.4
+    }
+  },
+  {
+    "profile": "desktop",
+    "mode": "nodes",
+    "n": 6,
+    "legal": 6,
+    "depth0": 0,
+    "depth": {
+      "min": 3,
+      "median": 4.5,
+      "max": 6
+    },
+    "initMs": {
+      "min": 376.6,
+      "median": 452.8,
+      "max": 698.4
+    },
+    "goWallMs": {
+      "min": 100.4,
+      "median": 103.1,
+      "max": 113.1
+    },
+    "initThroughMoveMs": {
+      "min": 487.4,
+      "median": 558.3,
+      "max": 801.9
+    },
+    "goWallOver125": 0,
+    "primeMs": {
+      "min": 53.9,
+      "median": 68.2,
+      "max": 211
+    },
+    "primeDepth": {
+      "min": 2,
+      "median": 2.0,
+      "max": 2
+    },
+    "primeNodes": {
+      "min": 192,
+      "median": 192.0,
+      "max": 192
+    },
+    "pairedInitThroughMoveDeltaMs": {
+      "min": -48.5,
+      "median": 108.8,
+      "max": 186.8
+    }
+  },
+  {
+    "profile": "desktop",
+    "mode": "none",
+    "n": 6,
+    "legal": 6,
+    "depth0": 1,
+    "depth": {
+      "min": 0,
+      "median": 4.0,
+      "max": 6
+    },
+    "initMs": {
+      "min": 286.2,
+      "median": 333.4,
+      "max": 611.6
+    },
+    "goWallMs": {
+      "min": 105.2,
+      "median": 106.3,
+      "max": 234
+    },
+    "initThroughMoveMs": {
+      "min": 395.4,
+      "median": 441.8,
+      "max": 850.4
+    },
+    "goWallOver125": 1
+  },
+  {
+    "profile": "desktop",
+    "mode": "time",
+    "n": 6,
+    "legal": 6,
+    "depth0": 0,
+    "depth": {
+      "min": 3,
+      "median": 5.0,
+      "max": 6
+    },
+    "initMs": {
+      "min": 392,
+      "median": 509.9,
+      "max": 635.7
+    },
+    "goWallMs": {
+      "min": 101.7,
+      "median": 105.5,
+      "max": 107.1
+    },
+    "initThroughMoveMs": {
+      "min": 495.2,
+      "median": 617.8,
+      "max": 742.3
+    },
+    "goWallOver125": 0,
+    "primeMs": {
+      "min": 50.6,
+      "median": 91.0,
+      "max": 231.2
+    },
+    "primeDepth": {
+      "min": 0,
+      "median": 2.0,
+      "max": 2
+    },
+    "primeNodes": {
+      "min": 1,
+      "median": 192.0,
+      "max": 192
+    },
+    "pairedInitThroughMoveDeltaMs": {
+      "min": -355.2,
+      "median": 201.6,
+      "max": 341.2
+    }
+  }
+]

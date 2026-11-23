@@ -1,0 +1,642 @@
+{
+  "configs": [
+    {
+      "file": "normal-game-primary.jsonl",
+      "event": "config",
+      "levels": [
+        100,
+        500,
+        1500
+      ],
+      "families": [
+        "game"
+      ],
+      "pairCount": 1,
+      "pairOffset": 0,
+      "plyCap": 200,
+      "wasmSha": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "rulesSha": "b1acf7b7a595150d8a2766111d8171ff84ccbd718ea33239f5b5b7f513c51344",
+      "engineSha": "5ad6baa616fe11b64f8a63cd8d3b6aab264e401f67979e27ad7e8fc001e500f7",
+      "evalSha": "768068f0d534a0603a5d38bcd143de6bbca820d5f1c95a14d40863e5b7892d76",
+      "node": "v22.23.5",
+      "mode": "match"
+    },
+    {
+      "file": "normal-hirate-primary.jsonl",
+      "event": "config",
+      "levels": [
+        100,
+        500,
+        1500
+      ],
+      "families": [
+        "hirate"
+      ],
+      "pairCount": 1,
+      "pairOffset": 0,
+      "plyCap": 200,
+      "wasmSha": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "rulesSha": "b1acf7b7a595150d8a2766111d8171ff84ccbd718ea33239f5b5b7f513c51344",
+      "engineSha": "5ad6baa616fe11b64f8a63cd8d3b6aab264e401f67979e27ad7e8fc001e500f7",
+      "evalSha": "768068f0d534a0603a5d38bcd143de6bbca820d5f1c95a14d40863e5b7892d76",
+      "node": "v22.23.5",
+      "mode": "match"
+    }
+  ],
+  "games": 12,
+  "cells": [
+    {
+      "key": "game 100",
+      "games": 2,
+      "score95": [
+        0,
+        100
+      ],
+      "stock": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 2,
+        "winPct": 0,
+        "sente": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "gote": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "moves": 55,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 17,
+        "over50ms": 0,
+        "meanWallMs": 106.79,
+        "maxWallMs": 137.17,
+        "meanEngineMs": 103.76,
+        "meanNodes": 4002.73,
+        "meanDepth": 3.38
+      },
+      "reference": {
+        "wins": 2,
+        "draws": 0,
+        "losses": 0,
+        "winPct": 100,
+        "sente": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "gote": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "moves": 56,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 8,
+        "over50ms": 0,
+        "meanWallMs": 95.09,
+        "maxWallMs": 134.77,
+        "meanEngineMs": 94.88,
+        "meanNodes": 32913.93,
+        "meanDepth": 13.54
+      },
+      "results": [
+        {
+          "stockSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 32,
+          "pair": 0
+        },
+        {
+          "stockSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 79,
+          "pair": 0
+        }
+      ]
+    },
+    {
+      "key": "game 1500",
+      "games": 2,
+      "score95": [
+        0,
+        100
+      ],
+      "stock": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 2,
+        "winPct": 0,
+        "sente": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "gote": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "moves": 71,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 15,
+        "over50ms": 0,
+        "meanWallMs": 1504.09,
+        "maxWallMs": 1534.87,
+        "meanEngineMs": 1502.46,
+        "meanNodes": 201507.06,
+        "meanDepth": 7.72
+      },
+      "reference": {
+        "wins": 2,
+        "draws": 0,
+        "losses": 0,
+        "winPct": 100,
+        "sente": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "gote": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "moves": 72,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 7,
+        "over50ms": 0,
+        "meanWallMs": 1277.71,
+        "maxWallMs": 1532.35,
+        "meanEngineMs": 1277.35,
+        "meanNodes": 821253.42,
+        "meanDepth": 19.85
+      },
+      "results": [
+        {
+          "stockSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 46,
+          "pair": 0
+        },
+        {
+          "stockSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 97,
+          "pair": 0
+        }
+      ]
+    },
+    {
+      "key": "game 500",
+      "games": 2,
+      "score95": [
+        0,
+        100
+      ],
+      "stock": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 2,
+        "winPct": 0,
+        "sente": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "gote": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "moves": 50,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 17,
+        "over50ms": 0,
+        "meanWallMs": 507.31,
+        "maxWallMs": 543.36,
+        "meanEngineMs": 505,
+        "meanNodes": 41611.92,
+        "meanDepth": 6.64
+      },
+      "reference": {
+        "wins": 2,
+        "draws": 0,
+        "losses": 0,
+        "winPct": 100,
+        "sente": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "gote": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "moves": 51,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 1,
+        "over50ms": 0,
+        "meanWallMs": 425.88,
+        "maxWallMs": 506.86,
+        "meanEngineMs": 425.98,
+        "meanNodes": 215928.92,
+        "meanDepth": 17.14
+      },
+      "results": [
+        {
+          "stockSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 46,
+          "pair": 0
+        },
+        {
+          "stockSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 55,
+          "pair": 0
+        }
+      ]
+    },
+    {
+      "key": "hirate 100",
+      "games": 2,
+      "score95": [
+        0,
+        100
+      ],
+      "stock": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 2,
+        "winPct": 0,
+        "sente": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "gote": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "moves": 109,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 32,
+        "over50ms": 0,
+        "meanWallMs": 105.45,
+        "maxWallMs": 148.73,
+        "meanEngineMs": 103.33,
+        "meanNodes": 6672.79,
+        "meanDepth": 4.65
+      },
+      "reference": {
+        "wins": 2,
+        "draws": 0,
+        "losses": 0,
+        "winPct": 100,
+        "sente": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "gote": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "moves": 110,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 9,
+        "over50ms": 0,
+        "meanWallMs": 96.11,
+        "maxWallMs": 137.75,
+        "meanEngineMs": 95.52,
+        "meanNodes": 42027.35,
+        "meanDepth": 13.66
+      },
+      "results": [
+        {
+          "stockSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 80,
+          "pair": 0
+        },
+        {
+          "stockSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 139,
+          "pair": 0
+        }
+      ]
+    },
+    {
+      "key": "hirate 1500",
+      "games": 2,
+      "score95": [
+        0,
+        100
+      ],
+      "stock": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 2,
+        "winPct": 0,
+        "sente": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "gote": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "moves": 108,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 27,
+        "over50ms": 1,
+        "meanWallMs": 1505.72,
+        "maxWallMs": 1602.77,
+        "meanEngineMs": 1504.24,
+        "meanNodes": 179070.81,
+        "meanDepth": 7.77
+      },
+      "reference": {
+        "wins": 2,
+        "draws": 0,
+        "losses": 0,
+        "winPct": 100,
+        "sente": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "gote": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "moves": 109,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 10,
+        "over50ms": 2,
+        "meanWallMs": 1396.28,
+        "maxWallMs": 1590.37,
+        "meanEngineMs": 1395.55,
+        "meanNodes": 840942.25,
+        "meanDepth": 21.03
+      },
+      "results": [
+        {
+          "stockSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 104,
+          "pair": 0
+        },
+        {
+          "stockSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 113,
+          "pair": 0
+        }
+      ]
+    },
+    {
+      "key": "hirate 500",
+      "games": 2,
+      "score95": [
+        0,
+        100
+      ],
+      "stock": {
+        "wins": 0,
+        "draws": 0,
+        "losses": 2,
+        "winPct": 0,
+        "sente": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "gote": {
+          "wins": 0,
+          "draws": 0,
+          "losses": 1,
+          "winPct": 0
+        },
+        "moves": 96,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 19,
+        "over50ms": 0,
+        "meanWallMs": 503.88,
+        "maxWallMs": 516.96,
+        "meanEngineMs": 502.47,
+        "meanNodes": 70175.04,
+        "meanDepth": 8.05
+      },
+      "reference": {
+        "wins": 2,
+        "draws": 0,
+        "losses": 0,
+        "winPct": 100,
+        "sente": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "gote": {
+          "wins": 1,
+          "draws": 0,
+          "losses": 0,
+          "winPct": 100
+        },
+        "moves": 97,
+        "clockFlags": 0,
+        "illegal": 0,
+        "fallback": 0,
+        "timeout": 0,
+        "resign": 0,
+        "declaration": 0,
+        "over5ms": 2,
+        "over50ms": 0,
+        "meanWallMs": 451.44,
+        "maxWallMs": 508.25,
+        "meanEngineMs": 451.71,
+        "meanNodes": 342446.12,
+        "meanDepth": 19.18
+      },
+      "results": [
+        {
+          "stockSide": 0,
+          "winner": 1,
+          "reason": "checkmate",
+          "plies": 110,
+          "pair": 0
+        },
+        {
+          "stockSide": 1,
+          "winner": 0,
+          "reason": "checkmate",
+          "plies": 83,
+          "pair": 0
+        }
+      ]
+    }
+  ],
+  "incomplete": [],
+  "stock": {
+    "wins": 0,
+    "draws": 0,
+    "losses": 12,
+    "winPct": 0,
+    "sente": {
+      "wins": 0,
+      "draws": 0,
+      "losses": 6,
+      "winPct": 0
+    },
+    "gote": {
+      "wins": 0,
+      "draws": 0,
+      "losses": 6,
+      "winPct": 0
+    },
+    "moves": 489,
+    "clockFlags": 0,
+    "illegal": 0,
+    "fallback": 0,
+    "timeout": 0,
+    "resign": 0,
+    "declaration": 0,
+    "over5ms": 127,
+    "over50ms": 1,
+    "meanWallMs": 737.25,
+    "maxWallMs": 1602.77,
+    "meanEngineMs": 735.36,
+    "meanNodes": 88776.14,
+    "meanDepth": 6.51
+  },
+  "reference": {
+    "wins": 12,
+    "draws": 0,
+    "losses": 0,
+    "winPct": 100,
+    "sente": {
+      "wins": 6,
+      "draws": 0,
+      "losses": 0,
+      "winPct": 100
+    },
+    "gote": {
+      "wins": 6,
+      "draws": 0,
+      "losses": 0,
+      "winPct": 100
+    },
+    "moves": 495,
+    "clockFlags": 0,
+    "illegal": 0,
+    "fallback": 0,
+    "timeout": 0,
+    "resign": 0,
+    "declaration": 0,
+    "over5ms": 37,
+    "over50ms": 2,
+    "meanWallMs": 657.77,
+    "maxWallMs": 1590.37,
+    "meanEngineMs": 657.46,
+    "meanNodes": 407048.06,
+    "meanDepth": 17.61
+  }
+}

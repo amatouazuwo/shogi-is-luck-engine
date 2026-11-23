@@ -1,0 +1,13 @@
+{
+  "event": "oracle-verification",
+  "corpusSha256": "e2d7707d605bd2596c711da405547a71fac5d542ba30b7e305a30d19fdb225aa",
+  "referenceSha256": "ec54fbca6e1d399e2ed1103f237ba6877e86db4f24ccf327f2972786ec298822",
+  "positions": 16,
+  "checks": {
+    "legal": 16,
+    "mate": 94
+  },
+  "moveSetDifferences": 0,
+  "labelDifferences": 0,
+  "verifiedChecks": true
+}

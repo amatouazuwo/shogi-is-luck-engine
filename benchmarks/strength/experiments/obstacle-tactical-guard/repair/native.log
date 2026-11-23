@@ -1,0 +1,11 @@
+   Compiling rsshogi v1.7.2 (/workspace/work/strength/next-obstacle/repair/rules/crates/rsshogi)
+   Compiling rsshogi-nnue-mini v0.4.0 (/workspace/work/strength/next-obstacle/repair/engine)
+    Finished `release` profile [optimized] target(s) in 59.86s
+     Running unittests src/lib.rs (/workspace/work/strength/forensics/engine/native-target/release/deps/rsshogi_nnue_mini-5408e4d207991782)
+
+running 2 tests
+test search::obstacle_guard::tests::exact_screen_rejects_a_faster_mate_that_the_selective_screen_misses ... ok
+test search::obstacle_guard::tests::checks_and_near_king_captures_expose_both_obstacle_traps ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 235 filtered out; finished in 0.00s
+

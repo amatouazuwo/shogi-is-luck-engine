@@ -1,0 +1,38 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling version_check v0.9.5
+   Compiling generic-array v0.14.7
+   Compiling syn v3.0.3
+   Compiling typenum v1.20.1
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling thiserror v2.0.20
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling thiserror-impl v2.0.20
+   Compiling serde_derive v1.0.229
+   Compiling rsshogi v1.7.2 (/workspace/work/strength/special-evaluation/rules/crates/rsshogi)
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling digest v0.10.7
+   Compiling ryu-js v1.0.3
+   Compiling cpufeatures v0.2.17
+   Compiling log v0.4.33
+   Compiling cfg-if v1.0.5
+   Compiling sha2 v0.10.9
+   Compiling serde_json_canonicalizer v0.3.2
+   Compiling rsshogi-usi v0.2.0
+   Compiling rsshogi-nnue-mini v0.4.0 (/workspace/work/strength/special-evaluation/engine)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 37.36s
+     Running unittests src/lib.rs (target/debug/deps/rsshogi_nnue_mini-5d6ada7840f88903)
+
+running 3 tests
+test eval::reserve_pressure::tests::closed_rook_drop_rays_help_the_defender ... ok
+test eval::reserve_pressure::tests::holes_behind_piece_obstructions_and_empty_hands_are_neutral ... ok
+test eval::reserve_pressure::tests::knight_drop_direction_and_saturation_agree_under_color_rotation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 235 filtered out; finished in 0.00s
+

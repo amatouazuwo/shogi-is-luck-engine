@@ -1,0 +1,22 @@
+{
+  "positions": 36,
+  "tallies": {
+    "blackhole/attack/3": 4,
+    "blackhole/attack/5": 4,
+    "blackhole/attack/7": 4,
+    "pit/attack/3": 4,
+    "pit/attack/5": 4,
+    "pit/attack/7": 4,
+    "blackhole/escape/3": 2,
+    "blackhole/escape/5": 2,
+    "blackhole/escape/7": 2,
+    "pit/escape/3": 2,
+    "pit/escape/5": 2,
+    "pit/escape/7": 2
+  },
+  "digests": {
+    "unseen-attack.jsonl": "ed5eb075d7be87191f86304d48b0d24625bece2c5c4e9436ac9ef43006a2ad0c",
+    "unseen-defense.jsonl": "5cb549448866c515bef89ec855637c52373953c9f8fc78f114463b6405cb2d52"
+  },
+  "independentNodes": 14889442
+}

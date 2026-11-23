@@ -1,0 +1,7 @@
+{"event":"config","levels":[100,500,1500],"families":["hirate"],"pairCount":1,"pairOffset":0,"plyCap":200,"wasmSha":"feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d","rulesSha":"b1acf7b7a595150d8a2766111d8171ff84ccbd718ea33239f5b5b7f513c51344","officialWorkerSha":"7357552f5cf6bcea12fa6105f336cc612f790f1d1d6d01577856332584a5a0da","candidateWorkerSha":"316830de7b28042f36c118762e978d139016c2f469f2b5651f3f8f9756a1cc7f","opponent":"stock","node":"v22.23.5","mode":"smoke"}
+{"event":"smoke","engine":0,"ms":100,"wall":115.14166799999998,"move":"2g2f","nodes":1649,"depth":4,"time":51}
+{"event":"smoke","engine":0,"ms":500,"wall":509.01284899999985,"move":"2g2f","nodes":20225,"depth":9,"time":500}
+{"event":"smoke","engine":0,"ms":1500,"wall":1510.0198,"move":"2g2f","nodes":45313,"depth":10,"time":1501}
+{"event":"smoke","engine":1,"ms":100,"wall":104.7455930000001,"move":"2g2f","nodes":1235,"depth":3,"time":101}
+{"event":"smoke","engine":1,"ms":500,"wall":515.8549839999996,"move":"2g2f","nodes":46046,"depth":9,"time":504}
+{"event":"smoke","engine":1,"ms":1500,"wall":1503.799989,"move":"2g2f","nodes":194632,"depth":10,"time":1503}

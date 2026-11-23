@@ -1,0 +1,13 @@
+{
+  "seed": 6395783,
+  "cases": 100,
+  "categories": [
+    "mate-in-one",
+    "evade-forced-win",
+    "material-gain",
+    "ray-blocking",
+    "no-legal-loss"
+  ],
+  "perCategoryAndHazard": 10,
+  "note": "Exact game-rule enumeration generated labels before running either search engine. Hole layouts are a single interior pit or an exact 3×3 zone. Many sparse endgame motifs are color/geometry transformations; this is a tactical corpus, not a sample of human-game frequency."
+}

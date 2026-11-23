@@ -1,0 +1,114 @@
+{
+  "filename": "unseen-special.jsonl",
+  "sha256": "ec1fa261bb12d1d836ecb9f56890802f35ca330d5e13d1c57b8632d8558d1a20",
+  "positions": 36,
+  "sources": {
+    "attack": {
+      "filename": "unseen-attack.jsonl",
+      "checksum": "ed5eb075d7be87191f86304d48b0d24625bece2c5c4e9436ac9ef43006a2ad0c",
+      "count": 24,
+      "strata": {
+        "blackhole/3/0": 2,
+        "blackhole/3/1": 2,
+        "blackhole/5/1": 2,
+        "blackhole/5/0": 2,
+        "blackhole/7/1": 2,
+        "blackhole/7/0": 2,
+        "pit/3/1": 2,
+        "pit/3/0": 2,
+        "pit/5/0": 2,
+        "pit/5/1": 2,
+        "pit/7/0": 2,
+        "pit/7/1": 2
+      },
+      "families": {
+        "offset-hole-cross": 8,
+        "rank-edge-net": 7,
+        "central-fork": 5,
+        "corner-approach": 3,
+        "side-lane-recapture": 1
+      },
+      "rootCheck": {
+        "false": 24
+      },
+      "occupancy": {
+        "minimum": 10,
+        "median": 12.5,
+        "maximum": 15,
+        "histogram": {
+          "10": 2,
+          "11": 4,
+          "12": 6,
+          "13": 7,
+          "14": 4,
+          "15": 1
+        }
+      }
+    },
+    "defense": {
+      "filename": "unseen-defense.jsonl",
+      "checksum": "5cb549448866c515bef89ec855637c52373953c9f8fc78f114463b6405cb2d52",
+      "count": 12,
+      "strata": {
+        "blackhole/3/0": 1,
+        "blackhole/3/1": 1,
+        "blackhole/5/0": 1,
+        "blackhole/5/1": 1,
+        "blackhole/7/0": 1,
+        "blackhole/7/1": 1,
+        "pit/3/0": 1,
+        "pit/3/1": 1,
+        "pit/5/0": 1,
+        "pit/5/1": 1,
+        "pit/7/0": 1,
+        "pit/7/1": 1
+      },
+      "families": {
+        "camp-line": 6,
+        "skew-flank": 2,
+        "central-pocket": 3,
+        "corner-turn": 1
+      },
+      "rootCheck": {
+        "true": 9,
+        "false": 3
+      },
+      "occupancy": {
+        "minimum": 10,
+        "median": 11,
+        "maximum": 11,
+        "histogram": {
+          "10": 4,
+          "11": 8
+        }
+      }
+    }
+  },
+  "priorCanonicalCount": 614,
+  "priorOverlap": 0,
+  "internalOverlap": 0,
+  "exactOracleReplay": {
+    "positions": 36,
+    "tallies": {
+      "blackhole/attack/3": 4,
+      "blackhole/attack/5": 4,
+      "blackhole/attack/7": 4,
+      "pit/attack/3": 4,
+      "pit/attack/5": 4,
+      "pit/attack/7": 4,
+      "blackhole/escape/3": 2,
+      "blackhole/escape/5": 2,
+      "blackhole/escape/7": 2,
+      "pit/escape/3": 2,
+      "pit/escape/5": 2,
+      "pit/escape/7": 2
+    },
+    "digests": {
+      "unseen-attack.jsonl": "ed5eb075d7be87191f86304d48b0d24625bece2c5c4e9436ac9ef43006a2ad0c",
+      "unseen-defense.jsonl": "5cb549448866c515bef89ec855637c52373953c9f8fc78f114463b6405cb2d52"
+    },
+    "independentNodes": 14889442
+  },
+  "checkpointRule": "No NNUE engine result or timed outcome was used in selecting or labeling these fixtures.",
+  "gameRulesCommit": "0119f2b94e35b119db675ed21b65f78d51821679"
+}
