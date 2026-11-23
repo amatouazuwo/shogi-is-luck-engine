@@ -1,0 +1,153 @@
+name: Holdout masks - bracket 25k 50k and unlimited at equal 1.5s
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/provisional-fourdan-50k-fresh-bridge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fourdan-50k-fresh-bridge-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  masked-native-paired:
+    name: ${{ matrix.label }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - label: 25k-versus-50k
+            candidate_nodes: "25000"
+            opponent_nodes: "50000"
+          - label: 50k-versus-timeonly
+            candidate_nodes: "50000"
+            opponent_nodes: "none"
+          - label: 25k-versus-timeonly
+            candidate_nodes: "25000"
+            opponent_nodes: "none"
+    env:
+      LABEL: ${{ matrix.label }}
+      CANDIDATE_NODES: ${{ matrix.candidate_nodes }}
+      OPPONENT_NODES: ${{ matrix.opponent_nodes }}
+      FIXTURE_SEED: "20261124"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check clock, search and relative-scorecard safeguards
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs
+          node --check benchmarks/strength/ci/search-axis-match.mjs
+          node --check benchmarks/strength/ci/difficulty-scorecard.mjs
+          node --test benchmarks/strength/ci/difficulty-scorecard.test.mjs \
+            benchmarks/strength/ci/clock-budget.test.mjs \
+            benchmarks/strength/ci/search-control-contract.test.mjs
+      - name: Build one pinned NNUE SDK and independent legal referee
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/fresh-bridge-sdk"
+          (cd "$RUNNER_TEMP/fresh-bridge-sdk" && sha256sum -c SHA256SUMS)
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp \
+            -o "$RUNNER_TEMP/fresh-bridge-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs \
+            "$RUNNER_TEMP/fresh-bridge-referee"
+      - name: Generate identical seed-based obstacles for each comparison
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/fresh-bridge-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/fresh-bridge-openings.jsonl "$FIXTURE_SEED" \
+            | tee results/fresh-bridge-generation.json
+      - name: Play 24 color-reversed legal native games at 1500ms for both sides
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/search-axis-match.mjs \
+            "$RUNNER_TEMP/fresh-bridge-referee" "$RUNNER_TEMP/fresh-bridge-sdk" \
+            1500 300 6 0 "$RUNNER_TEMP/fresh-bridge-sdk" obstacle \
+            results/fresh-bridge-openings.jsonl \
+            1500 20 20 1300 1300 fixed fixed 64 64 \
+            "$CANDIDATE_NODES" "$OPPONENT_NODES" \
+            | tee "results/$LABEL-games.jsonl"
+      - name: Verify every pairing, node/time cap, legal play, clock, neutral treatment
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/difficulty-scorecard.mjs \
+            "results/$LABEL-games.jsonl" 1500 1500 \
+            | tee "results/$LABEL-scorecard.json"
+          python3 - results/fresh-bridge-openings.jsonl \
+              "results/$LABEL-games.jsonl" "results/$LABEL-scorecard.json" <<'PY'
+          import json,sys,os,hashlib,collections
+          fxraw=open(sys.argv[1],'rb').read()
+          fixtures=[json.loads(r) for r in fxraw.splitlines() if r]
+          ev=[json.loads(line) for line in open(sys.argv[2],encoding='utf-8') if line.strip()]
+          sc=json.load(open(sys.argv[3],encoding='utf-8'))
+          conf=[x for x in ev if x.get('event')=='config']
+          games=[x for x in ev if x.get('event')=='game']
+          assert len(conf)==1 and len(games)==24 and len(fixtures)==12
+          cfg=conf[0]
+          node=lambda key: None if os.environ[key]=='none' else int(os.environ[key])
+          assert cfg['candidateNodesCap']==node('CANDIDATE_NODES')
+          assert cfg['opponentNodesCap']==node('OPPONENT_NODES')
+          assert cfg['budget']==cfg['opponentBudget']==1500
+          assert cfg['cap']==300 and cfg['pairs']==6 and cfg['offset']==0
+          assert cfg['clockMs']==180000 and cfg['clockDelayMethod']=='virtual-debit-not-wall-wait'
+          assert cfg['candidateSha']==cfg['baselineSha']
+          assert cfg['candidateWorkerSha']==cfg['baselineWorkerSha']
+          assert cfg['candidateDepthCap']==cfg['opponentDepthCap']==64
+          assert cfg['candidateClockDivisor']==cfg['opponentClockDivisor']==20
+          assert cfg['candidatePreMoveDelayMs']==cfg['opponentPreMoveDelayMs']==1300
+          assert cfg['fixtureSha']==hashlib.sha256(fxraw).hexdigest()
+          keyed={(f['pair'],f['kind']):f for f in fixtures}
+          assert len(keyed)==12 and len({f['pair'] for f in fixtures})==6
+          assert len({f['sfen'] for f in fixtures})==6
+          assert collections.Counter(f['sourceFamily'] for f in fixtures)=={'hirate':6,'game':6}
+          assert all(f['legal']>=5 for f in fixtures)
+          assert all(sorted(len(f['holes']) for f in fixtures if f['pair']==k)==[1,9]
+                     for k in {f['pair'] for f in fixtures})
+          side_map=collections.defaultdict(list)
+          for g in games:
+              key=(g['pair'],g['kind'])
+              assert key in keyed
+              fixture=keyed[key]
+              assert g['start']==fixture['sfen']
+              assert g['holes']==fixture['holes']
+              assert g['candidateSide'] in (0,1)
+              side_map[key].append(g['candidateSide'])
+              assert len(g['turns'])<=300
+              assert all(time<=180000 for time in g['clocks'])
+              for turn in g['turns']:
+                  assert turn['depthCap']==64
+                  chosen=turn['engine']=='candidate'
+                  maxnodes=cfg['candidateNodesCap'] if chosen else cfg['opponentNodesCap']
+                  assert turn['nodesCap']==maxnodes
+                  assert isinstance(turn['nodes'],int) and turn['nodes']>=0
+                  assert maxnodes is None or turn['nodes']<=maxnodes
+                  assert 0<turn['requestMs']<=1500
+          assert len(side_map)==12 and all(sorted(v)==[0,1] for v in side_map.values())
+          assert sc['games']==24 and sc['sameModelAndWorker']
+          assert sc['candidateWins']+sc['opponentWins']+sc['neutralUndecided']==24
+          assert sc['amateurRankValidation']=='NOT_PERFORMED'
+          assert sc['autoAssignAmateurGrade'] is False
+          print('PASS: 24 legal paired 3-minute native NNUE games; identical search time and mask, node controls and neutral outcomes audited')
+          print('RESULT:',json.dumps({'label':os.environ['LABEL'], 'wins':sc['candidateWins'],
+                  'losses':sc['opponentWins'], 'neutral':sc['neutralUndecided'],
+                  'bounds':sc['scoreBoundsIncludingNeutral']},ensure_ascii=False))
+          PY
+          echo "### $LABEL" >> "$GITHUB_STEP_SUMMARY"
+          cat "results/$LABEL-scorecard.json" >> "$GITHUB_STEP_SUMMARY"
+      - name: Document the sample and production restrictions
+        if: always()
+        run: |
+          echo 'All competitors use the SAME 1500ms nominal time and rsshogi build in each job; node caps alone vary. Six original normal SFENs are selected from an archived corpus, and seeded obstacle masks are freshly generated with seed 20261124.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Color-reversed 24 games per comparison. These overlapping start positions are correlated and are NOT human amateur Elo/4-dan calibration.' >> "$GITHUB_STEP_SUMMARY"
+          echo '300-ply or unadjudicated repetition is neutral. Special 1% events and real mobile/browser power budget are not simulated.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Engine-only Draft PR #3; do NOT modify game CPU profiles or production main/develop/Render and do NOT merge.' >> "$GITHUB_STEP_SUMMARY"
