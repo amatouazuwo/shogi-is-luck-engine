@@ -38,7 +38,7 @@ async function readUntil(it,predicate,timeoutMs=30000){
  }finally{clearTimeout(timer)}
 }
 async function refereeCommand(command,sfen,holes='',move=''){
- referee.stdin.write([command,sfen,holes,move].join('\t')+'\n');
+ referee.stdin.write((command==='step'?[command,sfen,holes,move]:[command,sfen,holes]).join('\t')+'\n');
  const line=await readUntil(legalLines,()=>true,15000);
  const v=JSON.parse(line);assert.ok(!v.error,JSON.stringify(v));
  return v;
