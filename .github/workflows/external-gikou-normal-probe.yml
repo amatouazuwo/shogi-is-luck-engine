@@ -7,6 +7,7 @@ on:
       - 'benchmarks/strength/ci/external-usi-calibration-contract.mjs'
       - 'benchmarks/strength/ci/external-usi-calibration-contract.test.mjs'
       - 'benchmarks/strength/ci/external-usi-normal-probe.mjs'
+      - 'benchmarks/strength/ci/external-usi-normal-match.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,6 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check benchmarks/strength/ci/external-usi-normal-probe.mjs
+          node --check benchmarks/strength/ci/external-usi-normal-match.mjs
           node --test benchmarks/strength/ci/external-usi-calibration-contract.test.mjs
       - name: Build genuine Gikou2 at pinned source revision
         run: |
@@ -72,6 +74,16 @@ jobs:
             results/real-gikou-reference.jsonl \
             | tee results/real-gikou-reference-run.jsonl
           tail -n 1 results/real-gikou-reference-run.jsonl >> "$GITHUB_STEP_SUMMARY"
+      - name: Play native normal-shogi head-to-head against Gikou2 depth2
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/external-usi-normal-match.mjs \
+            "$RUNNER_TEMP/gikou-src/bin/release" "$RUNNER_TEMP/gikou-src" \
+            "$RUNNER_TEMP/gikou-probe-sdk" "$RUNNER_TEMP/gikou-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            | tee results/real-gikou-normal-matches.jsonl
+          grep '"event":"gikou-normal-match-summary"' \
+            results/real-gikou-normal-matches.jsonl >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve the calibration boundary
         if: always()
         run: |
