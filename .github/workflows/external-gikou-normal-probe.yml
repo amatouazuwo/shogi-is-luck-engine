@@ -1,4 +1,4 @@
-name: Real Gikou2 normal-board USI reference probe
+name: Recheck Gikou2 normal-board baseline with full official weights
 on:
   push:
     branches: [chatgpt/strength-ci]
@@ -8,6 +8,7 @@ on:
       - 'benchmarks/strength/ci/external-usi-calibration-contract.test.mjs'
       - 'benchmarks/strength/ci/external-usi-normal-probe.mjs'
       - 'benchmarks/strength/ci/external-usi-normal-match.mjs'
+      - 'patches/gikou2-empty-legal-probability.patch'
   workflow_dispatch:
 permissions:
   contents: read
@@ -40,6 +41,8 @@ jobs:
           git -C "$RUNNER_TEMP/gikou-src" checkout -q --detach FETCH_HEAD
           test "$(git -C "$RUNNER_TEMP/gikou-src" rev-parse HEAD)" = \
             f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-src" apply --check "$GITHUB_WORKSPACE/patches/gikou2-empty-legal-probability.patch"
+          git -C "$RUNNER_TEMP/gikou-src" apply "$GITHUB_WORKSPACE/patches/gikou2-empty-legal-probability.patch"
           make -C "$RUNNER_TEMP/gikou-src" release -j2
           test -x "$RUNNER_TEMP/gikou-src/bin/release"
           sha256sum "$RUNNER_TEMP/gikou-src/bin/release"
@@ -57,6 +60,10 @@ jobs:
           cp "$PARAM" "$RUNNER_TEMP/gikou-src/params.bin"
           sha256sum "$RUNNER_TEMP/gikou-src/params.bin"
           echo "6bbc573306839fe019634dd94b06af7c22834a641e8bc060e23889ae9b3b2195  $RUNNER_TEMP/gikou-src/params.bin" | sha256sum -c -
+          PROGRESS=$(find "$RUNNER_TEMP/gikou-eval" -type f -name progress.bin -print -quit)
+          test -n "$PROGRESS" || { echo "Missing official progress.bin"; exit 1; }
+          cp "$PROGRESS" "$RUNNER_TEMP/gikou-src/progress.bin"
+          echo "ddf60a3180f768d9756b83cd4fe50a18b9e93855d1ad7281566934fb7c53a042  $RUNNER_TEMP/gikou-src/progress.bin" | sha256sum -c -
           echo 'Genuine published Gikou2 parameter file found (SHA256 in log)' >> "$GITHUB_STEP_SUMMARY"
       - name: Build unchanged pinned obstacle-aware NNUE WASM and independent legal referee
         run: |
@@ -91,4 +98,6 @@ jobs:
         run: |
           echo 'This tests real Gikou2, not fake USI. But bestmove agreement is not head-to-head win rate.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Gikou2 depth2 historical Shogi Club 24 estimate is NOT a certified amateur grade for rsshogi.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Gikou2 pinned upstream has one terminal no-legal-move guard and BOTH official params/progress weights.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Prior depth2 baseline without progress.bin is not valid for the current comparison.' >> "$GITHUB_STEP_SUMMARY"
           echo 'No Gikou binary or evaluation parameter redistribution. No main/develop or Render changes.' >> "$GITHUB_STEP_SUMMARY"
