@@ -1,10 +1,11 @@
-name: Diagnose real Gikou2 depth8 reference search
+name: Verify pinned Gikou2 depth8 terminal-node patch with full evaluation data
 on:
   push:
     branches: [chatgpt/strength-ci]
     paths:
       - '.github/workflows/gikou-depth8-isolated.yml'
       - 'benchmarks/strength/ci/gikou-depth8-isolated-smoke.mjs'
+      - 'patches/gikou2-empty-legal-probability.patch'
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,6 +32,8 @@ jobs:
           git -C "$RUNNER_TEMP/gikou-src" checkout -q --detach FETCH_HEAD
           test "$(git -C "$RUNNER_TEMP/gikou-src" rev-parse HEAD)" = \
             f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-src" apply --check "$GITHUB_WORKSPACE/patches/gikou2-empty-legal-probability.patch"
+          git -C "$RUNNER_TEMP/gikou-src" apply "$GITHUB_WORKSPACE/patches/gikou2-empty-legal-probability.patch"
           make -C "$RUNNER_TEMP/gikou-src" release -j2
       - name: Fetch verified official evaluation parameters
         run: |
@@ -45,6 +48,10 @@ jobs:
           test -n "$PARAM"
           cp "$PARAM" "$RUNNER_TEMP/gikou-src/params.bin"
           echo "6bbc573306839fe019634dd94b06af7c22834a641e8bc060e23889ae9b3b2195  $RUNNER_TEMP/gikou-src/params.bin" | sha256sum -c -
+          PROGRESS=$(find "$RUNNER_TEMP/gikou-eval" -type f -name progress.bin -print -quit)
+          test -n "$PROGRESS" || { echo "Missing official progress.bin"; exit 1; }
+          cp "$PROGRESS" "$RUNNER_TEMP/gikou-src/progress.bin"
+          echo "ddf60a3180f768d9756b83cd4fe50a18b9e93855d1ad7281566934fb7c53a042  $RUNNER_TEMP/gikou-src/progress.bin" | sha256sum -c -
       - name: Isolate Gikou depth5 baseline then depth8 searches and capture real exit status
         run: |
           set -euo pipefail
