@@ -9,6 +9,9 @@ on:
       - 'benchmarks/strength/ci/adaptive-scorecard.mjs'
       - 'benchmarks/strength/ci/adaptive-scorecard.test.mjs'
       - 'benchmarks/strength/ci/referee-feature-smoke.mjs'
+      - 'benchmarks/strength/ci/referee.cpp'
+      - 'benchmarks/strength/ci/match.mjs'
+      - 'benchmarks/strength/ci/difficulty-scorecard.mjs'
   workflow_dispatch:
 permissions:
   contents: read
