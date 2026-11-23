@@ -68,3 +68,29 @@ test('all four official nominal budgets are accepted for future tiers',()=>{
     assert.equal(scoreDifficultyGames(a).candidateBudgetMs,budget);
   }
 });
+
+test('full-force game clock budget is independently audited for every native turn',()=>{
+  const events=makeSample();
+  Object.assign(events[0],{budget:6000,opponentBudget:1500,
+    candidateClockDivisor:12,opponentClockDivisor:20,
+    candidatePreMoveDelayMs:1300,opponentPreMoveDelayMs:1300,
+    clockDelayMethod:'virtual-debit-not-wall-wait'});
+  for(const game of events.slice(1)){
+    game.turns=game.turns.map(t=>{
+      const candidate=t.engine==='candidate';
+      const requestMs=candidate?6000:1500,elapsed=candidate?6001:1502;
+      return {...t,requestMs,elapsed,
+        clockDivisor:candidate?12:20,
+        clockBeforeMs:180000,
+        preMoveDelayChargedMs:1300,clockAfterDelayMs:178700,
+        chargedMs:1300+elapsed,clockAfterTurnMs:178700-elapsed};
+    });
+  }
+  const score=scoreDifficultyGames(events);
+  assert.equal(score.clockPolicy.candidate.divisor,12);
+  assert.equal(score.clockPolicy.opponent.divisor,20);
+  assert.equal(score.performance.candidate.meanClockChargeMs,7301);
+  assert.equal(score.performance.opponent.meanClockChargeMs,2802);
+  events[1].turns[0].requestMs=1500;
+  assert.throws(()=>scoreDifficultyGames(events),/Observed Worker budget/);
+});
