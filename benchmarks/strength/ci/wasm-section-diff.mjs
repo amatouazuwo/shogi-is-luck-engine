@@ -49,7 +49,7 @@ export function parseWasm(input){
       id,name,label:labels[id]??'unknown',
       payload_length:len.value,payload_sha256:sha(payload),
       span_start:start,span_end:end,
-      raw:b.subarray(start,end),
+      payload,raw:b.subarray(start,end),
     });
     at=end;
   }
@@ -92,7 +92,7 @@ export function compareWasm(a,b){
         leftLength:x?.payload_length??null,rightLength:y?.payload_length??null,
         leftSha256:x?.payload_sha256??null,rightSha256:y?.payload_sha256??null,
         firstDifferentPayloadByte:x&&y?
-          firstDifference(x.raw,y.raw):null,
+          firstDifference(x.payload,y.payload):null,
       });
     }
   }
