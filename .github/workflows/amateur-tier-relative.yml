@@ -1,0 +1,69 @@
+name: Amateur target CPU relative calibration - 100ms versus 500ms
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/amateur-tier-relative.yml'
+      - 'benchmarks/strength/ci/difficulty-scorecard.mjs'
+      - 'benchmarks/strength/ci/difficulty-scorecard.test.mjs'
+      - 'benchmarks/strength/ci/match.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: amateur-tier-relative-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  bounded-amateur-tier-contrast:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate scoreboard and game match commands before expensive builds
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/match.mjs
+          node --check benchmarks/strength/ci/difficulty-scorecard.mjs
+          node --test benchmarks/strength/ci/difficulty-scorecard.test.mjs
+      - name: Install exact locked Rust version for obstacle rules
+        run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build checksum-verified unchanged rsshogi obstacle engine
+        run: |
+          set -euo pipefail
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/amateur-tier-sdk"
+          (cd "$RUNNER_TEMP/amateur-tier-sdk" && sha256sum --check SHA256SUMS)
+      - name: Build independent game legality referee
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/amateur-tier-referee"
+      - name: Generate never-before-used reproducible obstacle opening pairs
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/amateur-tier-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/amateur-100-vs-500-openings.jsonl 20261125 \
+            | tee results/amateur-openings-manifest.json
+      - name: Direct native 100ms versus 500ms on both hole types and reversed colors
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs \
+            "$RUNNER_TEMP/amateur-tier-referee" "$RUNNER_TEMP/amateur-tier-sdk" \
+            100 120 2 0 "$RUNNER_TEMP/amateur-tier-sdk" obstacle \
+            results/amateur-100-vs-500-openings.jsonl 500 \
+            | tee results/amateur-100-vs-500-games.jsonl
+      - name: Verify pair completeness and publish neutral-aware exploratory scorecard
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/difficulty-scorecard.mjs \
+            results/amateur-100-vs-500-games.jsonl 100 500 \
+            | tee results/amateur-100-vs-500-scorecard.json
+          cat results/amateur-100-vs-500-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Explain limitations and preserve log evidence
+        if: always()
+        run: |
+          echo 'Experimental 100ms versus 500ms comparison in one engine/WASM, color-swapped, two obstacle types. Capped games are NEUTRAL, not draws.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This run does NOT validate actual amateur 5-kyu/shodan ranks or assign an Elo, regardless of win/loss results.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Original engine and private game deployment are unchanged. JSONL is printed in Actions logs; no artifact upload due to quota.' >> "$GITHUB_STEP_SUMMARY"
