@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {planTurn} from './clock-budget.mjs';
+import {referenceProxyForDepth} from './gikou-reference-proxies.mjs';
 
 const digest=s=>createHash('sha256').update(s).digest('hex');
 const close=(a,b)=>Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<1.01;
@@ -20,7 +21,9 @@ export function auditNormalReferenceGrid(events,openingCorpus,{
   const cfg=configs[0];
   assert.match(cfg.name,/gikou|技巧/i,'Real Gikou identity required');
   assert.equal(cfg.tag,'v2.0.2');
-  assert.ok([2,3,4,5].includes(cfg.depthLimit),'Unreviewed reference depth');
+  assert.ok([2,3,4,5,8].includes(cfg.depthLimit),'Unreviewed reference depth');
+  assert.deepEqual(cfg.referenceProxy??null,referenceProxyForDepth(cfg.depthLimit),
+    'Provisional reference rank label must match selected depth without certification');
   assert.equal(cfg.book,false,'No book advantage');
   assert.equal(cfg.threads,1);
   assert.equal(cfg.referenceUsesDepthInsteadOfTimeLimit,true,
@@ -149,14 +152,15 @@ export function auditNormalReferenceGrid(events,openingCorpus,{
   });
   return {event:'gikou-depth-grid-audited',status:'exploratory-only',
     externalEngine:cfg.name,externalDepth:cfg.depthLimit,
+    provisionalReference:referenceProxyForDepth(cfg.depthLimit),
     genuinePinnedParameterSha256:cfg.referenceParamsHash,
     sourceNormalOpeningIds:cfg.fixtureIds,uniqueOpeningCount:fixtures.length,
     totalGames:records.length,results:report,
-    pendingHumanGradeValidation:true,amateurGradeAssigned:false,
+    humanValidationRequested:false,amateurGradeAssigned:false,
     relativeTo:'Gikou2 v2.0.2 depth-limited engine only',
     limitations:'Paired games from correlated historic normal openings. Gikou uses depth limit, '+
       'not the same fixed 1-second cap as rsshogi. Even a 50% match score cannot '+ 
-      'certify Shogi Club 24 grade or general amateur rank; human data needed.'};
+      'certify Shogi Club 24 grade or general amateur rank. Depth8 is a user-selected working label, not proof.'};
 }
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
