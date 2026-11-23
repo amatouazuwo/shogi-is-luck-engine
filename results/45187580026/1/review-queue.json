@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "file": "results/direct.jsonl",
+      "kind": "blackhole",
+      "pair": 21,
+      "candidateCommit": "dc3c24d19366a83bfbded42da65d6d21a3235efa",
+      "candidateWasmSha256": "cea5a48cfb4e5df6c10d79e9470048752ecf80b30e4a1ef5f018e43efb1b3901",
+      "baselineWasmSha256": "908d9f8b8e27013245e0433c49d0b544395f178a7ec00178b3952ec9c875c471",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "results": {
+        "candidateSente": "win",
+        "candidateGote": "loss"
+      },
+      "divergencePly": 13,
+      "divergentMoves": {
+        "candidateSente": "B*7f",
+        "candidateGote": "L*8f"
+      },
+      "divergentPositions": {
+        "candidateSente": "spp2n2+L/pk1gp1lp1/3p1ppg1/1s7/1n1r5/9/1G1BPGNS1/1SK+N1P1P1/PP1P2P2 b RBLP2p 21",
+        "candidateGote": "spp2n2+L/pk1gp1lp1/3p1ppg1/1s7/1n1r5/9/1G1BPGNS1/1SK+N1P1P1/PP1P2P2 b RBLP2p 21"
+      },
+      "reviewCandidates": [
+        {
+          "candidateSide": 1,
+          "lastCandidatePly": 46,
+          "lastCandidateMove": "7a7b",
+          "lastCandidateSfen": "skp2n2+L/p1G1p1lp1/1pSp1ppg1/R8/2+R6/2G6/4PGNS1/1SK+N1P1P1/PP1P2P2 w NLP2b2p 54",
+          "precedingMoves": [
+            "1h1d",
+            "1b2c",
+            "1d1a+",
+            "9c8e",
+            "9g8g",
+            "7b6b",
+            "6h7h",
+            "6a8c",
+            "5i6h",
+            "8c4g+",
+            "3h4g",
+            "R*6e",
+            "L*8f",
+            "6e6g",
+            "7h6g",
+            "8b9c",
+            "6g7h",
+            "8a8b",
+            "R*9f",
+            "B*9d",
+            "B*7f",
+            "6b7c",
+            "8f8e",
+            "8d8e",
+            "7f8e",
+            "L*7d",
+            "N*7f",
+            "7d7f",
+            "8g7f",
+            "7c8d",
+            "R*7c",
+            "8b8c",
+            "8e9d",
+            "8d9d",
+            "B*7e",
+            "N*8d",
+            "7e8d",
+            "9c8d",
+            "7c7e+",
+            "8d9c",
+            "9f9d",
+            "9c8b",
+            "S*7c",
+            "8b8a",
+            "G*7b"
+          ],
+          "reason": "no-legal",
+          "plies": 47
+        }
+      ],
+      "priority": "review-single-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "pit",
+      "pair": 21,
+      "candidateCommit": "dc3c24d19366a83bfbded42da65d6d21a3235efa",
+      "candidateWasmSha256": "cea5a48cfb4e5df6c10d79e9470048752ecf80b30e4a1ef5f018e43efb1b3901",
+      "baselineWasmSha256": "908d9f8b8e27013245e0433c49d0b544395f178a7ec00178b3952ec9c875c471",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "results": {
+        "candidateSente": "win",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 2,
+      "divergentMoves": {
+        "candidateSente": "9c8e",
+        "candidateGote": "1b2c"
+      },
+      "divergentPositions": {
+        "candidateSente": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6L/9/6L2/G2BP+RNS1/1SlK1PGP1/PP1P+N1P2 w R2p 10",
+        "candidateGote": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6L/9/6L2/G2BP+RNS1/1SlK1PGP1/PP1P+N1P2 w R2p 10"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/normal.jsonl",
+      "kind": "game",
+      "pair": 8,
+      "candidateCommit": "dc3c24d19366a83bfbded42da65d6d21a3235efa",
+      "candidateWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "baselineWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11",
+      "results": {
+        "candidateSente": "unresolved",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 2,
+      "divergentMoves": {
+        "candidateSente": "1c1d",
+        "candidateGote": "9b8c"
+      },
+      "divergentPositions": {
+        "candidateSente": "1+p1ps2nb/+p1lgn+pp+rk/1+Lp1pglp+p/9/9/9/2PPG1SL+P/PG2PPRP1/SPK1B1PN+N w S 2",
+        "candidateGote": "1+p1ps2nb/+p1lgn+pp+rk/1+Lp1pglp+p/9/9/9/2PPG1SL+P/PG2PPRP1/SPK1B1PN+N w S 2"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    },
+    {
+      "file": "results/normal.jsonl",
+      "kind": "hirate",
+      "pair": 8,
+      "candidateCommit": "dc3c24d19366a83bfbded42da65d6d21a3235efa",
+      "candidateWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "baselineWasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d",
+      "opponent": "baseline",
+      "budgetMs": 100,
+      "fixtureSha256": "071cdcabdfeb8ab9e43530170b8e90ec625d1a697d5bda870612171db7974b11",
+      "results": {
+        "candidateSente": "unresolved",
+        "candidateGote": "unresolved"
+      },
+      "divergencePly": 4,
+      "divergentMoves": {
+        "candidateSente": "7a6b",
+        "candidateGote": "6a5b"
+      },
+      "divergentPositions": {
+        "candidateSente": "lnsg1g1nl/1r3ksb1/p1pppp1pp/6p2/1p7/2PP3P1/PPB1PPP1P/2SG3R1/LN2KGSNL w - 12",
+        "candidateGote": "lnsg1g1nl/1r3ksb1/p1pppp1pp/6p2/1p7/2PP3P1/PPB1PPP1P/2SG3R1/LN2KGSNL w - 12"
+      },
+      "reviewCandidates": [],
+      "priority": "no-confirmed-loss",
+      "caveat": "These are replay entry points, not proven blunders. No position evaluation, causal proof or engine improvement is implied."
+    }
+  ]
+}
