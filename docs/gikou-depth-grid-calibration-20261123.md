@@ -1,5 +1,8 @@
 # 技巧2とrsshogiのノード数・探索深さの実対局校正 第2段階
 
+> **追加訂正（2026-11-23）**：公式技巧2のソースを再確認した結果、評価モデルの一部である`probability.bin`も必要でした（`src/main.cc`から呼ばれる`MoveProbability::Init()`が使用）。公式配布ZIPに同梱されていることと、SHA-256 `dc2b18f1eaa7551822901eab7b68c6f279cc449ef527462b611b5d9510cb6c1a` を[確認済み](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45119493528)。これまでの技巧2戦は`params.bin`のみ、または`params.bin`＋`progress.bin`の不完全な条件だったため、**段級位・ノード数換算の決定根拠には採用しません**。3つの公式評価ファイルを揃え、既知の終局局面対策パッチを適用した[新しい再測定](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45119596031)の結果を採用します。
+
+
 > **訂正・重要（2026-11-23）**：本資料の過去の「技巧2 vs rsshogi」の勝敗は、公式`params.bin`は配置していたものの、技巧2が使用する公式`progress.bin`を欠いた環境で測定されたことが判明しました。**この勝敗に基づくノード数と棋力の結び付けはいったん撤回し、校正済みの値として使いません。** 正しい評価データと終局局面でのクラッシュ防止パッチを用いる[再測定](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45118969180)を別条件として扱います。**特殊盤面のrsshogi単独実験には影響しません。** またユーザー方針により人間との対局は必須とせず、技巧2の深さ8を「アマ四段程度（仮）」の便宜的比較基準とします。
 
 
