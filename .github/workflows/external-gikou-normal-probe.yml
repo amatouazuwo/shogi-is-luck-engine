@@ -50,11 +50,13 @@ jobs:
             -o "$RUNNER_TEMP/gikou2_win.zip" \
             https://github.com/gikou-official/Gikou/releases/download/v2.0.2/gikou2_win.zip
           sha256sum "$RUNNER_TEMP/gikou2_win.zip"
+          echo "3bbb667bfd77e0236b052593b5c61b7fe1827ed72b5b5f437760c60974852757  $RUNNER_TEMP/gikou2_win.zip" | sha256sum -c -
           unzip -q "$RUNNER_TEMP/gikou2_win.zip" -d "$RUNNER_TEMP/gikou-eval"
           PARAM=$(find "$RUNNER_TEMP/gikou-eval" -type f -name params.bin -print -quit)
           test -n "$PARAM"
           cp "$PARAM" "$RUNNER_TEMP/gikou-src/params.bin"
           sha256sum "$RUNNER_TEMP/gikou-src/params.bin"
+          echo "6bbc573306839fe019634dd94b06af7c22834a641e8bc060e23889ae9b3b2195  $RUNNER_TEMP/gikou-src/params.bin" | sha256sum -c -
           echo 'Genuine published Gikou2 parameter file found (SHA256 in log)' >> "$GITHUB_STEP_SUMMARY"
       - name: Build unchanged pinned obstacle-aware NNUE WASM and independent legal referee
         run: |
