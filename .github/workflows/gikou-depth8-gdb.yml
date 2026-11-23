@@ -35,6 +35,13 @@ jobs:
           test -n "$PARAM"
           cp "$PARAM" "$RUNNER_TEMP/gikou-debug/params.bin"
           echo "6bbc573306839fe019634dd94b06af7c22834a641e8bc060e23889ae9b3b2195  $RUNNER_TEMP/gikou-debug/params.bin" | sha256sum -c -
+          echo 'Shipped engine weight files:'
+          find "$RUNNER_TEMP/gikou-eval" -type f -printf '%P %s bytes\n' | grep -Ei '(progress|params)\.bin' || true
+          PROGRESS=$(find "$RUNNER_TEMP/gikou-eval" -type f -name progress.bin -print -quit)
+          test -n "$PROGRESS" || { echo 'ERROR: official Gikou2 zip is missing mandatory progress.bin'; exit 1; }
+          cp "$PROGRESS" "$RUNNER_TEMP/gikou-debug/progress.bin"
+          test -s "$RUNNER_TEMP/gikou-debug/progress.bin"
+          sha256sum "$RUNNER_TEMP/gikou-debug/progress.bin"
       - name: Obtain backtrace or explicitly report nonreproduction
         run: |
           set -euo pipefail
