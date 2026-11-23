@@ -1,0 +1,103 @@
+name: Reproducibility audit - independently rebuild obstacle NNUE WASM twice
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/wasm-reproducibility-audit.yml'
+      - 'benchmarks/strength/ci/wasm-section-diff.mjs'
+      - 'benchmarks/strength/ci/wasm-section-diff.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: reproducible-obstacle-wasm-draft
+  cancel-in-progress: true
+jobs:
+  wasm-section-diff:
+    name: Compare custom, code and data sections of 2 independently built SDKs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate the binary parser and its negative controls
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/wasm-section-diff.mjs
+          node --test benchmarks/strength/ci/wasm-section-diff.test.mjs
+      - name: Record pinned compiler and build input hashes
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          rustc +1.95.0 --version --verbose
+          cargo +1.95.0 --version --verbose
+          sha256sum scripts/build-obstacle-sdk.sh patches/obstacle-engine.patch \
+            patches/obstacle-rules.patch
+      - name: Independently generate first NNUE WASM using exact existing recipe
+        run: |
+          set -euo pipefail
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/wasm-repro-A"
+          (cd "$RUNNER_TEMP/wasm-repro-A" && sha256sum -c SHA256SUMS)
+          sha256sum "$RUNNER_TEMP/wasm-repro-A/rsshogi_nnue_mini.wasm"
+      - name: Independently generate second NNUE WASM using same recipe and runner
+        run: |
+          set -euo pipefail
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/wasm-repro-B"
+          (cd "$RUNNER_TEMP/wasm-repro-B" && sha256sum -c SHA256SUMS)
+          sha256sum "$RUNNER_TEMP/wasm-repro-B/rsshogi_nnue_mini.wasm"
+      - name: Audit exact per-section difference (no identity assumptions)
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/wasm-section-diff.mjs \
+            "$RUNNER_TEMP/wasm-repro-A/rsshogi_nnue_mini.wasm" \
+            "$RUNNER_TEMP/wasm-repro-B/rsshogi_nnue_mini.wasm" \
+            | tee results/wasm-section-audit.jsonl
+          python3 - <<'PY'
+          import json
+          with open('results/wasm-section-audit.jsonl',encoding='utf8') as f: r=json.load(f)
+          assert r['event']=='wasm-reproducibility-section-diff'
+          assert r['comparison'] in ('byte-identical','custom-sections-only',
+                                     'non-custom-sections-differ')
+          assert r['left']['byteLength']>4000000
+          assert r['right']['byteLength']>4000000
+          assert any(s['name']=='code' for s in r['left']['sections'])
+          assert any(s['name']=='data' for s in r['left']['sections'])
+          assert len(r['left']['sha256'])==len(r['right']['sha256'])==64
+          print('WASM REPRODUCIBILITY CLASSIFICATION:',r['comparison'])
+          print('CODE SECTION IDENTICAL:',r['codeSectionIdentical'])
+          print('DATA SECTION IDENTICAL:',r['dataSectionIdentical'])
+          print('NONCUSTOM SECTION IDENTICAL:',r['nonCustomSectionsIdentical'])
+          print('CHANGED SECTIONS:',[x['section'] for x in r['changed']])
+          if r['comparison']=='non-custom-sections-differ':
+              print('WARNING: code/data or other noncustom section differs; '
+                    'behavioral equivalence NOT established')
+          elif r['comparison']=='custom-sections-only':
+              print('Runtime noncustom section bytes identical; '
+                    'exact WASM bytes are STILL different')
+          else:
+              print('Byte-reproducible within one runner for these TWO builds; '
+                    'this does not prove equality to previously committed private game WASM')
+          PY
+          {
+            echo '### rsshogi obstacle WASM reproducibility investigation'
+            echo 'Two full separate builds with identical pinned source, Rust toolchain and Linux runner.'
+            echo 'This job reports, but does not suppress or normalize, binary divergence.'
+            echo 'The previously pinned private-game WASM hash is 0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108.'
+            echo 'This DOES NOT verify that the private game WASM is byte-identical or behaviorally interchangeable.'
+            cat results/wasm-section-audit.jsonl
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Save section metadata report only (never private game files)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-section-audit
+          path: results/wasm-section-audit.jsonl
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Preserve live game and CPU profile restrictions
+        if: always()
+        run: |
+          echo 'This was a public engine draft-only reproducibility experiment; no private game binaries copied, no CPU difficulty changes, no PR merge, no deploy.' >> "$GITHUB_STEP_SUMMARY"
