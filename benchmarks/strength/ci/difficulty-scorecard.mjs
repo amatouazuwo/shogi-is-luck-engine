@@ -128,6 +128,22 @@ export function scoreDifficultyGames(events, {
       undecided:rows.filter(g=>g.winner===null).length,
     }];
   }));
+  // The original SFEN families and side swaps are correlated; publish
+  // breakdowns rather than hiding opposite outcomes inside an aggregate.
+  const scoreGroup=rows=>({
+    games:rows.length,
+    candidateWins:rows.filter(g=>g.winner===g.candidateSide).length,
+    opponentWins:rows.filter(g=>g.winner!==null&&g.winner!==g.candidateSide).length,
+    neutralUndecided:rows.filter(g=>g.winner===null).length,
+  });
+  const byOpeningPair=Object.fromEntries(
+    [...new Set(games.map(g=>g.pair))].sort((a,b)=>a-b).map(pair=>[
+      String(pair),scoreGroup(games.filter(g=>g.pair===pair)),
+    ]),
+  );
+  const byCandidateSide=Object.fromEntries([0,1].map(side=>[
+    String(side),scoreGroup(games.filter(g=>g.candidateSide===side)),
+  ]));
   // A game won on the board is not equivalent to a clock-flag win in a
   // three-minute game. Report both separately so stronger but slower search
   // does not hide real time-forfeit risk.
@@ -153,6 +169,8 @@ export function scoreDifficultyGames(events, {
       Math.round((wins+undecided)/n*10000)/10000],
     candidateDecidedWinRate:wins+losses?Math.round(wins/(wins+losses)*10000)/10000:null,
     breakdownByObstacle:kindBreakdown,
+    byOpeningPair,
+    byCandidateSide,
     byTermination,
     performance:{candidate:scoreSide('candidate'),opponent:scoreSide('opponent')},
     sameModelAndWorker:true,
