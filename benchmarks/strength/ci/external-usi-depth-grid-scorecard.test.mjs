@@ -43,7 +43,7 @@ function sample(){
      balances[side]-=charge;turns.push(turn);
    }
    const neutral=f.pair===9;
-   games.push({event:'gikou-normal-match-game',nodesCap,pair:f.pair,
+   games.push({event:'gikou-normal-match-game',nodesCap:nodeCap,pair:f.pair,
      candidateSide,start:f.opening,clocks:balances,
      winner:neutral?null:0,reason:neutral?'repetition-unadjudicated':'no-legal',
      turns});
