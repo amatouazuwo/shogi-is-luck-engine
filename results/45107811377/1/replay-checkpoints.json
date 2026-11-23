@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "verifiedGames": 8,
+  "verifiedMoves": 448,
+  "skippedTerminalMoves": 0,
+  "checkpointCount": 0,
+  "perLossLimit": 3,
+  "checkpoints": [],
+  "warning": "Reference-rules replay only. Does not prove parity with private game, strength improvement, or blunder causality."
+}

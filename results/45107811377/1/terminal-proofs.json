@@ -1,0 +1,11 @@
+{
+  "schema": 3,
+  "certificateScheme": "exists-win / forall-loss / terminal-no-legal",
+  "maxPositions": 2,
+  "selectionRule": "fewest maximum legal opponent replies then total replies",
+  "depthAfterCandidateMove": 3,
+  "maxNodesPerBranch": 300,
+  "analyzed": 0,
+  "records": [],
+  "warning": "Finite-horizon exhaustive terminal checks only. UNKNOWN is not a draw. Short-horizon contrasts must be checked against full game rules, new holdout cases, and stronger search before declaring a general blunder."
+}

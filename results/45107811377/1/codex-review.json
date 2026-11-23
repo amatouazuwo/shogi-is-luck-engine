@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "source": "results/reply-probes.json",
+  "caseCount": 0,
+  "cases": [],
+  "caveats": [
+    "Original starts are archived; this is not a fresh held-out evaluation.",
+    "A different reference reply does not imply a better alternative move.",
+    "Search results have not been checked for tactical correctness against all legal replies.",
+    "Do not promote or deploy a candidate based on this diagnostic list."
+  ]
+}
