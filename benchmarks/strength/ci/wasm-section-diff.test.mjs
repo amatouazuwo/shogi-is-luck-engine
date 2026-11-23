@@ -44,6 +44,8 @@ test('code section difference is flagged, never falsely marked equivalent',()=>{
   assert.equal(r.dataSectionIdentical,true);
   assert.equal(r.changed.length,1);
   assert.equal(r.changed[0].section,'section:10');
+  assert.equal(r.changed[0].firstDifferentPayloadByte,2,
+    'Diagnostic byte offsets must exclude section ID and length framing');
 });
 test('data section difference is also a noncustom difference',()=>{
   const r=compareWasm(wasm('alpha',[1,2,3],[9,8]),
