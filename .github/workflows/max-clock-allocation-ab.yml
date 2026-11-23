@@ -1,0 +1,76 @@
+name: Experimental maximum clock allocation A-B (24 and 36 versus current 12)
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/max-clock-allocation-ab.yml'
+      - 'benchmarks/strength/ci/clock-policy-ab-scorecard.mjs'
+      - 'benchmarks/strength/ci/clock-policy-ab-scorecard.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: max-clock-allocation-ab-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  paired-fullforce-ab:
+    strategy:
+      fail-fast: false
+      matrix:
+        clock_divisor: [24, 36]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify all test helpers before expensive build
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/match.mjs
+          node --check benchmarks/strength/ci/clock-budget.mjs
+          node --check benchmarks/strength/ci/clock-policy-ab-scorecard.mjs
+          node --test benchmarks/strength/ci/clock-budget.test.mjs \
+            benchmarks/strength/ci/difficulty-scorecard.test.mjs \
+            benchmarks/strength/ci/clock-policy-ab-scorecard.test.mjs
+      - name: Rebuild pinned original rsshogi with obstacle rules
+        run: |
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/clock-ab-sdk"
+          (cd "$RUNNER_TEMP/clock-ab-sdk" && sha256sum -c SHA256SUMS)
+      - name: Build independent shogi legality referee
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/clock-ab-referee"
+      - name: Same fixed openings across BOTH clock-allocation experiments
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/clock-ab-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/clock-ab-openings.jsonl 20261130 \
+            | tee results/clock-ab-opening-manifest.json
+      - name: Play real 6000ms versus 6000ms with different clock fractions (reversed colors)
+        run: |
+          set -euo pipefail
+          # Experimental max clock divisor = matrix(24 or 36); existing max=12.
+          # Both retain the SAME 6000ms ceiling and virtual 1300ms pre-move wait.
+          # 100-ply verification limit is UNDECIDED, not a draw.
+          node benchmarks/strength/ci/match.mjs \
+            "$RUNNER_TEMP/clock-ab-referee" "$RUNNER_TEMP/clock-ab-sdk" \
+            6000 100 1 0 "$RUNNER_TEMP/clock-ab-sdk" obstacle \
+            results/clock-ab-openings.jsonl 6000 ${{ matrix.clock_divisor }} 12 1300 1300 \
+            | tee results/clock-ab-${{ matrix.clock_divisor }}-games.jsonl
+      - name: Independently audit every move clock and summarize A-B outcome
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/clock-policy-ab-scorecard.mjs \
+            results/clock-ab-${{ matrix.clock_divisor }}-games.jsonl ${{ matrix.clock_divisor }} \
+            | tee results/clock-ab-${{ matrix.clock_divisor }}-scorecard.json
+          cat results/clock-ab-${{ matrix.clock_divisor }}-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Explain reliability and safety constraints
+        if: always()
+        run: |
+          echo 'Experimental clock divisor ${{ matrix.clock_divisor }} versus existing 12. All sides use same 6000ms cap, same rsshogi WASM+Worker, same 3-minute clock and pre-move delay, with color-swapped pit/blackhole.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Small sample (4 games per policy); unadjudicated 100-ply or repetitions remain NEUTRAL. Not an Elo, not amateur-rank calibration. No 1% effects or real browser delays.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'NO automatic tuning, merge, main/develop update, or production Render deployment. Keep JSONL in job logs because artifacts quota is exhausted.' >> "$GITHUB_STEP_SUMMARY"
