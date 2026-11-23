@@ -56,7 +56,7 @@ jobs:
             -ex 'set pagination off' \
             -ex 'set print thread-events off' \
             -ex 'set debuginfod enabled off' \
-            -ex "run < $RUNNER_TEMP/depth8-reproducer.usi" \
+            -ex 'run' \
             -ex 'thread apply all bt 12' \
             -ex 'thread 1' \
             -ex 'frame 7' \
@@ -68,7 +68,8 @@ jobs:
             -ex 'print this->shared_.signals.stop' \
             -ex 'print this->shared_.signals.limit_reached' \
             -ex 'print this->root_moves_.size()' \
-            --args "$RUNNER_TEMP/gikou-debug/bin/development" 2>&1 \
+            --args "$RUNNER_TEMP/gikou-debug/bin/development" \
+            < <(cat "$RUNNER_TEMP/depth8-reproducer.usi"; sleep 12) 2>&1 \
             | tee "$RUNNER_TEMP/depth8-backtrace.log"
           result=$?
           set -e
@@ -79,6 +80,7 @@ jobs:
             echo "Debug build produced no crash signal (status $result); may depend on build optimization or game history." >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "GDB_EXIT_STATUS=$result"
+          echo 'Kept standard input open for 12 seconds to prevent upstream EOF-triggered stop.' >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve non-production diagnostic boundary
         if: always()
         run: |
