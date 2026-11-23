@@ -1,0 +1,78 @@
+name: Native rsshogi diminishing returns - 1s and 3s versus 6s
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/think-time-diminishing-returns.yml'
+      - 'benchmarks/strength/ci/think-time-efficiency.mjs'
+      - 'benchmarks/strength/ci/think-time-efficiency.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: think-time-diminishing-returns-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  fixed-cap-clock-controlled:
+    strategy:
+      fail-fast: false
+      matrix:
+        max_think_ms: [1000, 3000]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify budget, match and reports without any engine build
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/match.mjs
+          node --check benchmarks/strength/ci/difficulty-scorecard.mjs
+          node --check benchmarks/strength/ci/think-time-efficiency.mjs
+          node --test benchmarks/strength/ci/clock-budget.test.mjs \
+            benchmarks/strength/ci/difficulty-scorecard.test.mjs \
+            benchmarks/strength/ci/think-time-efficiency.test.mjs
+      - name: Build and verify the same pinned obstacle-aware rsshogi
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/time-return-sdk"
+          (cd "$RUNNER_TEMP/time-return-sdk" && sha256sum -c SHA256SUMS)
+      - name: Compile independent legal-move referee
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/time-return-referee"
+      - name: Generate identical diverse openings for each thinking-time trial
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/time-return-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/time-return-openings.jsonl 20261202 \
+            | tee results/time-return-openings-manifest.json
+      - name: Match native short search against full six-second reference
+        run: |
+          set -euo pipefail
+          # CHANGE ONLY per-move max think budget 1000/3000 versus 6000ms.
+          # BOTH use clock divisor 12 and 1300ms pre-move delay.
+          # Identical start positions and side reversal, pit+blackhole.
+          # 100-ply limit = NEUTRAL UNDECIDED, not a draw.
+          node benchmarks/strength/ci/match.mjs \
+            "$RUNNER_TEMP/time-return-referee" "$RUNNER_TEMP/time-return-sdk" \
+            ${{ matrix.max_think_ms }} 100 1 0 "$RUNNER_TEMP/time-return-sdk" obstacle \
+            results/time-return-openings.jsonl 6000 12 12 1300 1300 \
+            | tee results/time-return-${{ matrix.max_think_ms }}-games.jsonl
+      - name: Validate paired games, compare depth, wins and remaining clock
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/think-time-efficiency.mjs \
+            results/time-return-${{ matrix.max_think_ms }}-games.jsonl ${{ matrix.max_think_ms }} \
+            | tee results/time-return-${{ matrix.max_think_ms }}-scorecard.json
+          cat results/time-return-${{ matrix.max_think_ms }}-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve important limitations
+        if: always()
+        run: |
+          echo 'Short versus 6000ms in the exact same engine/WASM/Worker, 180s clock, /12 divisor and 1300ms virtual charged pre-move delay. Each matrix is 4 correlated games, not rank-verified Elo.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Unfinished or repeated positions are NEUTRAL, not draws. Depth, nodes and time are NOT linear strength units.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No ranking labels changed, no CPU calibration claims, no changes to game main/develop or Render production. JSONL in Actions logs (artifact quota).' >> "$GITHUB_STEP_SUMMARY"
