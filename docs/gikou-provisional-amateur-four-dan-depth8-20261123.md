@@ -1,5 +1,8 @@
 # 技巧2 深さ8：「アマ四段程度（仮）」比較基準の採用（2026-11-23）
 
+> **追加訂正（2026-11-23）**：公式技巧2のソースを再確認した結果、評価モデルの一部である`probability.bin`も必要でした（`src/main.cc`から呼ばれる`MoveProbability::Init()`が使用）。公式配布ZIPに同梱されていることと、SHA-256 `dc2b18f1eaa7551822901eab7b68c6f279cc449ef527462b611b5d9510cb6c1a` を[確認済み](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45119493528)。これまでの技巧2戦は`params.bin`のみ、または`params.bin`＋`progress.bin`の不完全な条件だったため、**段級位・ノード数換算の決定根拠には採用しません**。3つの公式評価ファイルを揃え、既知の終局局面対策パッチを適用した[新しい再測定](https://github.com/amatouazuwo/shogi-is-luck-engine/actions/runs/45119596031)の結果を採用します。
+
+
 ## 採用する仮設定
 
 **技巧2（Gikou2 v2.0.2）の探索深さ8を、開発用の「アマ四段程度（仮）」比較基準として使う。**
