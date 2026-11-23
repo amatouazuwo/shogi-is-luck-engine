@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "verifiedGames": 8,
+  "verifiedMoves": 434,
+  "skippedTerminalMoves": 0,
+  "checkpointCount": 3,
+  "perLossLimit": 3,
+  "checkpoints": [
+    {
+      "file": "results/direct.jsonl",
+      "kind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "reason": "no-legal",
+      "start": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6r/9/9/G2BP+RNS1/1SlK1PGPL/PP1P+N1P2 b 2p 9",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "sourceCandidateWasmSha256": "36f469ddd19ee1de8e2f0ee2dfc0ae0f85e4d27cc7ad7ee83d65f2692faf861a",
+      "sourceBaselineWasmSha256": "b5e95e2dbc44c3dee9c8b286d84f16c7e6c6a9011f516c32958635f25c2ca93c",
+      "budgetMs": 100,
+      "candidatePly": 30,
+      "sfen": "spp2n2+L/pkb3lp1/2S+R1ppg1/nsG6/9/Ln7/2KBP+RN+p1/1S1P1PGP1/PP4P2 w G3Pp 38",
+      "playedMove": "8d7c",
+      "legalMoveCount": 2,
+      "legalMoves": [
+        "8b9c",
+        "8d7c"
+      ],
+      "notice": "Choice point in a loss, not a proven blunder. Legal alternatives are not ranked."
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "reason": "no-legal",
+      "start": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6r/9/9/G2BP+RNS1/1SlK1PGPL/PP1P+N1P2 b 2p 9",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "sourceCandidateWasmSha256": "36f469ddd19ee1de8e2f0ee2dfc0ae0f85e4d27cc7ad7ee83d65f2692faf861a",
+      "sourceBaselineWasmSha256": "b5e95e2dbc44c3dee9c8b286d84f16c7e6c6a9011f516c32958635f25c2ca93c",
+      "budgetMs": 100,
+      "candidatePly": 28,
+      "sfen": "spp2n2+L/p1b3lp1/k2+R1ppg1/nsG6/9/Ln7/2KBP+RN+p1/1S1P1PGP1/PP4P2 w GS3Pp 36",
+      "playedMove": "9c8b",
+      "legalMoveCount": 4,
+      "legalMoves": [
+        "7b6c",
+        "7b8c",
+        "8d7c",
+        "9c8b"
+      ],
+      "notice": "Choice point in a loss, not a proven blunder. Legal alternatives are not ranked."
+    },
+    {
+      "file": "results/direct.jsonl",
+      "kind": "blackhole",
+      "pair": 21,
+      "candidateSide": 1,
+      "reason": "no-legal",
+      "start": "sppb1n2p/pkg1p1lpg/n2p1pp2/1s6r/9/9/G2BP+RNS1/1SlK1PGPL/PP1P+N1P2 b 2p 9",
+      "holes": [
+        "4d",
+        "3d",
+        "2d",
+        "4e",
+        "3e",
+        "2e",
+        "4f",
+        "3f",
+        "2f"
+      ],
+      "sourceFixtureSha256": "93faffbce960dca53c54d802340162d49a94682577a756c5470488cee9657871",
+      "sourceCandidateWasmSha256": "36f469ddd19ee1de8e2f0ee2dfc0ae0f85e4d27cc7ad7ee83d65f2692faf861a",
+      "sourceBaselineWasmSha256": "b5e95e2dbc44c3dee9c8b286d84f16c7e6c6a9011f516c32958635f25c2ca93c",
+      "budgetMs": 100,
+      "candidatePly": 26,
+      "sfen": "spp2n2+L/p1b1+R1lp1/k2p1ppg1/1sG6/9/Ln7/2KBP+RN+p1/1S1P1PGP1/PP4P2 w GS2Pnp 34",
+      "playedMove": "N*9d",
+      "legalMoveCount": 5,
+      "legalMoves": [
+        "7b9d",
+        "8d9e",
+        "9c8b",
+        "N*9d",
+        "N*9e"
+      ],
+      "notice": "Choice point in a loss, not a proven blunder. Legal alternatives are not ranked."
+    }
+  ],
+  "warning": "Reference-rules replay only. Does not prove parity with private game, strength improvement, or blunder causality."
+}
