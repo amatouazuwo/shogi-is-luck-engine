@@ -1,0 +1,61 @@
+name: Diagnose real Gikou2 depth8 reference search
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/gikou-depth8-isolated.yml'
+      - 'benchmarks/strength/ci/gikou-depth8-isolated-smoke.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolate-real-depth8:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate isolated diagnostic source
+        run: |
+          node --check benchmarks/strength/ci/gikou-depth8-isolated-smoke.mjs
+          node --test benchmarks/strength/ci/gikou-reference-proxies.test.mjs
+      - name: Build official Gikou 2 source at fixed revision
+        run: |
+          set -euo pipefail
+          git init -q "$RUNNER_TEMP/gikou-src"
+          git -C "$RUNNER_TEMP/gikou-src" fetch -q --depth 1 \
+            https://github.com/gikou-official/Gikou.git \
+            f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-src" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/gikou-src" rev-parse HEAD)" = \
+            f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          make -C "$RUNNER_TEMP/gikou-src" release -j2
+      - name: Fetch verified official evaluation parameters
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 300 \
+            -o "$RUNNER_TEMP/gikou2_win.zip" \
+            https://github.com/gikou-official/Gikou/releases/download/v2.0.2/gikou2_win.zip
+          echo "3bbb667bfd77e0236b052593b5c61b7fe1827ed72b5b5f437760c60974852757  $RUNNER_TEMP/gikou2_win.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/gikou-eval"
+          unzip -q "$RUNNER_TEMP/gikou2_win.zip" -d "$RUNNER_TEMP/gikou-eval"
+          PARAM=$(find "$RUNNER_TEMP/gikou-eval" -type f -name params.bin -print -quit)
+          test -n "$PARAM"
+          cp "$PARAM" "$RUNNER_TEMP/gikou-src/params.bin"
+          echo "6bbc573306839fe019634dd94b06af7c22834a641e8bc060e23889ae9b3b2195  $RUNNER_TEMP/gikou-src/params.bin" | sha256sum -c -
+      - name: Isolate Gikou depth5 baseline then depth8 searches and capture real exit status
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          node benchmarks/strength/ci/gikou-depth8-isolated-smoke.mjs \
+            "$RUNNER_TEMP/gikou-src/bin/release" "$RUNNER_TEMP/gikou-src" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            | tee "$RUNNER_TEMP/depth8-isolated-diagnostic.jsonl"
+          tail -n 4 "$RUNNER_TEMP/depth8-isolated-diagnostic.jsonl" >> "$GITHUB_STEP_SUMMARY"
+      - name: Confirm diagnostic is not a human-grade calibration
+        if: always()
+        run: |
+          echo 'Gikou2 DepthLimit=8 is a user-selected provisional fourth-dan comparator, not an official rank.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This isolated probe does not use rsshogi or touch game code, main/develop or Render.' >> "$GITHUB_STEP_SUMMARY"
