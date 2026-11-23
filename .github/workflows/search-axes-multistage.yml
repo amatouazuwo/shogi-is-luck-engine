@@ -1,0 +1,92 @@
+name: Search control validation across opening middle and reduced positions
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/search-axes-multistage.yml'
+      - 'benchmarks/strength/ci/search-axis-stage-scorecard.mjs'
+      - 'benchmarks/strength/ci/search-axis-stage-scorecard.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: search-axes-multistage-draft
+  cancel-in-progress: true
+jobs:
+  paired-stage-trials:
+    strategy:
+      fail-fast: false
+      matrix:
+        axis: [depth, nodes]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate stage classification, fixture SHA and neutral outcomes
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/search-axis-match.mjs
+          node --check benchmarks/strength/ci/search-axis-stage-scorecard.mjs
+          node --test benchmarks/strength/ci/search-control-contract.test.mjs \
+            benchmarks/strength/ci/search-axis-scorecard.test.mjs \
+            benchmarks/strength/ci/search-axis-stage-scorecard.test.mjs \
+            benchmarks/strength/ci/difficulty-scorecard.test.mjs \
+            benchmarks/strength/ci/clock-budget.test.mjs
+      - name: Build and verify same pinned rsshogi NNUE Worker for both sides
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/stage-sdk"
+          (cd "$RUNNER_TEMP/stage-sdk" && sha256sum -c SHA256SUMS)
+      - name: Build independent obstacle legal move referee
+        run: |
+          set -euo pipefail
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/stage-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs "$RUNNER_TEMP/stage-referee"
+      - name: Select one independent axis; keep time, model and clock equal
+        run: |
+          if [ "${{ matrix.axis }}" = "depth" ]; then
+            echo 'CAND_DEPTH=4' >> "$GITHUB_ENV"
+            echo 'OPP_DEPTH=2' >> "$GITHUB_ENV"
+            echo 'CAND_NODES=250000' >> "$GITHUB_ENV"
+            echo 'OPP_NODES=250000' >> "$GITHUB_ENV"
+          else
+            echo 'CAND_DEPTH=64' >> "$GITHUB_ENV"
+            echo 'OPP_DEPTH=64' >> "$GITHUB_ENV"
+            echo 'CAND_NODES=10000' >> "$GITHUB_ENV"
+            echo 'OPP_NODES=500' >> "$GITHUB_ENV"
+          fi
+      - name: Play six pre-existing opening families x two obstacles x two colors
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          # 2 opening + 2 middle + 2 reduced family IDs, archived BEFORE
+          # this stage hypothesis. These are not brand-new hidden holdouts.
+          # Each side gets 1000ms max, 180s total, /20 divisor, 1300ms
+          # charged pre-move. Unfinished at 300ply stays NEUTRAL.
+          node benchmarks/strength/ci/search-axis-match.mjs \
+            "$RUNNER_TEMP/stage-referee" "$RUNNER_TEMP/stage-sdk" \
+            1000 300 6 0 "$RUNNER_TEMP/stage-sdk" obstacle \
+            benchmarks/strength/experiments/holdout-openings.jsonl \
+            1000 20 20 1300 1300 \
+            fixed fixed "$CAND_DEPTH" "$OPP_DEPTH" "$CAND_NODES" "$OPP_NODES" \
+            | tee results/search-axes-multistage-${{ matrix.axis }}.jsonl
+      - name: Audit every turn and report stage, obstacle and paired-family results
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/search-axis-stage-scorecard.mjs \
+            results/search-axes-multistage-${{ matrix.axis }}.jsonl \
+            benchmarks/strength/experiments/holdout-openings.jsonl \
+            ${{ matrix.axis }} \
+            | tee results/search-axes-multistage-${{ matrix.axis }}-scorecard.json
+          cat results/search-axes-multistage-${{ matrix.axis }}-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: State statistical and implementation limits
+        if: always()
+        run: |
+          echo '24 correlated games; only six original families, 12 obstacle positions; all pairs color-swapped.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Archived labels opening/middle/reduced, not a verified human endgame strength test.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Capped/repetition = neutral; no automatic Elo or amateur-rank label.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Game CPU presets, main, develop and production Render untouched; no 1% events/browser rendering.' >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,74 @@
+name: Check provisional 25k fourth-dan NNUE tier on special obstacle boards
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/provisional-four-dan-special.yml'
+      - 'benchmarks/strength/ci/provisional-four-dan-special-scorecard.mjs'
+      - 'benchmarks/strength/ci/provisional-four-dan-special-scorecard.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: provisional-four-dan-special-draft
+  cancel-in-progress: true
+jobs:
+  same-engine-paired-obstacles:
+    strategy:
+      fail-fast: false
+      matrix:
+        reference_nodes: [10000, 50000]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Independently test obstacle pairing and scorecard integrity
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/provisional-four-dan-special-scorecard.mjs
+          node --check benchmarks/strength/ci/search-axis-match.mjs
+          node --test benchmarks/strength/ci/provisional-four-dan-special-scorecard.test.mjs \
+            benchmarks/strength/ci/difficulty-scorecard.test.mjs \
+            benchmarks/strength/ci/clock-budget.test.mjs
+      - name: Build and verify same pinned obstacle-aware NNUE for both sides
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/provisional-sdk"
+          (cd "$RUNNER_TEMP/provisional-sdk" && sha256sum -c SHA256SUMS)
+      - name: Compile independent rules referee
+        run: |
+          set -euo pipefail
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/provisional-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs "$RUNNER_TEMP/provisional-referee"
+      - name: Play six archived families with pit and blackhole, swap both colors
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/search-axis-match.mjs \
+            "$RUNNER_TEMP/provisional-referee" "$RUNNER_TEMP/provisional-sdk" \
+            1000 300 6 0 "$RUNNER_TEMP/provisional-sdk" obstacle \
+            benchmarks/strength/experiments/holdout-openings.jsonl \
+            1000 20 20 1300 1300 \
+            fixed fixed 64 64 25000 ${{ matrix.reference_nodes }} \
+            | tee results/provisional-25k-vs-${{ matrix.reference_nodes }}.jsonl
+      - name: Audit every game and publish opening/middle/reduced breakdown
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/provisional-four-dan-special-scorecard.mjs \
+            results/provisional-25k-vs-${{ matrix.reference_nodes }}.jsonl \
+            benchmarks/strength/experiments/holdout-openings.jsonl \
+            ${{ matrix.reference_nodes }} \
+            | tee results/provisional-25k-vs-${{ matrix.reference_nodes }}-scorecard.json
+          cat results/provisional-25k-vs-${{ matrix.reference_nodes }}-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve limited interpretation and production boundary
+        if: always()
+        run: |
+          echo '25k node cap is PROVISIONAL, based on approximate normal-board comparison with Gikou2 depth8.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Same obstacle NNUE Worker, same 1s cap, same 3-minute clock. 6 correlated source families x 2 obstacle types x both colors.' >> "$GITHUB_STEP_SUMMARY"
+          echo '300-ply/repetition neutral results are NOT counted as losses.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This does not evaluate 1% game events or certify real human four-dan skill.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No game production preset, main/develop, Render or game Draft PR change.' >> "$GITHUB_STEP_SUMMARY"

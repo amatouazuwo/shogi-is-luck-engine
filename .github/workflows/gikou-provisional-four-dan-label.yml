@@ -1,0 +1,32 @@
+name: Provisional Gikou2 depth8 fourth-dan reference config check
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/gikou-provisional-four-dan-label.yml'
+      - 'benchmarks/strength/ci/gikou-reference-proxies.mjs'
+      - 'benchmarks/strength/ci/gikou-reference-proxies.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-reference-label:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify that Gikou2 depth8 is only a provisional reference label
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/external-usi-depth-grid-match.mjs
+          node --check benchmarks/strength/ci/external-usi-depth-grid-scorecard.mjs
+          node --test benchmarks/strength/ci/gikou-reference-proxies.test.mjs \
+            benchmarks/strength/ci/external-usi-depth-grid-scorecard.test.mjs
+      - name: Preserve the user's practical, non-verified rank convention
+        run: |
+          echo 'Gikou2 v2.0.2 DepthLimit=8 is the provisional amateur fourth-dan comparator label.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This is a deliberate heuristic, not a demonstrated human grade. No human tests are planned.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No game difficulty, production branch or Render deployment changed.' >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,12 @@
+{
+  "obstacle": {
+    "status": "reference-for-experiments-not-production",
+    "commit": "56d5c1ca0e651bd73aaa717ca520b7f9309fb3e6"
+  },
+  "normal": {
+    "status": "official-stock",
+    "version": "v0.4.0",
+    "wasmSha256": "feb190263b48caed5a81e0009cda35f6d2a23548ccf61d785f019420b857222d"
+  },
+  "promotion": "Explicit reviewed decision only; never auto-promote from smoke tests"
+}

@@ -1,0 +1,53 @@
+name: Confirm continuous obstacle playing-strength experiment results
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-continuous-review.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  review-completed-games:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download finished native continuous-search match archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download 45026414339 --repo "$GITHUB_REPOSITORY" \
+            --pattern "continuous-obstacle-eval-45026414339" --dir incoming
+          find incoming -type f -print
+      - name: Replay full playing-strength evidence and timing diagnostics
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find incoming -type f -name 'continuous-*-*.jsonl' | sort)
+          test "${#files[@]}" -eq 3
+          node benchmarks/strength/experiments/continuous-obstacle/report.mjs \
+            results/continuous-reviewed.json "${files[@]}"
+          python3 - <<'PY'
+          import json
+          x=json.load(open('results/continuous-reviewed.json'))
+          t=x['total']
+          assert (t['games'],t['wins'],t['losses'],t['undecided'])==(40,22,12,6),t
+          assert (t['completeColorPairs'],t['incompleteColorPairs'])==(15,5),t
+          assert len(x['groups'])==3
+          groups=sorted(x['groups'],key=lambda g:(g['budget'],g['cap']))
+          assert [(g['budget'],g['cap'],g['wins'],g['losses'],g['undecided'])
+                  for g in groups]==[(100,120,10,4,2),(100,300,8,6,2),(500,120,4,2,2)]
+          assert all(g['candidateSearch']['budgetOverrun50']==0 for g in groups)
+          assert all(g['baselineSearch']['budgetOverrun50']==0 for g in groups)
+          assert len(set(g['wasmSha'] for g in groups))==1
+          print('Verified all 40 games, identical NNUE WASM, 15 completed color-swaps, no 50ms search overruns.')
+          print('Neutral unfinished outcomes remain UNDECIDED, not a negative grade.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuous-obstacle-reviewed-strength
+          path: results/continuous-reviewed.json
+          retention-days: 14

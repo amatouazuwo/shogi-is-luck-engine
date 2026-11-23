@@ -1,0 +1,52 @@
+name: Special position NNUE teacher and node tier move agreement
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/special-teacher-calibration.yml'
+      - 'benchmarks/strength/ci/special-teacher-contract.mjs'
+      - 'benchmarks/strength/ci/special-teacher-contract.test.mjs'
+      - 'benchmarks/strength/ci/special-teacher-probe.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: special-teacher-calibration-draft
+  cancel-in-progress: true
+jobs:
+  real-nnue-teacher:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate teacher metrics without confusing move agreement and accuracy
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/special-teacher-probe.mjs
+          node --test benchmarks/strength/ci/special-teacher-contract.test.mjs \
+            benchmarks/strength/ci/search-control-contract.test.mjs
+      - name: Build same pinned obstacle-aware NNUE WASM and Worker
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/special-teacher-sdk"
+          (cd "$RUNNER_TEMP/special-teacher-sdk" && sha256sum -c SHA256SUMS)
+      - name: Run real 6s NNUE reference and four independently reset student node tiers
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/special-teacher-probe.mjs \
+            "$RUNNER_TEMP/special-teacher-sdk" \
+            benchmarks/strength/experiments/holdout-openings.jsonl \
+            results/special-teacher-probe.jsonl \
+            | tee results/special-teacher-run.jsonl
+          tail -n 1 results/special-teacher-run.jsonl >> "$GITHUB_STEP_SUMMARY"
+      - name: Record the calibration boundary
+        if: always()
+        run: |
+          echo 'Teacher agreement is NOT correctness, Elo, amateur rank or tactical accuracy.' >> "$GITHUB_STEP_SUMMARY"
+          echo '12 archived pit/blackhole positions x four node tiers, not a sealed independent test.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No browser or 1 percent events. No main/develop or Render deployment, no difficulty edits.' >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,95 @@
+name: Held-out adaptive v2 versus v1 and fixed 1s
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/adaptive-v2-head-to-head.yml'
+      - 'benchmarks/strength/ci/adaptive-think-policy-v2.mjs'
+      - 'benchmarks/strength/ci/adaptive-think-policy-v2.test.mjs'
+      - 'benchmarks/strength/ci/adaptive-v2-scorecard.mjs'
+      - 'benchmarks/strength/ci/adaptive-v2-scorecard.test.mjs'
+      - 'benchmarks/strength/ci/match.mjs'
+      - 'benchmarks/strength/ci/difficulty-scorecard.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: adaptive-v2-head-to-head-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  heldout-paired-matches:
+    strategy:
+      fail-fast: false
+      matrix:
+        opponent: [v1, fixed1]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify deterministic v2 triggers and independent opponent audits
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/match.mjs
+          node --check benchmarks/strength/ci/difficulty-scorecard.mjs
+          node --check benchmarks/strength/ci/adaptive-v2-scorecard.mjs
+          node --test \
+            benchmarks/strength/ci/clock-budget.test.mjs \
+            benchmarks/strength/ci/adaptive-think-policy.test.mjs \
+            benchmarks/strength/ci/adaptive-think-policy-v2.test.mjs \
+            benchmarks/strength/ci/adaptive-scorecard.test.mjs \
+            benchmarks/strength/ci/adaptive-v2-scorecard.test.mjs \
+            benchmarks/strength/ci/difficulty-scorecard.test.mjs
+      - name: Configure reference CPU
+        run: |
+          if [ "${{ matrix.opponent }}" = "v1" ]; then
+            echo 'OPPONENT_MS=6000' >> "$GITHUB_ENV"
+            echo 'OPPONENT_POLICY=adaptive-feature-v1' >> "$GITHUB_ENV"
+          else
+            echo 'OPPONENT_MS=1000' >> "$GITHUB_ENV"
+            echo 'OPPONENT_POLICY=fixed' >> "$GITHUB_ENV"
+          fi
+      - name: Build unchanged native NNUE + independent legal/tactical referee
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/v2-sdk"
+          (cd "$RUNNER_TEMP/v2-sdk" && sha256sum -c SHA256SUMS)
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/v2-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs "$RUNNER_TEMP/v2-referee"
+      - name: Sealed fresh openings after observing v1 - same seed for both opponents
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/v2-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/v2-openings.jsonl 20261208 \
+            | tee results/v2-openings-manifest.json
+      - name: Direct real 300-ply v2-v1 or v2-fixed1 matches with reversed colors
+        run: |
+          set -euo pipefail
+          # Same actual rsshogi NNUE/WASM+Worker. Both /12 clock divisor,
+          # virtual 1300ms pre-move delay charged, both 3-minute clocks.
+          # Independently computed tactical policy for each adaptive side.
+          node benchmarks/strength/ci/match.mjs \
+            "$RUNNER_TEMP/v2-referee" "$RUNNER_TEMP/v2-sdk" \
+            6000 300 1 0 "$RUNNER_TEMP/v2-sdk" obstacle \
+            results/v2-openings.jsonl "$OPPONENT_MS" 12 12 1300 1300 \
+            adaptive-feature-v2 "$OPPONENT_POLICY" \
+            | tee results/v2-v-${{ matrix.opponent }}.jsonl
+      - name: Independently verify both CPU clocks, tactical choices and results
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/adaptive-v2-scorecard.mjs \
+            results/v2-v-${{ matrix.opponent }}.jsonl "$OPPONENT_POLICY" \
+            | tee results/v2-v-${{ matrix.opponent }}-scorecard.json
+          cat results/v2-v-${{ matrix.opponent }}-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve test limitations
+        if: always()
+        run: |
+          echo 'Trial only: v2 vs ${{ matrix.opponent }} in ONE held-out opening family, pit+blackhole, colors reversed (four games), 300 ply NEUTRAL undecided cap.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'v2 is a time-management hypothesis and may be WEAKER. Independent C++ legality/tactical features; feature overhead debited to own clock. Includes no 1% events or browser render overhead.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No automatic Elo or amateur-rank calibration, no game/main/develop/Render changes. JSONL logs preserved in job output; artifact quota exhausted.' >> "$GITHUB_STEP_SUMMARY"

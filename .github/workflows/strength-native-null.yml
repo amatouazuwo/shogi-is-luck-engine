@@ -1,0 +1,65 @@
+name: Native rsshogi self-match reproducibility control
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-native-null.yml']
+permissions:
+  contents: read
+concurrency:
+  group: strength-native-null-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  same-engine-control:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare fixed WASM builder
+        run: |
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          node --check benchmarks/strength/ci/match.mjs
+          node --test benchmarks/strength/experiments/hole-eval/summarize-native-eval.test.mjs
+      - name: Build one unchanged obstacle-aware rsshogi engine
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/control-sdk"
+      - name: Compile independent legal-move referee
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Identical baseline-vs-baseline at 100ms
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/control-sdk" \
+            100 80 4 0 "$RUNNER_TEMP/control-sdk" obstacle \
+            benchmarks/strength/experiments/reserve-pressure/direct-openings.jsonl \
+            | tee results/native-null-100.jsonl
+      - name: Identical baseline-vs-baseline at 500ms
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/control-sdk" \
+            500 60 2 0 "$RUNNER_TEMP/control-sdk" obstacle \
+            benchmarks/strength/experiments/reserve-pressure/direct-openings.jsonl \
+            | tee results/native-null-500.jsonl
+      - name: Measure stochastic move disagreement without any engine difference
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/experiments/hole-eval/summarize-native-eval.mjs \
+            results/native-null-summary.json results/native-null-100.jsonl results/native-null-500.jsonl
+          python3 - <<'PY'
+          import json
+          r=json.load(open('results/native-null-summary.json'))
+          assert r['total']['games']==24
+          assert r['total']['openingPairs']==12
+          assert r['total']['firstMoveComparisons']==12
+          for e in r['experiments']:
+              assert e['candidateWasmSha256']==e['baselineWasmSha256']
+          print('Identical binary hashes and paired-game count verified.')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-rsshogi-self-control-${{ github.run_id }}
+          path: results/native-null-*
+          retention-days: 14
+          if-no-files-found: warn

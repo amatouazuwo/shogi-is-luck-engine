@@ -1,0 +1,39 @@
+name: Hard abort and restart real continuous obstacle WASM safely
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-continuous-abort.yml']
+permissions:
+  contents: read
+jobs:
+  verify-abort:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned rsshogi compiler
+        run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build exact same obstacle rsshogi engine as reference
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/base-sdk"
+      - name: Package continuous Worker without changing the NNUE/engine
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs \
+            "$RUNNER_TEMP/base-sdk" "$RUNNER_TEMP/continuous-sdk"
+          cmp "$RUNNER_TEMP/base-sdk/rsshogi_nnue_mini.wasm" "$RUNNER_TEMP/continuous-sdk/rsshogi_nnue_mini.wasm"
+      - name: Hard abort a live 1500ms search and legally restart from the obstacle SFEN
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/abort-smoke.mjs \
+            "$RUNNER_TEMP/continuous-sdk" | tee results/continuous-abort-smoke.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-obstacle-abort-${{ github.run_id }}
+          path: results/continuous-abort-smoke.jsonl
+          retention-days: 14
+          if-no-files-found: warn

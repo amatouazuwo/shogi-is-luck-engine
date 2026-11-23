@@ -1,0 +1,47 @@
+name: Verify fresh obstacle fixture generation
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-fresh-obstacle-fixtures.yml']
+permissions:
+  contents: read
+jobs:
+  verify-fresh-fixtures:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build independent shogi obstacle rules verifier
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Generate new deterministic obstacle positions without move labels
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/continuous-fresh-openings.jsonl 20261122
+          python3 - <<'PY'
+          import json,collections
+          rows=[json.loads(x) for x in open('results/continuous-fresh-openings.jsonl')]
+          assert len(rows)==12
+          assert len({x['sfen'] for x in rows})==6
+          assert set(x['kind'] for x in rows)=={'pit','blackhole'}
+          assert all(x['legal']>=5 for x in rows)
+          assert collections.Counter(x['sourceFamily'] for x in rows)=={'hirate':6,'game':6}
+          for pair in set(x['pair'] for x in rows):
+              a=[x for x in rows if x['pair']==pair]
+              assert len(a)==2 and set(x['kind'] for x in a)=={'pit','blackhole'}
+              assert all(x['sfen']==a[0]['sfen'] for x in a)
+              assert sorted(len(x['holes']) for x in a)==[1,9]
+          print('Six new obstacle-layout opening pairs, no tactical best-move labels, all root-legal.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fresh-continuous-obstacle-positions
+          path: results/continuous-fresh-openings.jsonl
+          retention-days: 14

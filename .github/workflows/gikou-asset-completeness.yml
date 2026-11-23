@@ -1,0 +1,37 @@
+name: Verify all official Gikou2 evaluation assets
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/gikou-asset-completeness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  official-evaluation-assets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect pinned official v2.0.2 release archive for required models
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 300 \
+            -o "$RUNNER_TEMP/gikou2_win.zip" \
+            https://github.com/gikou-official/Gikou/releases/download/v2.0.2/gikou2_win.zip
+          echo "3bbb667bfd77e0236b052593b5c61b7fe1827ed72b5b5f437760c60974852757  $RUNNER_TEMP/gikou2_win.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/gikou-eval"
+          unzip -q "$RUNNER_TEMP/gikou2_win.zip" -d "$RUNNER_TEMP/gikou-eval"
+          for file in params.bin progress.bin probability.bin; do
+            candidate=$(find "$RUNNER_TEMP/gikou-eval" -type f -name "$file" -print -quit)
+            if [ -n "$candidate" ]; then
+              echo "FOUND $file"
+              sha256sum "$candidate"
+              du -h "$candidate"
+              echo "FOUND $file with SHA256 $(sha256sum "$candidate" | cut -d' ' -f1)" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "MISSING $file"
+              echo "MISSING $file in official release archive" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+          echo 'Note: Gikou2 initialization reads params.bin, progress.bin AND probability.bin.' >> "$GITHUB_STEP_SUMMARY"

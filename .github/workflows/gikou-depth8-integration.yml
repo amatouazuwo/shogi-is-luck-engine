@@ -1,0 +1,84 @@
+name: Verify patched Gikou2 depth8 against real rsshogi integration
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/gikou-depth8-integration.yml'
+      - 'benchmarks/strength/ci/external-usi-depth8-diagnostic-match.mjs'
+      - 'patches/gikou2-empty-legal-probability.patch'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-depth8-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source and published development reference checks
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/external-usi-depth8-diagnostic-match.mjs
+          node --test benchmarks/strength/ci/gikou-reference-proxies.test.mjs \
+            benchmarks/strength/ci/external-usi-depth-grid-scorecard.test.mjs
+      - name: Build Gikou2 pinned upstream plus one documented terminal-search guard
+        run: |
+          set -euo pipefail
+          git init -q "$RUNNER_TEMP/gikou-src"
+          git -C "$RUNNER_TEMP/gikou-src" fetch -q --depth 1 \
+            https://github.com/gikou-official/Gikou.git f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-src" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/gikou-src" rev-parse HEAD)" = \
+            f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-src" apply --check "$GITHUB_WORKSPACE/patches/gikou2-empty-legal-probability.patch"
+          git -C "$RUNNER_TEMP/gikou-src" apply "$GITHUB_WORKSPACE/patches/gikou2-empty-legal-probability.patch"
+          make -C "$RUNNER_TEMP/gikou-src" release -j2
+          curl -fsSL --retry 3 --max-time 300 \
+            -o "$RUNNER_TEMP/gikou2_win.zip" \
+            https://github.com/gikou-official/Gikou/releases/download/v2.0.2/gikou2_win.zip
+          echo "3bbb667bfd77e0236b052593b5c61b7fe1827ed72b5b5f437760c60974852757  $RUNNER_TEMP/gikou2_win.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/gikou-eval"
+          unzip -q "$RUNNER_TEMP/gikou2_win.zip" -d "$RUNNER_TEMP/gikou-eval"
+          PARAM=$(find "$RUNNER_TEMP/gikou-eval" -type f -name params.bin -print -quit)
+          test -n "$PARAM"
+          cp "$PARAM" "$RUNNER_TEMP/gikou-src/params.bin"
+          echo "6bbc573306839fe019634dd94b06af7c22834a641e8bc060e23889ae9b3b2195  $RUNNER_TEMP/gikou-src/params.bin" | sha256sum -c -
+          PROGRESS=$(find "$RUNNER_TEMP/gikou-eval" -type f -name progress.bin -print -quit)
+          test -n "$PROGRESS" || { echo "Missing official progress.bin"; exit 1; }
+          cp "$PROGRESS" "$RUNNER_TEMP/gikou-src/progress.bin"
+          echo "ddf60a3180f768d9756b83cd4fe50a18b9e93855d1ad7281566934fb7c53a042  $RUNNER_TEMP/gikou-src/progress.bin" | sha256sum -c -
+          PROBABILITY=$(find "$RUNNER_TEMP/gikou-eval" -type f -name probability.bin -print -quit)
+          test -n "$PROBABILITY" || { echo "Missing official probability.bin"; exit 1; }
+          cp "$PROBABILITY" "$RUNNER_TEMP/gikou-src/probability.bin"
+          echo "dc2b18f1eaa7551822901eab7b68c6f279cc449ef527462b611b5d9510cb6c1a  $RUNNER_TEMP/gikou-src/probability.bin" | sha256sum -c -
+      - name: Compile same pinned obstacle-capable rsshogi WASM and independent legal referee
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/depth8-sdk"
+          (cd "$RUNNER_TEMP/depth8-sdk" && sha256sum -c SHA256SUMS)
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/depth8-referee"
+      - name: Play four ordinary-shogi games and log any Gikou2 crash with SFEN and signal
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          ulimit -c 0
+          node benchmarks/strength/ci/external-usi-depth8-diagnostic-match.mjs \
+            "$RUNNER_TEMP/gikou-src/bin/release" "$RUNNER_TEMP/gikou-src" \
+            "$RUNNER_TEMP/depth8-sdk" "$RUNNER_TEMP/depth8-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            8 10000 8,9 | tee results/depth8-diagnostic-matches.jsonl
+          node benchmarks/strength/ci/external-usi-depth-grid-scorecard.mjs \
+            results/depth8-diagnostic-matches.jsonl \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            8 10000 8,9 | tee results/depth8-diagnostic-audited.json
+          cat results/depth8-diagnostic-audited.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve human-calibration disclaimer and prevent production edits
+        if: always()
+        run: |
+          echo 'Depth8 is ONLY a provisional user-selected amateur fourth-dan reference.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Gikou2 is pinned upstream plus terminal-node guard; both params.bin and progress.bin are SHA-verified.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No human-grade verification, production CPU change, main/develop merge or Render deployment.' >> "$GITHUB_STEP_SUMMARY"

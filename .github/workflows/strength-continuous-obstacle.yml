@@ -1,0 +1,112 @@
+name: Experimental native continuous search on obstacle boards
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-continuous-obstacle.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: strength-continuous-obstacle-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  continuous-vs-sliced:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate scripts and install pinned rsshogi compiler
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/experiments/continuous-obstacle/worker.js
+          node --check benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs
+          node --check benchmarks/strength/ci/match.mjs
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build verified existing obstacle rsshogi baseline
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/baseline-sdk"
+      - name: Package SAME WASM and exact NNUE with one continuous-search Worker
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs \
+            "$RUNNER_TEMP/baseline-sdk" "$RUNNER_TEMP/continuous-sdk"
+          for d in "$RUNNER_TEMP/baseline-sdk" "$RUNNER_TEMP/continuous-sdk"; do
+            (cd "$d" && sha256sum --check SHA256SUMS)
+          done
+          cmp "$RUNNER_TEMP/baseline-sdk/rsshogi_nnue_mini.wasm" "$RUNNER_TEMP/continuous-sdk/rsshogi_nnue_mini.wasm"
+          cmp "$RUNNER_TEMP/baseline-sdk/mini.js" "$RUNNER_TEMP/continuous-sdk/mini.js"
+          python3 - <<'PY'
+          import os,json
+          b=json.load(open(os.environ['RUNNER_TEMP']+'/baseline-sdk/manifest.json'))
+          x=json.load(open(os.environ['RUNNER_TEMP']+'/continuous-sdk/manifest.json'))
+          for k in ('embedded_rsnn_sha256','cargo_lock_sha256','upstream_engine','upstream_rules','source_patches_sha256'):
+              assert b[k]==x[k],f'Experimental candidate changed the engine identity: {k}'
+          assert b['artifacts_sha256']['worker.js']!=x['artifacts_sha256']['worker.js']
+          print('Confirmed exact engine/model/rule equivalence: ONLY worker scheduling changed')
+          PY
+      - name: Compile independent obstacle rules referee
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Direct games, 100ms, 300-ply cap, primary obstacle openings
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/continuous-sdk" \
+            100 300 4 0 "$RUNNER_TEMP/baseline-sdk" obstacle \
+            benchmarks/strength/experiments/reserve-pressure/direct-openings.jsonl \
+            | tee results/continuous-direct-100.jsonl
+      - name: Direct games, 100ms, 120-ply cap, other archived obstacle openings
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/continuous-sdk" \
+            100 120 4 0 "$RUNNER_TEMP/baseline-sdk" obstacle \
+            benchmarks/strength/experiments/holdout-openings.jsonl \
+            | tee results/continuous-other-100.jsonl
+      - name: Direct games, 500ms, 120-ply cap, primary obstacle openings
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/continuous-sdk" \
+            500 120 2 0 "$RUNNER_TEMP/baseline-sdk" obstacle \
+            benchmarks/strength/experiments/reserve-pressure/direct-openings.jsonl \
+            | tee results/continuous-direct-500.jsonl
+      - name: Independent special-board tactic safety check (not strength score)
+        run: |
+          set -euo pipefail
+          (
+            cd benchmarks/strength
+            node forensics/heldout/run-heldout.mjs --corpus special-unseen/unseen-special.jsonl \
+              --sdk "candidate=$RUNNER_TEMP/continuous-sdk" \
+              --sdk "baseline=$RUNNER_TEMP/baseline-sdk" --budget 100,500 --rounds 1
+          ) | tee results/continuous-tactical.jsonl
+          node benchmarks/strength/ci/verified-special-delta.mjs \
+            results/continuous-tactical.jsonl \
+            benchmarks/strength/special-unseen/unseen-special.jsonl \
+            results/continuous-tactical-delta.json
+      - name: Summarize direct playing strength (neutral undecided)
+        if: always()
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,pathlib
+          print('## Continuous rsshogi search versus 35ms sliced rsshogi (same WASM/NNUE)')
+          for name in ['continuous-direct-100','continuous-other-100','continuous-direct-500']:
+              p=pathlib.Path('results/'+name+'.jsonl')
+              if not p.exists():
+                  print(name+': not completed');continue
+              a=[json.loads(l) for l in p.read_text().splitlines() if l.strip()]
+              c=next(x for x in a if x.get('event')=='config')
+              print(f"### {name}: {c['budget']}ms, {c['cap']} ply cap")
+              for x in a:
+                  if x.get('event')=='summary':
+                      print(f"- {x['kind']}: candidate {x['wins']} wins, {x['losses']} losses, {x['undecided']} neutral UNDECIDED")
+              assert len([x for x in a if x.get('event')=='game'])==4*c['pairs']
+          print('No candidate is promoted automatically. One uninterrupted synchronous WASM search cannot handle stop until it returns.')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-obstacle-eval-${{ github.run_id }}
+          path: results/continuous-*
+          retention-days: 14
+          if-no-files-found: warn

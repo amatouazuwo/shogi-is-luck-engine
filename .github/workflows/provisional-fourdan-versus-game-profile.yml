@@ -1,0 +1,101 @@
+name: Compare provisional 25k depth8 proxy against existing game four-dan CPU profile
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/provisional-fourdan-versus-game-profile.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fourdan-profile-bridge-draft
+  cancel-in-progress: true
+jobs:
+  compare-provisional-nodes-against-1500ms-profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Guard independent rules, native controls, scorecard and game clock
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/search-axis-match.mjs
+          node --check benchmarks/strength/ci/difficulty-scorecard.mjs
+          node --test benchmarks/strength/ci/difficulty-scorecard.test.mjs \
+            benchmarks/strength/ci/clock-budget.test.mjs \
+            benchmarks/strength/ci/search-control-contract.test.mjs
+      - name: Build same pinned obstacle WASM and independent C++ referee
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/profile-bridge-sdk"
+          (cd "$RUNNER_TEMP/profile-bridge-sdk" && sha256sum -c SHA256SUMS)
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/profile-bridge-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs "$RUNNER_TEMP/profile-bridge-referee"
+      - name: Actual native matches - 25k and 1 second versus game yondan 1.5 seconds uncapped
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          # Three source families: opening (21), middle (22), reduced (23).
+          # Each family has pit and blackhole variants, with both colors: 12 games.
+          # Both 180s clocks, 1300ms virtual premove wait, clock divisor 20.
+          # Candidate: 25k nodes and 1000ms; opponent: no node cap and 1500ms.
+          node benchmarks/strength/ci/search-axis-match.mjs \
+            "$RUNNER_TEMP/profile-bridge-referee" "$RUNNER_TEMP/profile-bridge-sdk" \
+            1000 300 3 0 "$RUNNER_TEMP/profile-bridge-sdk" obstacle \
+            benchmarks/strength/experiments/holdout-openings.jsonl \
+            1500 20 20 1300 1300 fixed fixed 64 64 25000 none \
+            | tee results/25k-vs-game-yondan.jsonl
+      - name: Audit real clock, per-move limits, missing games and no false grade assignment
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/difficulty-scorecard.mjs \
+            results/25k-vs-game-yondan.jsonl 1000 1500 \
+            | tee results/25k-vs-game-yondan-scorecard.json
+          python3 - results/25k-vs-game-yondan.jsonl results/25k-vs-game-yondan-scorecard.json <<'PY'
+          import json,sys,collections
+          records=[json.loads(l) for l in open(sys.argv[1],encoding='utf-8') if l.strip()]
+          score=json.load(open(sys.argv[2],encoding='utf-8'))
+          configs=[r for r in records if r.get('event')=='config']
+          games=[r for r in records if r.get('event')=='game']
+          assert len(configs)==1 and len(games)==12
+          cfg=configs[0]
+          assert (cfg['candidateSha'],cfg['candidateWorkerSha'])==(cfg['baselineSha'],cfg['baselineWorkerSha'])
+          assert (cfg['budget'],cfg['opponentBudget'])==(1000,1500)
+          assert (cfg['candidateNodesCap'],cfg['opponentNodesCap'])==(25000,None)
+          assert (cfg['candidateDepthCap'],cfg['opponentDepthCap'])==(64,64)
+          assert (cfg['candidateClockDivisor'],cfg['opponentClockDivisor'])==(20,20)
+          assert (cfg['candidatePreMoveDelayMs'],cfg['opponentPreMoveDelayMs'])==(1300,1300)
+          assert cfg['clockMs']==180000 and cfg['cap']==300 and cfg['pairs']==3 and cfg['offset']==0
+          assert cfg['clockDelayMethod']=='virtual-debit-not-wall-wait'
+          assert score['games']==12 and score['sameModelAndWorker']
+          assert score['autoAssignAmateurGrade'] is False
+          assert score['candidateWins']+score['opponentWins']+score['neutralUndecided']==12
+          kinds=collections.Counter(g['kind'] for g in games)
+          assert kinds=={'pit':6,'blackhole':6}
+          paired=collections.defaultdict(list)
+          for g in games:
+              assert g['pair'] in (21,22,23)
+              paired[(g['pair'],g['kind'])].append(g['candidateSide'])
+              for t in g['turns']:
+                  if t['engine']=='candidate':
+                      assert t['nodesCap']==25000 and 0<=t['nodes']<=25000
+                      assert t['requestMs']<=1000
+                  else:
+                      assert t['nodesCap'] is None
+                      assert t['requestMs']<=1500
+          assert len(paired)==6 and all(sorted(x)==[0,1] for x in paired.values())
+          print('PASS: 12 paired native matches, same NNUE/Worker, both clocks, node caps, neutral endings.')
+          print('RESULT:',json.dumps({k:score[k] for k in ('candidateWins','opponentWins','neutralUndecided','scoreBoundsIncludingNeutral')},ensure_ascii=False))
+          PY
+          cat results/25k-vs-game-yondan-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: State the limits and production boundary
+        if: always()
+        run: |
+          echo 'This bridge measures provisional 25k nodes / 1000ms AGAINST the current experimental game am-yondan 1500ms unlimited-node native profile. Both think time AND node cap differ; do not infer a pure single-variable node effect.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The source corpus has 3 previously used opening families (pit/blackhole, swapped colors). 12 games are only exploratory; these are not real three-minute browser games or human four-dan certification.' >> "$GITHUB_STEP_SUMMARY"
+          echo '300-ply and unadjudicated repetition stay neutral; 1% events, animations, device performance and real mobile hardware are not measured.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Do NOT edit any game presets, game PR #12, main/develop or production Render.' >> "$GITHUB_STEP_SUMMARY"

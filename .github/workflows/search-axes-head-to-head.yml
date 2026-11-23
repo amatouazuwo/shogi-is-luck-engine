@@ -1,0 +1,94 @@
+name: Real rsshogi depth and node head-to-head with equal time
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/search-axes-head-to-head.yml'
+      - 'benchmarks/strength/ci/search-axis-match.mjs'
+      - 'benchmarks/strength/ci/search-axis-scorecard.mjs'
+      - 'benchmarks/strength/ci/search-axis-scorecard.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: search-axes-head-to-head-draft
+  cancel-in-progress: true
+jobs:
+  paired-search-axis:
+    strategy:
+      fail-fast: false
+      matrix:
+        axis: [depth, nodes]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate depth/node experiment and neutral scorecard
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/search-axis-match.mjs
+          node --check benchmarks/strength/ci/search-axis-scorecard.mjs
+          node --test benchmarks/strength/ci/search-control-contract.test.mjs \
+            benchmarks/strength/ci/search-axis-scorecard.test.mjs \
+            benchmarks/strength/ci/difficulty-scorecard.test.mjs \
+            benchmarks/strength/ci/clock-budget.test.mjs
+      - name: Build and verify identical pinned WASM and Worker for both sides
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/search-axis-sdk"
+          (cd "$RUNNER_TEMP/search-axis-sdk" && sha256sum -c SHA256SUMS)
+      - name: Build independently implemented legal move referee
+        run: |
+          set -euo pipefail
+          g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/search-axis-referee"
+          node benchmarks/strength/ci/referee-feature-smoke.mjs "$RUNNER_TEMP/search-axis-referee"
+      - name: Generate identical fresh pit and blackhole starting positions
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/search-axis-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/search-axis-openings.jsonl 20261221 \
+            | tee results/search-axis-openings-manifest.json
+      - name: Select depth-only or node-only variation
+        run: |
+          if [ "${{ matrix.axis }}" = "depth" ]; then
+            echo 'CAND_DEPTH=4' >> "$GITHUB_ENV"
+            echo 'OPP_DEPTH=2' >> "$GITHUB_ENV"
+            echo 'CAND_NODES=250000' >> "$GITHUB_ENV"
+            echo 'OPP_NODES=250000' >> "$GITHUB_ENV"
+          else
+            echo 'CAND_DEPTH=64' >> "$GITHUB_ENV"
+            echo 'OPP_DEPTH=64' >> "$GITHUB_ENV"
+            echo 'CAND_NODES=10000' >> "$GITHUB_ENV"
+            echo 'OPP_NODES=500' >> "$GITHUB_ENV"
+          fi
+      - name: Run native 3-minute matches with 300-ply neutral cap and side swaps
+        run: |
+          set -euo pipefail
+          # Both sides have max 1000ms, clock /20 and 1300ms charged pre-move.
+          # Only depth OR nodes limit differs. Pit and blackhole, both colors.
+          node benchmarks/strength/ci/search-axis-match.mjs \
+            "$RUNNER_TEMP/search-axis-referee" "$RUNNER_TEMP/search-axis-sdk" \
+            1000 300 1 0 "$RUNNER_TEMP/search-axis-sdk" obstacle \
+            results/search-axis-openings.jsonl 1000 20 20 1300 1300 \
+            fixed fixed "$CAND_DEPTH" "$OPP_DEPTH" "$CAND_NODES" "$OPP_NODES" \
+            | tee results/search-axis-${{ matrix.axis }}-games.jsonl
+      - name: Independently score per-side depth, nodes, clocks and decided outcomes
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/search-axis-scorecard.mjs \
+            results/search-axis-${{ matrix.axis }}-games.jsonl ${{ matrix.axis }} \
+            | tee results/search-axis-${{ matrix.axis }}-scorecard.json
+          cat results/search-axis-${{ matrix.axis }}-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve key limitations
+        if: always()
+        run: |
+          echo 'Pilot: same NNUE and 1-second clock limit; one variable at a time (search depth or nodes).' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Only four correlated games, two obstacle kinds with color swap. 300-ply/repetition remains NEUTRAL.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No amateur grade/Elo validation; no live browser/1% events. No main/develop, production or game setting changes.' >> "$GITHUB_STEP_SUMMARY"

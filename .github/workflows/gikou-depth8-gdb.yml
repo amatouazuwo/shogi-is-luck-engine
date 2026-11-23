@@ -1,0 +1,94 @@
+name: Diagnose Gikou2 depth8 terminal position with gdb
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/gikou-depth8-gdb.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-upstream-backtrace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile pinned Gikou2 with debug symbols without modifying upstream code
+        run: |
+          set -euo pipefail
+          git init -q "$RUNNER_TEMP/gikou-debug"
+          git -C "$RUNNER_TEMP/gikou-debug" fetch -q --depth 1 \
+            https://github.com/gikou-official/Gikou.git f5773abb6b93c53508bca4d6d5705463e56ccb0f
+          git -C "$RUNNER_TEMP/gikou-debug" checkout -q --detach FETCH_HEAD
+          make -C "$RUNNER_TEMP/gikou-debug" development -j2
+          test -x "$RUNNER_TEMP/gikou-debug/bin/development"
+      - name: Fetch pinned official evaluation parameters
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 300 \
+            -o "$RUNNER_TEMP/gikou2_win.zip" \
+            https://github.com/gikou-official/Gikou/releases/download/v2.0.2/gikou2_win.zip
+          echo "3bbb667bfd77e0236b052593b5c61b7fe1827ed72b5b5f437760c60974852757  $RUNNER_TEMP/gikou2_win.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/gikou-eval"
+          unzip -q "$RUNNER_TEMP/gikou2_win.zip" -d "$RUNNER_TEMP/gikou-eval"
+          PARAM=$(find "$RUNNER_TEMP/gikou-eval" -type f -name params.bin -print -quit)
+          test -n "$PARAM"
+          cp "$PARAM" "$RUNNER_TEMP/gikou-debug/params.bin"
+          echo "6bbc573306839fe019634dd94b06af7c22834a641e8bc060e23889ae9b3b2195  $RUNNER_TEMP/gikou-debug/params.bin" | sha256sum -c -
+          echo 'Shipped engine weight files:'
+          find "$RUNNER_TEMP/gikou-eval" -type f -printf '%P %s bytes\n' | grep -Ei '(progress|params)\.bin' || true
+          PROGRESS=$(find "$RUNNER_TEMP/gikou-eval" -type f -name progress.bin -print -quit)
+          test -n "$PROGRESS" || { echo 'ERROR: official Gikou2 zip is missing mandatory progress.bin'; exit 1; }
+          cp "$PROGRESS" "$RUNNER_TEMP/gikou-debug/progress.bin"
+          test -s "$RUNNER_TEMP/gikou-debug/progress.bin"
+          sha256sum "$RUNNER_TEMP/gikou-debug/progress.bin"
+      - name: Obtain backtrace or explicitly report nonreproduction
+        run: |
+          set -euo pipefail
+          command -v gdb || (sudo apt-get update -qq && sudo apt-get install -y -qq gdb)
+          cat > "$RUNNER_TEMP/depth8-reproducer.usi" <<'USI'
+          usi
+          setoption name DepthLimit value 8
+          setoption name OwnBook value false
+          setoption name Threads value 1
+          setoption name USI_Hash value 16
+          isready
+          position sfen 6B1l/l4g+N1k/p4pspn/3P4p/7S1/3SP1P2/P2S1K1PP/5GG2/L7L b 2RB2N8Pg 127
+          go depth 8
+          USI
+          cd "$RUNNER_TEMP/gikou-debug"
+          set +e
+          ulimit -c 0
+          timeout 60s gdb --batch --quiet \
+            -ex 'set pagination off' \
+            -ex 'set print thread-events off' \
+            -ex 'set debuginfod enabled off' \
+            -ex 'run' \
+            -ex 'thread apply all bt 12' \
+            -ex 'thread 1' \
+            -ex 'frame 7' \
+            -ex 'info locals' \
+            -ex 'print iteration' \
+            -ex 'print score' \
+            -ex 'print this->pv_index_' \
+            -ex 'print this->multipv_' \
+            -ex 'print this->shared_.signals.stop' \
+            -ex 'print this->shared_.signals.limit_reached' \
+            -ex 'print this->root_moves_.size()' \
+            --args "$RUNNER_TEMP/gikou-debug/bin/development" \
+            < <(cat "$RUNNER_TEMP/depth8-reproducer.usi"; sleep 12) 2>&1 \
+            | tee "$RUNNER_TEMP/depth8-backtrace.log"
+          result=$?
+          set -e
+          if grep -Eq 'received signal SIG|SIGSEGV|SIGABRT|SIGKILL' "$RUNNER_TEMP/depth8-backtrace.log"; then
+            echo 'Captured a native crash signal; details appear in the job log.' >> "$GITHUB_STEP_SUMMARY"
+            grep -E 'received signal SIG|#0|#1|#2|#3' "$RUNNER_TEMP/depth8-backtrace.log" | tail -35 >> "$GITHUB_STEP_SUMMARY" || true
+          else
+            echo "Debug build produced no crash signal (status $result); may depend on build optimization or game history." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "GDB_EXIT_STATUS=$result"
+          echo 'Kept standard input open for 12 seconds to prevent upstream EOF-triggered stop.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve non-production diagnostic boundary
+        if: always()
+        run: |
+          echo 'Diagnostic only for a pinned upstream Gikou2 source: no human-grade calibration, no production game edits.' >> "$GITHUB_STEP_SUMMARY"

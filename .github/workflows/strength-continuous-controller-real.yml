@@ -1,0 +1,44 @@
+name: Real rsshogi controller cancellation and recovery
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/strength-continuous-controller-real.yml'
+      - 'benchmarks/strength/experiments/continuous-obstacle/controller-real-smoke.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.test.mjs'
+permissions:
+  contents: read
+jobs:
+  real-controller-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare pinned WASM compiler
+        run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Compile reference obstacle rsshogi
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/base-sdk"
+      - name: Package exact same rsshogi WASM with continuous Worker
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs \
+            "$RUNNER_TEMP/base-sdk" "$RUNNER_TEMP/continuous-sdk"
+          cmp "$RUNNER_TEMP/base-sdk/rsshogi_nnue_mini.wasm" "$RUNNER_TEMP/continuous-sdk/rsshogi_nnue_mini.wasm"
+      - name: Check protocol controller unit tests and live recovery
+        run: |
+          set -euo pipefail
+          node --test benchmarks/strength/experiments/continuous-obstacle/continuous-controller.test.mjs
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/controller-real-smoke.mjs \
+            "$RUNNER_TEMP/continuous-sdk" | tee results/continuous-controller-real.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-controller-real-${{ github.run_id }}
+          path: results/continuous-controller-real.jsonl
+          if-no-files-found: warn
+          retention-days: 14

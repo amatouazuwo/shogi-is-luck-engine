@@ -1,0 +1,244 @@
+name: Strength CI - independent tactics and matches
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths: ['.github/workflows/strength-independent.yml', 'benchmarks/strength/ci/**', 'patches/**', 'scripts/**']
+  workflow_dispatch:
+    inputs:
+      baseline_sha:
+        description: Optional trusted public engine commit (40 hex characters)
+        type: string
+        default: ''
+      budget:
+        description: Search budget in milliseconds
+        type: choice
+        options: ['100', '500', '1500']
+        default: '100'
+      pairs:
+        description: Number of archived opening pairs per variant (1-6)
+        type: choice
+        options: ['1', '2', '3', '4', '5', '6']
+        default: '1'
+      ply_cap:
+        description: Maximum plies (20 is a smoke test, not strength evidence)
+        type: choice
+        options: ['20', '60', '120', '180']
+        default: '20'
+permissions:
+  contents: read
+concurrency:
+  group: strength-independent-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  tactics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fast unit checks before expensive WASM builds
+        run: |
+          set -euo pipefail
+          node --test benchmarks/strength/ci/report.test.mjs
+          node --test benchmarks/strength/ci/review-queue.test.mjs
+          node --test benchmarks/strength/ci/reply-probes.test.mjs
+          node --test benchmarks/strength/ci/codex-review.test.mjs
+          node --test benchmarks/strength/ci/terminal-proof.test.mjs
+          node --test benchmarks/strength/ci/proof-priority.test.mjs
+          node --test benchmarks/strength/ci/holdout-admit.test.mjs
+          node --test benchmarks/strength/ci/tactical-delta.test.mjs
+          node --test benchmarks/strength/ci/split-tactical-pair.test.mjs
+          node --check benchmarks/strength/ci/tactical-counterfactual.mjs
+          node --test benchmarks/strength/ci/verified-special-delta.test.mjs
+      - run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build obstacle SDK
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/obstacle-sdk"
+      - name: Build pinned comparison SDK
+        env:
+          BASELINE_SHA: ${{ inputs.baseline_sha }}
+        run: |
+          set -euo pipefail
+          BASELINE_SHA="${BASELINE_SHA:-$(node -p 'require("./benchmarks/strength/ci/baselines.json").obstacle.commit')}"
+          [[ "$BASELINE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags --depth=1 origin "$BASELINE_SHA"
+          git worktree add --detach "$RUNNER_TEMP/baseline-source" "$BASELINE_SHA"
+          test "$(git -C "$RUNNER_TEMP/baseline-source" rev-parse HEAD)" = "$BASELINE_SHA"
+          bash "$RUNNER_TEMP/baseline-source/scripts/build-obstacle-sdk.sh" "$RUNNER_TEMP/baseline-sdk"
+          echo "BASELINE_SHA=$BASELINE_SHA" >> "$GITHUB_ENV"
+      - name: Paired tactical category comparisons against pinned baseline
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          (
+            cd benchmarks/strength
+            node forensics/heldout/run-heldout.mjs --corpus tactics/corpus.jsonl --sdk "candidate=$RUNNER_TEMP/obstacle-sdk" --sdk "baseline=$RUNNER_TEMP/baseline-sdk" --budget 100 --rounds 1
+          ) | tee results/tactical-paired.jsonl
+          node benchmarks/strength/ci/split-tactical-pair.mjs results/tactical-paired.jsonl
+          node benchmarks/strength/ci/tactical-delta.mjs results/tactical-candidate.jsonl results/tactical-baseline.jsonl 100
+      - name: Archived independently proved obstacle attack and defense A/B
+        run: |
+          set -euo pipefail
+          (
+            cd benchmarks/strength
+            node forensics/heldout/run-heldout.mjs --corpus special-unseen/unseen-special.jsonl --sdk "candidate=$RUNNER_TEMP/obstacle-sdk" --sdk "baseline=$RUNNER_TEMP/baseline-sdk" --budget 100,500 --rounds 1
+          ) | tee results/verified-special-paired.jsonl
+          node benchmarks/strength/ci/verified-special-delta.mjs results/verified-special-paired.jsonl benchmarks/strength/special-unseen/unseen-special.jsonl results/verified-special-delta.json
+      - name: Known forced-loss escape regressions (archived two cases)
+        run: |
+          set -euo pipefail
+          (
+            cd benchmarks/strength
+            node forensics/heldout/run-heldout.mjs --corpus experiments/obstacle-tactical-guard/positions.jsonl --sdk "candidate=$RUNNER_TEMP/obstacle-sdk" --sdk "baseline=$RUNNER_TEMP/baseline-sdk" --budget 100,500 --rounds 1
+          ) | tee results/known-loss-paired.jsonl
+          node benchmarks/strength/ci/verified-special-delta.mjs results/known-loss-paired.jsonl benchmarks/strength/experiments/obstacle-tactical-guard/positions.jsonl results/known-loss-delta.json
+      - name: Run archived tactical fixtures without private game checkout
+        env:
+          BUDGET: ${{ inputs.budget || '100' }}
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          cd benchmarks/strength
+          node forensics/heldout/run-heldout.mjs --corpus forensics/heldout/heldout-attack.jsonl --sdk incumbent="$RUNNER_TEMP/obstacle-sdk" --budget "$BUDGET" | tee ../../results/attack.jsonl
+          node forensics/heldout/run-heldout.mjs --corpus forensics/heldout/heldout-escape.jsonl --sdk incumbent="$RUNNER_TEMP/obstacle-sdk" --budget "$BUDGET" | tee ../../results/escape.jsonl
+      - name: Record results and enforce legality
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib, os
+          print("## Independent tactical validation")
+          print("Commit:", os.environ["GITHUB_SHA"])
+          for name in ("attack", "escape"):
+              p = pathlib.Path("results") / (name + ".jsonl")
+              if not p.exists(): raise SystemExit("Missing result: " + name)
+              records = [json.loads(l) for l in p.read_text().splitlines()]
+              trials = [r for r in records if r.get("event") == "trial"]
+              configs = [r for r in records if r.get("event") == "config"]
+              assert len(configs) == 1 and len(trials) == configs[0]["positions"]
+              summary = [r for r in records if r.get("event") == "summary" and r.get("group") == "all"]
+              assert len(summary) == 1
+              print("### " + name)
+              print("\x60\x60\x60json")
+              print(json.dumps({"config": configs[0], "summary": summary[0]}, indent=2))
+              print("\x60\x60\x60")
+              assert all(r.get("legal") is True and not r.get("error") for r in trials), "Illegal move or search failure"
+          PY
+      - name: Compile independent referee
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/referee"
+      - name: Re-evaluate opponent response after missed ray-blocking choices
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/tactical-counterfactual.mjs
+          node benchmarks/strength/ci/tactical-counterfactual.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/obstacle-sdk" results/tactical-candidate.jsonl benchmarks/strength/tactics/corpus.jsonl
+      - name: Paired obstacle matches
+        env:
+          BUDGET: ${{ inputs.budget || '100' }}
+          PAIRS: ${{ inputs.pairs || '1' }}
+          PLY_CAP: ${{ inputs.ply_cap || '60' }}
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/obstacle-sdk" "$BUDGET" "$PLY_CAP" "$PAIRS" | tee results/matches.jsonl
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$RUNNER_TEMP/obstacle-sdk" "$BUDGET" "$PLY_CAP" "$PAIRS" 0 "$RUNNER_TEMP/baseline-sdk" | tee results/direct.jsonl
+          printf '{"baseline_sha":"%s","candidate_sha":"%s"}\n' "$BASELINE_SHA" "$GITHUB_SHA" > results/revisions.jsonl
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          print("## Paired matches (archived openings; not a fresh holdout)")
+          for name in ("matches","direct"):
+              print("### "+name)
+              for line in open("results/"+name+".jsonl"):
+                  r=json.loads(line)
+                  if r["event"]=="summary": print("-",r)
+          PY
+      - name: Normal-board continuous search comparison
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/official.zip" https://github.com/nyoki-mtl/rsshogi-nnue-mini/releases/download/v0.4.0/rsshogi-nnue-mini-v0.4.0-wasm-sdk.zip
+          echo "3d05b85949f5ae3bce3cef1f0678a3aeb31d9e8f935565bcc09da63bb19dd1d1  $RUNNER_TEMP/official.zip" | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/official.zip" -d "$RUNNER_TEMP/official"
+          sdk="$RUNNER_TEMP/official/wasm-sdk"
+          node benchmarks/strength/ci/match.mjs "$RUNNER_TEMP/referee" "$sdk" 100 60 1 0 "$sdk" normal | tee results/normal.jsonl
+      - name: Generate conservative paired scorecard
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/report.mjs
+          node benchmarks/strength/ci/report.mjs results/matches.jsonl results/direct.jsonl results/normal.jsonl
+          node benchmarks/strength/ci/review-queue.mjs results/direct.jsonl results/normal.jsonl
+          node --check benchmarks/strength/ci/replay-check.mjs
+          node benchmarks/strength/ci/replay-check.mjs "$RUNNER_TEMP/referee" results/direct.jsonl results/normal.jsonl
+          node --check benchmarks/strength/ci/reply-probes.mjs
+          node benchmarks/strength/ci/reply-probes.mjs "$RUNNER_TEMP/referee" results/replay-checkpoints.json
+          node benchmarks/strength/ci/codex-review.mjs results/reply-probes.json
+          node benchmarks/strength/ci/prove-checkpoints.mjs "$RUNNER_TEMP/referee" results/reply-probes.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: strength-tactics-${{ github.run_id }}
+          path: |
+            results/*.jsonl
+            results/scorecard.json
+            results/review-queue.json
+            results/replay-checkpoints.json
+            results/reply-probes.json
+            results/codex-review.json
+            results/terminal-proofs.json
+            results/tactical-delta.json
+            results/tactical-counterfactual.json
+            results/verified-special-delta.json
+            results/known-loss-delta.json
+          retention-days: 3
+          if-no-files-found: warn
+
+  archive:
+    if: github.ref == 'refs/heads/chatgpt/strength-ci'
+    needs: tactics
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/strength-results
+      - uses: actions/download-artifact@v4
+        with:
+          name: strength-tactics-${{ github.run_id }}
+          path: incoming
+      - name: Preserve validated public benchmark records
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          target="results/$GITHUB_RUN_ID/$GITHUB_RUN_ATTEMPT"
+          test ! -e "$target"
+          mkdir -p "$target"
+          for name in attack escape matches direct revisions normal tactical-candidate tactical-baseline verified-special-paired known-loss-paired; do
+            test -s "incoming/$name.jsonl"
+            cp "incoming/$name.jsonl" "$target/$name.jsonl"
+          done
+          test -s incoming/scorecard.json
+          cp incoming/scorecard.json "$target/scorecard.json"
+          test -s incoming/review-queue.json
+          cp incoming/review-queue.json "$target/review-queue.json"
+          test -s incoming/replay-checkpoints.json
+          cp incoming/replay-checkpoints.json "$target/replay-checkpoints.json"
+          test -s incoming/reply-probes.json
+          cp incoming/reply-probes.json "$target/reply-probes.json"
+          test -s incoming/codex-review.json
+          cp incoming/codex-review.json "$target/codex-review.json"
+          test -s incoming/terminal-proofs.json
+          cp incoming/terminal-proofs.json "$target/terminal-proofs.json"
+          test -s incoming/tactical-delta.json
+          cp incoming/tactical-delta.json "$target/tactical-delta.json"
+          test -s incoming/tactical-counterfactual.json
+          cp incoming/tactical-counterfactual.json "$target/tactical-counterfactual.json"
+          for name in verified-special-delta known-loss-delta; do
+            test -s "incoming/$name.json"
+            cp "incoming/$name.json" "$target/$name.json"
+          done
+          printf '%s\n' "$SOURCE_SHA" > "$target/source-commit.txt"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "$target"
+          git commit -m "Archive strength validation $GITHUB_RUN_ID attempt $GITHUB_RUN_ATTEMPT"
+          git push origin HEAD:refs/heads/chatgpt/strength-results

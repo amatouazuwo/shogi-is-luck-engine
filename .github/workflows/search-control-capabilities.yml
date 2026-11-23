@@ -1,0 +1,50 @@
+name: Probe native rsshogi depth nodes and MultiPV
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/search-control-capabilities.yml'
+      - 'benchmarks/strength/ci/search-control-contract.mjs'
+      - 'benchmarks/strength/ci/search-control-contract.test.mjs'
+      - 'benchmarks/strength/ci/probe-native-search-controls.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: search-control-capabilities-draft
+  cancel-in-progress: true
+jobs:
+  real-sdk-controls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate depth and node controls in isolation
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/probe-native-search-controls.mjs
+          node --test benchmarks/strength/ci/search-control-contract.test.mjs
+      - name: Build pinned native rsshogi NNUE obstacle SDK
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/control-sdk"
+          (cd "$RUNNER_TEMP/control-sdk" && sha256sum -c SHA256SUMS)
+      - name: Verify real Worker depth, nodes and no MultiPV API
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/probe-native-search-controls.mjs \
+            "$RUNNER_TEMP/control-sdk" \
+            benchmarks/strength/experiments/holdout-openings.jsonl \
+            results/search-control.md \
+            | tee results/search-control.jsonl
+          cat results/search-control.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve truthful limitation
+        if: always()
+        run: |
+          echo 'Experiment only: native capability check, NOT actual amateur grade or verified strength.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No game profile change, main/develop merge or Render deploy. Output remains in CI logs (artifact quota).' >> "$GITHUB_STEP_SUMMARY"

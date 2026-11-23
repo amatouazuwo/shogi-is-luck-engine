@@ -1,0 +1,57 @@
+name: Real Chromium rsshogi continuous Worker safety
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/strength-continuous-browser.yml'
+      - 'benchmarks/strength/experiments/continuous-obstacle/browser-real-smoke.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.mjs'
+      - 'benchmarks/strength/experiments/continuous-obstacle/continuous-controller.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: strength-continuous-browser-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  chromium-module-worker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Rust WASM toolchain
+        run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build same verified obstacle rsshogi SDK
+        run: bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/base-sdk"
+      - name: Replace only Worker scheduling with continuous mode
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/experiments/continuous-obstacle/build-sdk.mjs \
+            "$RUNNER_TEMP/base-sdk" "$RUNNER_TEMP/continuous-sdk"
+          cmp "$RUNNER_TEMP/base-sdk/rsshogi_nnue_mini.wasm" "$RUNNER_TEMP/continuous-sdk/rsshogi_nnue_mini.wasm"
+          cmp "$RUNNER_TEMP/base-sdk/mini.js" "$RUNNER_TEMP/continuous-sdk/mini.js"
+          (cd "$RUNNER_TEMP/continuous-sdk" && sha256sum -c SHA256SUMS)
+      - name: Install pinned Playwright and Chromium browser
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix "$RUNNER_TEMP/browser-deps" playwright@1.56.1
+          "$RUNNER_TEMP/browser-deps/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Test actual Chromium desktop and emulated Pixel7 Worker cancellation
+        env:
+          PLAYWRIGHT_NODE_MODULES: ${{ runner.temp }}/browser-deps
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node --test benchmarks/strength/experiments/continuous-obstacle/continuous-controller.test.mjs
+          node benchmarks/strength/experiments/continuous-obstacle/browser-real-smoke.mjs \
+            "$RUNNER_TEMP/continuous-sdk" | tee results/continuous-browser-real.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuous-browser-safety-${{ github.run_id }}
+          path: results/continuous-browser-real.jsonl
+          retention-days: 14
+          if-no-files-found: warn
