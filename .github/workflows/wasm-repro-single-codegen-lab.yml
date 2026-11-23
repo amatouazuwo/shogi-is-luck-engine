@@ -1,0 +1,94 @@
+name: Repro lab - single codegen unit and serial Cargo builds
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/wasm-repro-single-codegen-lab.yml'
+      - 'scripts/build-obstacle-sdk-repro-single-codegen.sh'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: rsshogi-repro-single-codegen-lab
+  cancel-in-progress: true
+jobs:
+  compare-single-codegen:
+    name: Two independent serial builds using 1 codegen unit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check analysis tools and preserve baseline build process
+        run: |
+          set -euo pipefail
+          node --test benchmarks/strength/ci/wasm-section-diff.test.mjs
+          node --check benchmarks/strength/ci/wasm-behavior-diff.mjs
+          diff -u scripts/build-obstacle-sdk.sh scripts/build-obstacle-sdk-repro-single-codegen.sh || true
+          sha256sum scripts/build-obstacle-sdk.sh scripts/build-obstacle-sdk-repro-single-codegen.sh patches/obstacle-engine.patch patches/obstacle-rules.patch
+          rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+          rustc +1.95.0 --version --verbose
+      - name: Build first experimental single-codegen SDK
+        run: |
+          set -euo pipefail
+          bash scripts/build-obstacle-sdk-repro-single-codegen.sh "$RUNNER_TEMP/one-codegen-A"
+          (cd "$RUNNER_TEMP/one-codegen-A" && sha256sum -c SHA256SUMS)
+      - name: Build second experimental single-codegen SDK independently
+        run: |
+          set -euo pipefail
+          bash scripts/build-obstacle-sdk-repro-single-codegen.sh "$RUNNER_TEMP/one-codegen-B"
+          (cd "$RUNNER_TEMP/one-codegen-B" && sha256sum -c SHA256SUMS)
+      - name: Compare actual WASM sections, game-pinned hash and native behavior
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/ci/wasm-section-diff.mjs \
+            "$RUNNER_TEMP/one-codegen-A/rsshogi_nnue_mini.wasm" \
+            "$RUNNER_TEMP/one-codegen-B/rsshogi_nnue_mini.wasm" \
+            | tee results/wasm-single-codegen-sections.json
+          node benchmarks/strength/ci/wasm-behavior-diff.mjs \
+            "$RUNNER_TEMP/one-codegen-A" "$RUNNER_TEMP/one-codegen-B" \
+            | tee results/wasm-single-codegen-behavior.json
+          python3 - <<'PY'
+          import json
+          a=json.load(open('results/wasm-single-codegen-sections.json'))
+          b=json.load(open('results/wasm-single-codegen-behavior.json'))
+          assert a['event']=='wasm-reproducibility-section-diff'
+          assert b['event']=='wasm-native-behavior-crosscheck'
+          assert b['comparisons']==6
+          assert b['identicalCases']+b['divergentCases']==6
+          assert a['left']['sha256']==b['shaLeft']
+          assert a['right']['sha256']==b['shaRight']
+          private_wasm_sha='0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108'
+          print('REPRO LAB: serial build / single codegen unit')
+          print('WASM A:', a['left']['sha256'], 'size:',a['left']['byteLength'])
+          print('WASM B:', a['right']['sha256'], 'size:',a['right']['byteLength'])
+          print('BYTE REPRODUCIBLE IN LAB:',a['byteIdentical'])
+          print('CODE SECTION IDENTICAL:',a['codeSectionIdentical'])
+          print('DATA SECTION IDENTICAL:',a['dataSectionIdentical'])
+          print('COMPATIBLE WITH GAME BINARY BY SHA:',a['left']['sha256']==private_wasm_sha)
+          print('SIX REAL NNUE SEARCHES IDENTICAL:',b['identicalCases'],'/6')
+          print('CAUTION: matching six test positions never certifies semantic equivalence or 3-minute game integration.')
+          PY
+          {
+            echo '### Research-only WASM reproducibility experiment'
+            echo 'Changed ONLY experimental build: one Cargo job, no incremental, SOURCE_DATE_EPOCH=0, -C codegen-units=1.'
+            echo 'Original game SDK build script, game WASM, CPU settings, Render and main/develop unchanged.'
+            echo 'Byte-for-byte identity, code and data section identity are distinct from six-case behavioral matches.'
+            cat results/wasm-single-codegen-sections.json
+            cat results/wasm-single-codegen-behavior.json
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Persist numerical evidence without SDK binaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: single-codegen-repro-evidence
+          path: results/*.json
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Confirm no production action was taken
+        if: always()
+        run: |
+          echo 'Draft engine PR only. No game runtime changes, no release, no merge, no deployment.' >> "$GITHUB_STEP_SUMMARY"
