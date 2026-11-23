@@ -93,10 +93,10 @@ test('tampered fixture hash or per-game starting board is rejected',()=>{
   const {events,fixtures}=sample();
   assert.throws(()=>summarizeSearchAxisAcrossStages(events,fixtures+' ','depth'),
     /fixture hash/);
-  const a=sample();a.events[1].start='other-sfen';
+  const a=sample();a.events[1].start='other-sfen';a.events[2].start='other-sfen';
   assert.throws(()=>summarizeSearchAxisAcrossStages(a.events,a.fixtures,'depth'),
     /Opening SFEN/);
-  const b=sample();b.events[1].holes=['7e'];
+  const b=sample();b.events[1].holes=['7e'];b.events[2].holes=['7e'];
   assert.throws(()=>summarizeSearchAxisAcrossStages(b.events,b.fixtures,'depth'),
     /Obstacle mask/);
 });
