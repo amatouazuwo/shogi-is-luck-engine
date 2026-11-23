@@ -1,0 +1,77 @@
+name: Amateur max-force 6000ms vs four-dan-target 1500ms
+on:
+  push:
+    branches: [chatgpt/strength-ci]
+    paths:
+      - '.github/workflows/amateur-max-versus-fourdan.yml'
+      - 'benchmarks/strength/ci/clock-budget.mjs'
+      - 'benchmarks/strength/ci/clock-budget.test.mjs'
+      - 'benchmarks/strength/ci/difficulty-scorecard.mjs'
+      - 'benchmarks/strength/ci/difficulty-scorecard.test.mjs'
+      - 'benchmarks/strength/ci/match.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: amateur-max-v-fourdan-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  clock-aware-paired-max-versus-fourdan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify clock model, scorecard and match code
+        run: |
+          set -euo pipefail
+          node --check benchmarks/strength/ci/match.mjs
+          node --check benchmarks/strength/ci/clock-budget.mjs
+          node --check benchmarks/strength/ci/difficulty-scorecard.mjs
+          node --test benchmarks/strength/ci/clock-budget.test.mjs benchmarks/strength/ci/difficulty-scorecard.test.mjs
+      - name: Install locked Rust toolchain for unmodified NNUE model
+        run: rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Build and verify unchanged obstacle-ready rsshogi SDK
+        run: |
+          set -euo pipefail
+          bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/max-tier-sdk"
+          (cd "$RUNNER_TEMP/max-tier-sdk" && sha256sum -c SHA256SUMS)
+      - name: Build independent legal move referee
+        run: g++ -O3 -std=c++20 benchmarks/strength/ci/referee.cpp -o "$RUNNER_TEMP/max-tier-referee"
+      - name: Generate new seeded reproducible obstacle placements
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          node benchmarks/strength/experiments/continuous-obstacle/generate-fresh-openings.mjs \
+            "$RUNNER_TEMP/max-tier-referee" \
+            benchmarks/strength/experiments/normal-continuous/expansion/openings.jsonl \
+            results/max-v-fourdan-openings.jsonl 20261127 \
+            | tee results/max-v-fourdan-openings-manifest.json
+      - name: Four full-clock actual rsshogi matches - one opening family, two hole types, reversed colors
+        run: |
+          set -euo pipefail
+          # Arguments after opponent budget:
+          # 6000ms side: clock/12, 1300ms charged pre-move delay
+          # 1500ms side: clock/20, 1300ms charged pre-move delay
+          # 100-ply measurement cap is neutral, never adjudicated as draw.
+          node benchmarks/strength/ci/match.mjs \
+            "$RUNNER_TEMP/max-tier-referee" "$RUNNER_TEMP/max-tier-sdk" \
+            6000 100 1 0 "$RUNNER_TEMP/max-tier-sdk" obstacle \
+            results/max-v-fourdan-openings.jsonl 1500 12 20 1300 1300 \
+            | tee results/max-v-fourdan-games.jsonl
+      - name: Check exact clock-budget audits and report exploratory results
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/difficulty-scorecard.mjs \
+            results/max-v-fourdan-games.jsonl 6000 1500 \
+            | tee results/max-v-fourdan-scorecard.json
+          cat results/max-v-fourdan-scorecard.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Record strict trial limits
+        if: always()
+        run: |
+          echo 'Only four paired-color games (one opening per pit and blackhole). Very small exploratory sample, not Elo or validated amateur ranks.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Both sides use the same native rsshogi model+Worker. Virtual pre-move delay is charged to each real 3-minute game clock, no wall wait. Browser overhead and rare events are not simulated.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The 100-ply cap and repetitions remain neutral UNDECIDED, never a win/loss/draw. No automatic game tuning, merge, release or deployment.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Data in job logs only because Actions artifact quota is exhausted.' >> "$GITHUB_STEP_SUMMARY"
