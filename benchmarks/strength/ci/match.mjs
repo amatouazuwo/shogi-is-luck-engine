@@ -9,6 +9,7 @@ import {Worker} from 'node:worker_threads';
 import {planTurn} from './clock-budget.mjs';
 import {chooseAdaptiveThink} from './adaptive-think-policy.mjs';
 import {chooseAdaptiveThinkV2} from './adaptive-think-policy-v2.mjs';
+import {chooseAdaptiveThinkV2Check3s} from './adaptive-think-policy-v2-check3s.mjs';
 const [binary, sdk, budgetStr='100', capStr='20', pairsStr='1', offsetStr='0', baseline, mode='obstacle', customFixture, opponentBudgetStr=budgetStr, candidateDivisorStr='20', opponentDivisorStr='20', candidatePreDelayStr='0', opponentPreDelayStr='0',candidatePolicy='fixed',opponentPolicy='fixed']=process.argv.slice(2);
 const budget=Number(budgetStr), opponentBudget=Number(opponentBudgetStr), cap=Number(capStr), pairs=Number(pairsStr), offset=Number(offsetStr);
 const candidateDivisor=Number(candidateDivisorStr), opponentDivisor=Number(opponentDivisorStr);
@@ -20,7 +21,7 @@ assert.ok(Number.isInteger(pairs)&&pairs>=1&&pairs<=6&&Number.isInteger(offset)&
 assert.ok(['normal','normal-worker','obstacle'].includes(mode));
 const normal=mode==='normal'||mode==='normal-worker';
 for(const name of [candidatePolicy,opponentPolicy])
-  assert.ok(['fixed','adaptive-feature-v1','adaptive-feature-v2'].includes(name),'Unknown thinking policy');
+  assert.ok(['fixed','adaptive-feature-v1','adaptive-feature-v2','adaptive-feature-v2-check3s'].includes(name),'Unknown thinking policy');
 assert.ok((candidatePolicy==='fixed'&&opponentPolicy==='fixed')||!normal,
   'Tactical adaptive benchmark currently validates obstacle boards only');
 assert.ok(candidatePolicy==='fixed'||budget===6000,'Adaptive candidate requires max 6000ms');
@@ -118,7 +119,9 @@ try{
           if(clocks[side]<=0){winner=1-side;reason='clock';break;}
           adaptiveDecision=activePolicy==='adaptive-feature-v1'
             ?chooseAdaptiveThink(tacticalFeatures,clocks[side])
-            :chooseAdaptiveThinkV2(tacticalFeatures,clocks[side]);
+            :activePolicy==='adaptive-feature-v2'
+              ?chooseAdaptiveThinkV2(tacticalFeatures,clocks[side])
+              :chooseAdaptiveThinkV2Check3s(tacticalFeatures,clocks[side]);
         }
         const currentBudget=adaptiveDecision?.maxThinkMs??(isCandidate?budget:opponentBudget);
         const clockDivisor=isCandidate?candidateDivisor:opponentDivisor;
