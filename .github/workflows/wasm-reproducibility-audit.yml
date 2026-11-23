@@ -6,6 +6,7 @@ on:
       - '.github/workflows/wasm-reproducibility-audit.yml'
       - 'benchmarks/strength/ci/wasm-section-diff.mjs'
       - 'benchmarks/strength/ci/wasm-section-diff.test.mjs'
+      - 'benchmarks/strength/ci/wasm-behavior-diff.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,6 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check benchmarks/strength/ci/wasm-section-diff.mjs
+          node --check benchmarks/strength/ci/wasm-behavior-diff.mjs
           node --test benchmarks/strength/ci/wasm-section-diff.test.mjs
       - name: Record pinned compiler and build input hashes
         run: |
@@ -89,12 +91,40 @@ jobs:
             echo 'This DOES NOT verify that the private game WASM is byte-identical or behaviorally interchangeable.'
             cat results/wasm-section-audit.jsonl
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Probe fixed-budget native move/score/PV agreement of both builds
+        run: |
+          set -euo pipefail
+          node benchmarks/strength/ci/wasm-behavior-diff.mjs \
+            "$RUNNER_TEMP/wasm-repro-A" "$RUNNER_TEMP/wasm-repro-B" \
+            | tee results/wasm-native-behavior-audit.jsonl
+          python3 - <<'PY'
+          import json
+          r=json.load(open('results/wasm-native-behavior-audit.jsonl'))
+          assert r['event']=='wasm-native-behavior-crosscheck'
+          assert r['comparisons']==6
+          assert r['identicalCases']+r['divergentCases']==6
+          assert all(x['nodesCap'] in (5000,25000) for x in r['cases'])
+          print('NATIVE BEHAVIOR IDENTICAL TEST CASES:',r['identicalCases'],'/ 6')
+          print('BEHAVIOR DIVERGENT TEST CASES:',r['divergentCases'])
+          if r['divergentCases']:
+              print('WARNING: same-source binaries produced different moves/nodes/PV or scores in fixed position samples')
+          else:
+              print('No difference found in six samples; this does NOT prove all-position semantic equivalence')
+          PY
+          {
+            echo '### Fixed-node NNUE behavior probe'
+            echo '6 samples: normal/pit/blackhole at 5000 and 25000 nodes per search; full engine C-API, not simulated behavior.'
+            echo 'A matching six-sample result does NOT prove identical runtime semantics or compatibility with the private game stored WASM.'
+            cat results/wasm-native-behavior-audit.jsonl
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Save section metadata report only (never private game files)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wasm-section-audit
-          path: results/wasm-section-audit.jsonl
+          path: |
+            results/wasm-section-audit.jsonl
+            results/wasm-native-behavior-audit.jsonl
           if-no-files-found: ignore
           retention-days: 30
       - name: Preserve live game and CPU profile restrictions
