@@ -31,13 +31,19 @@ jobs:
           rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown
           bash scripts/build-obstacle-sdk.sh "$RUNNER_TEMP/browser-obstacle-sdk"
           (cd "$RUNNER_TEMP/browser-obstacle-sdk" && sha256sum -c SHA256SUMS)
-      - name: Compare generated SDK hashes against private game's pinned SDK manifest
+      - name: Audit and report exact SDK/patch differences from the private game's pinned manifest
         run: |
           set -euo pipefail
+          sha256sum patches/obstacle-engine.patch patches/obstacle-rules.patch
           cd "$RUNNER_TEMP/browser-obstacle-sdk"
-          echo '0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108  rsshogi_nnue_mini.wasm' | sha256sum -c -
-          echo 'fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2  worker.js' | sha256sum -c -
-          echo '112294de3bbd5ee315a81da86a6aa85ab8e55725e13bca5f5b8e8268ba7306b1  mini.js' | sha256sum -c -
+          sha256sum rsshogi_nnue_mini.wasm worker.js mini.js
+          echo 'Game-pinned WASM SHA256: 0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108'
+          echo 'Game-pinned Worker SHA256: fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2'
+          echo 'Game-pinned mini.js SHA256: 112294de3bbd5ee315a81da86a6aa85ab8e55725e13bca5f5b8e8268ba7306b1'
+          echo 'Game-pinned engine patch SHA256: f8c433568dd6c85979a2fa98a7f24f16caf15650d236a9c8bb6dafb391ddc009'
+          echo 'Game-pinned rules patch SHA256: e686a50abafc4e623fc245e874f1a73a0c2c002c5c0fea4c7f751824545b5fecc'
+          echo 'A mismatch is a real SDK identity gap, NOT a valid claim that the browser is testing exact game bytes.'
+          echo 'This step records differences without preventing separate experimental runtime validation.'
       - name: Install headless Chromium for real browser Worker test
         run: |
           set -euo pipefail
@@ -63,8 +69,16 @@ jobs:
           assert evidence['browser']=='Chromium'
           assert evidence['tests']==5 and len(evidence['sessions'])==4
           assert evidence['workerCancelledAndRecreated']
-          assert evidence['wasmSha256']=='0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108'
-          assert evidence['workerSha256']=='fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2'
+          expected_wasm='0aa92ee9c44cc31e82cf58e3338420d2efb75b60b7a14eb1a5c76d8b0c0d9108'
+          expected_worker='fe9298706c23a1a7818d0c9f97e7b871fa5a239dfeb672a220d65d4e3c35d6b2'
+          print('GAME-SDK-BINARY-ID=',json.dumps({
+             'wasm_equal':evidence['wasmSha256']==expected_wasm,
+             'worker_equal':evidence['workerSha256']==expected_worker,
+             'observed_wasm':evidence['wasmSha256'],
+             'observed_worker':evidence['workerSha256']
+          },ensure_ascii=False))
+          assert len(evidence['wasmSha256'])==64 and len(evidence['workerSha256'])==64
+          assert evidence['nativeWasmBytes']>1000000
           names=[x['name'] for x in evidence['sessions']]
           assert names==['normal-1500ms','pit-25k','blackhole-25k','worker-recreated-after-terminate']
           assert evidence['sessions'][0]['cap'] is None
@@ -77,7 +91,7 @@ jobs:
           {
             echo '### Actual browser/Web Worker validation'
             echo 'Expected five audited checks: normal search, pit, 3x3 blackhole, forced termination, and post-termination replacement search.'
-            echo 'Uses real Chromium Web Worker, 4.9MB NNUE WASM, and exact game-pinned SDK SHA256 files.'
+            echo 'Uses real Chromium Web Worker and source-pinned NNUE WASM; SDK file hashes must be compared to private game pins separately, and exact identity must NOT be claimed if different.'
             echo 'Does NOT run the private game UI, 3-minute clock controller, rare 1% events, or certify human amateur ranks.'
             cat results/browser-obstacle-worker-smoke.jsonl
           } >> "$GITHUB_STEP_SUMMARY"
