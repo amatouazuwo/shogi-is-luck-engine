@@ -36,6 +36,15 @@ test('undecided games are neutral and produce conservative score bounds',()=>{
   assert.equal(result.neutralUndecided,2);
   assert.deepEqual(result.scoreBoundsIncludingNeutral,[.25,.75]);
   assert.equal(result.candidateDecidedWinRate,.5);
+  assert.deepEqual(result.byOpeningPair['22'],{
+    games:4,candidateWins:1,opponentWins:1,neutralUndecided:2,
+  });
+  assert.deepEqual(result.byCandidateSide['0'],{
+    games:2,candidateWins:1,opponentWins:0,neutralUndecided:1,
+  });
+  assert.deepEqual(result.byCandidateSide['1'],{
+    games:2,candidateWins:0,opponentWins:1,neutralUndecided:1,
+  });
   assert.deepEqual(result.byTermination['no-legal'],{
     games:2,candidateWins:1,opponentWins:1,neutralUndecided:0,
   });
@@ -122,4 +131,23 @@ test('three-minute clock forfeits are separated from on-board victories',()=>{
     result.games,
   );
   assert.equal(result.autoAssignAmateurGrade,false);
+});
+
+test('the published openings and color splits must reconcile to exact total',()=>{
+  const result=scoreDifficultyGames(makeSample());
+  const sum=rows=>Object.values(rows).reduce((acc,x)=>({
+    games:acc.games+x.games,
+    candidateWins:acc.candidateWins+x.candidateWins,
+    opponentWins:acc.opponentWins+x.opponentWins,
+    neutralUndecided:acc.neutralUndecided+x.neutralUndecided,
+  }),{games:0,candidateWins:0,opponentWins:0,neutralUndecided:0});
+  const expected={games:result.games,candidateWins:result.candidateWins,
+    opponentWins:result.opponentWins,neutralUndecided:result.neutralUndecided};
+  assert.deepEqual(sum(result.byOpeningPair),expected);
+  assert.deepEqual(sum(result.byCandidateSide),expected);
+  const events=makeSample();
+  events[1].winner=1; // First pit game switches to opponent win.
+  const changed=scoreDifficultyGames(events);
+  assert.equal(changed.byOpeningPair['22'].opponentWins,2);
+  assert.equal(changed.byCandidateSide['0'].opponentWins,1);
 });
